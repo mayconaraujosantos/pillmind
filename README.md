@@ -1,1 +1,165 @@
-# pillmind
+# PillMind
+
+Aplicativo de gerenciamento de medicamentos e lembretes desenvolvido com React Native e Expo.
+
+## 🚀 Tecnologias
+
+- **React Native** - Framework para desenvolvimento mobile
+- **Expo** - Plataforma para desenvolvimento React Native
+- **TypeScript** - Tipagem estática
+- **React Navigation** - Navegação entre telas
+- **Jest** - Framework de testes
+- **ESLint** - Linter de código
+- **Prettier** - Formatador de código
+
+## 📁 Estrutura do Projeto
+
+O projeto utiliza uma arquitetura **Feature-Based com Clean Architecture**. Para mais detalhes, consulte a [documentação de arquitetura](./doc/ARCHITECTURE.md).
+
+## 🛠️ Instalação
+
+```bash
+# Instalar dependências
+npm install
+
+# Iniciar o servidor de desenvolvimento
+npm start
+
+# Executar no Android
+npm run android
+
+# Executar no iOS
+npm run ios
+```
+
+## 📝 Scripts Disponíveis
+
+```bash
+# Desenvolvimento
+npm start              # Inicia o servidor Expo
+npm start:clear        # Inicia com cache limpo
+npm reset              # Reseta o cache completamente
+
+# Build
+npm run build:dev:android  # Build de desenvolvimento para Android
+npm run build:dev:ios      # Build de desenvolvimento para iOS
+
+# Qualidade de código
+npm run lint           # Executa o ESLint
+npm run lint:fix       # Corrige problemas do ESLint
+npm run format         # Formata o código com Prettier
+npm run format:check   # Verifica formatação
+
+# Testes
+npm test               # Executa os testes
+npm run test:watch     # Executa testes em modo watch
+npm run test:coverage  # Gera relatório de cobertura
+```
+
+## 🌿 Git Flow
+
+Este projeto utiliza **Git Flow** para gerenciamento de branches. As branches principais são:
+
+- `main` - Branch de produção
+- `develop` - Branch de desenvolvimento
+
+### Comandos Git Flow
+
+#### Features
+
+Criar uma nova feature:
+```bash
+git flow feature start nome-da-feature
+```
+
+Finalizar uma feature (merge em develop):
+```bash
+git flow feature finish nome-da-feature
+```
+
+#### Releases
+
+Criar uma release:
+```bash
+git flow release start 1.0.0
+```
+
+Finalizar uma release (merge em main e develop):
+```bash
+git flow release finish 1.0.0
+```
+
+#### Hotfixes
+
+Criar um hotfix (a partir de main):
+```bash
+git flow hotfix start nome-do-hotfix
+```
+
+Finalizar um hotfix (merge em main e develop):
+```bash
+git flow hotfix finish nome-do-hotfix
+```
+
+### Exemplo de Fluxo de Trabalho
+
+1. Criar uma feature:
+   ```bash
+   git flow feature start adicionar-lembrete-medicamento
+   # ... fazer as alterações ...
+   git add .
+   git commit -m "feat: adicionar funcionalidade de lembrete"
+   git flow feature finish adicionar-lembrete-medicamento
+   ```
+
+2. Criar uma release:
+   ```bash
+   git flow release start 1.0.0
+   # ... ajustar versão, changelog, etc ...
+   git flow release finish 1.0.0
+   ```
+
+## 📚 Documentação
+
+- [Arquitetura](./doc/ARCHITECTURE.md) - Documentação da arquitetura do projeto
+- [Path Aliases](./doc/PATH_ALIASES.md) - Documentação sobre aliases de importação
+
+## 🔧 Configuração
+
+### Path Aliases
+
+O projeto utiliza aliases para facilitar os imports:
+
+- `@shared` - Componentes e utilitários compartilhados
+- `@features` - Features do aplicativo
+- `@core` - Configurações centrais
+- `@src` - Raiz do diretório src
+
+Exemplo:
+```typescript
+import { Button } from '@shared/components';
+import { HomeScreen } from '@features/home/presentation/screens/HomeScreen';
+```
+
+## 📦 Build e Deploy
+
+O projeto está configurado com **EAS (Expo Application Services)** para builds:
+
+```bash
+# Build de desenvolvimento para Android
+npm run build:dev:android
+
+# Build de desenvolvimento para iOS
+npm run build:dev:ios
+```
+
+## 🤝 Contribuindo
+
+1. Certifique-se de estar na branch `develop`
+2. Crie uma feature usando Git Flow
+3. Faça seus commits seguindo o padrão [Conventional Commits](https://www.conventionalcommits.org/)
+4. Finalize a feature e faça push
+
+## 📄 Licença
+
+Este projeto é privado.
