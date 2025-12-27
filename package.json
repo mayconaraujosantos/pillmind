@@ -18,7 +18,7 @@
     "test:coverage": "jest --coverage",
     "build:dev:android": "eas build --profile development --platform android",
     "build:dev:ios": "eas build --profile development --platform ios",
-    "prepare": "lefthook install"
+    "prepare": "npx lefthook install"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.9.0",
