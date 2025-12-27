@@ -8,10 +8,7 @@ const config = getDefaultConfig(__dirname);
 config.watchFolders = config.watchFolders || [];
 config.resolver = {
   ...config.resolver,
-  blockList: [
-    ...(config.resolver?.blockList || []),
-    /\.trunk\/.*/,
-  ],
+  blockList: [...(config.resolver?.blockList || []), /\.trunk\/.*/],
 };
 
 // Exclude .trunk from watcher
