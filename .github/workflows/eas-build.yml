@@ -33,11 +33,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "⚠️  EXPO_TOKEN secret is not set. Builds will fail without it."
+            echo "Learn more: https://docs.expo.dev/eas-update/github-actions/"
+            exit 1
+          fi
+
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'npm'
@@ -45,7 +53,6 @@ jobs:
       - name: Setup Expo
         uses: expo/expo-github-action@v8
         with:
-          expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
