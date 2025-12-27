@@ -23,6 +23,8 @@
     "react-native": "0.81.5"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "@evilmartians/lefthook": "^2.0.13",
     "@types/react": "~19.1.0",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
