@@ -23,4 +23,3 @@ module.exports = {
     'type-empty': [2, 'never'],
   },
 };
-

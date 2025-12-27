@@ -41,6 +41,7 @@ src/
 ## Camadas da Arquitetura
 
 ### 1. Domain (Domínio)
+
 - **Responsabilidade**: Lógica de negócio pura, independente de frameworks
 - **Contém**:
   - **Entities**: Modelos de dados do domínio
@@ -48,6 +49,7 @@ src/
   - **Use Cases**: Regras de negócio e lógica de aplicação
 
 ### 2. Data (Dados)
+
 - **Responsabilidade**: Implementação de acesso a dados
 - **Contém**:
   - **Repositories**: Implementação concreta dos repositórios
@@ -55,6 +57,7 @@ src/
   - **DTOs**: Data Transfer Objects para comunicação com APIs
 
 ### 3. Presentation (Apresentação)
+
 - **Responsabilidade**: Interface do usuário e interação
 - **Contém**:
   - **Screens**: Telas da aplicação
@@ -64,18 +67,23 @@ src/
 ## Princípios
 
 ### 1. Separação de Responsabilidades
+
 Cada camada tem uma responsabilidade única e bem definida:
+
 - **Domain**: Regras de negócio
 - **Data**: Acesso a dados
 - **Presentation**: Interface do usuário
 
 ### 2. Inversão de Dependências
+
 As camadas internas (Domain) não dependem das externas (Data, Presentation). As dependências apontam para dentro.
 
 ### 3. Features Independentes
+
 Cada feature é auto-contida e pode ser desenvolvida, testada e mantida independentemente.
 
 ### 4. Reutilização através de Shared
+
 Componentes, utilitários e tipos compartilhados ficam no módulo `shared`.
 
 ## Fluxo de Dados
@@ -95,6 +103,7 @@ DataSource (API/Local DB)
 ## Exemplo: Feature Home
 
 ### Domain
+
 ```typescript
 // entities/Medicine.ts
 export interface Medicine {
@@ -121,11 +130,12 @@ export class GetMedicinesUseCase {
 ```
 
 ### Data
+
 ```typescript
 // repositories/MedicineRepositoryImpl.ts
 export class MedicineRepositoryImpl implements MedicineRepository {
   constructor(private dataSource: MedicineDataSource) {}
-  
+
   async getAll(): Promise<Medicine[]> {
     return this.dataSource.getAll();
   }
@@ -133,6 +143,7 @@ export class MedicineRepositoryImpl implements MedicineRepository {
 ```
 
 ### Presentation
+
 ```typescript
 // screens/HomeScreen.tsx
 export const HomeScreen = () => {
@@ -156,4 +167,3 @@ Configurações globais ficam em `src/core/config/`.
 3. Implementar testes unitários para Use Cases
 4. Adicionar tratamento de erros global
 5. Implementar autenticação
-

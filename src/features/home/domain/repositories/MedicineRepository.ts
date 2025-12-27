@@ -8,4 +8,3 @@ export interface MedicineRepository {
   delete(id: string): Promise<void>;
   search(query: string): Promise<Medicine[]>;
 }
-

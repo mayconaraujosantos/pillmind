@@ -68,11 +68,13 @@ Este projeto utiliza **Git Flow** para gerenciamento de branches. As branches pr
 #### Features
 
 Criar uma nova feature:
+
 ```bash
 git flow feature start nome-da-feature
 ```
 
 Finalizar uma feature (merge em develop):
+
 ```bash
 git flow feature finish nome-da-feature
 ```
@@ -80,11 +82,13 @@ git flow feature finish nome-da-feature
 #### Releases
 
 Criar uma release:
+
 ```bash
 git flow release start 1.0.0
 ```
 
 Finalizar uma release (merge em main e develop):
+
 ```bash
 git flow release finish 1.0.0
 ```
@@ -92,11 +96,13 @@ git flow release finish 1.0.0
 #### Hotfixes
 
 Criar um hotfix (a partir de main):
+
 ```bash
 git flow hotfix start nome-do-hotfix
 ```
 
 Finalizar um hotfix (merge em main e develop):
+
 ```bash
 git flow hotfix finish nome-do-hotfix
 ```
@@ -104,6 +110,7 @@ git flow hotfix finish nome-do-hotfix
 ### Exemplo de Fluxo de Trabalho
 
 1. Criar uma feature:
+
    ```bash
    git flow feature start adicionar-lembrete-medicamento
    # ... fazer as alterações ...
@@ -136,6 +143,7 @@ O projeto utiliza aliases para facilitar os imports:
 - `@src` - Raiz do diretório src
 
 Exemplo:
+
 ```typescript
 import { Button } from '@shared/components';
 import { HomeScreen } from '@features/home/presentation/screens/HomeScreen';

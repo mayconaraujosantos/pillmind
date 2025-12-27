@@ -1,5 +1,11 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ViewStyle,
+  TextStyle,
+} from 'react-native';
 
 interface ButtonProps {
   title: string;
@@ -20,11 +26,18 @@ export const Button: React.FC<ButtonProps> = ({
 }) => {
   return (
     <TouchableOpacity
-      style={[styles.button, styles[variant], disabled && styles.disabled, style]}
+      style={[
+        styles.button,
+        styles[variant],
+        disabled && styles.disabled,
+        style,
+      ]}
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[styles.text, styles[`${variant}Text`], textStyle]}>{title}</Text>
+      <Text style={[styles.text, styles[`${variant}Text`], textStyle]}>
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 };
@@ -65,4 +78,3 @@ const styles = StyleSheet.create({
     color: '#007AFF',
   },
 });
-

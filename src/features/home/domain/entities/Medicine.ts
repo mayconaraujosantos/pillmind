@@ -10,4 +10,3 @@ export interface Medicine {
   notes?: string;
   imageUrl?: string;
 }
-
