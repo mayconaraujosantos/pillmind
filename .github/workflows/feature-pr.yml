@@ -1,0 +1,58 @@
+name: Feature PR Validation
+
+on:
+  pull_request:
+    branches:
+      - develop
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  validate:
+    name: Validate Feature PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check code formatting
+        run: npm run format:check
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test -- --coverage --watchAll=false
+
+      - name: Check branch naming
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          if [[ ! "$BRANCH_NAME" =~ ^feature/ ]]; then
+            echo "❌ Branch name must start with 'feature/'"
+            echo "Current branch: $BRANCH_NAME"
+            exit 1
+          fi
+          echo "✅ Branch name is valid: $BRANCH_NAME"
+
+      - name: Check commit messages
+        run: |
+          # Verifica se os commits seguem o padrão Conventional Commits
+          git log origin/develop..HEAD --pretty=format:"%s" | while read commit_msg; do
+            if [[ ! "$commit_msg" =~ ^(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert)(\(.+\))?: ]]; then
+              echo "❌ Invalid commit message: $commit_msg"
+              echo "Commit messages must follow Conventional Commits format"
+              exit 1
+            fi
+          done
+          echo "✅ All commit messages are valid"
