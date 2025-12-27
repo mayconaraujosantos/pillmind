@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - release/**
+    tags:
+      - 'v*'
+
+jobs:
+  release-validation:
+    name: Release Validation
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/release/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run all quality checks
+        run: |
+          npm run format:check
+          npm run lint
+          npm test -- --coverage --watchAll=false
+          npx tsc --noEmit
+
+      - name: Extract version
+        id: extract-version
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/release/}"
+          echo "version=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "Release version: $BRANCH_NAME"
+
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: []
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version
+        id: extract-version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Gera changelog baseado nos commits desde a última tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            COMMITS=$(git log --pretty=format:"- %s" HEAD)
+          else
+            COMMITS=$(git log --pretty=format:"- %s" ${PREV_TAG}..HEAD)
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMITS" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ steps.extract-version.outputs.version }}
+          body: |
+            ## Release ${{ steps.extract-version.outputs.version }}
+
+            ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false

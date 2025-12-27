@@ -1,0 +1,86 @@
+name: EAS Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        type: choice
+        options:
+          - android
+          - ios
+          - all
+      profile:
+        description: 'Build profile'
+        required: true
+        type: choice
+        options:
+          - development
+          - preview
+          - production
+  push:
+    branches:
+      - develop
+      - main
+      - release/**
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build with EAS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine build parameters
+        id: build-params
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            PLATFORM="${{ github.event.inputs.platform }}"
+            PROFILE="${{ github.event.inputs.profile }}"
+          elif [[ "${{ github.ref }}" == refs/heads/develop ]]; then
+            PLATFORM="all"
+            PROFILE="development"
+          elif [[ "${{ github.ref }}" == refs/heads/main ]] || [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            PLATFORM="all"
+            PROFILE="production"
+          elif [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+            PLATFORM="all"
+            PROFILE="preview"
+          else
+            PLATFORM="all"
+            PROFILE="development"
+          fi
+          echo "platform=$PLATFORM" >> $GITHUB_OUTPUT
+          echo "profile=$PROFILE" >> $GITHUB_OUTPUT
+          echo "Building for platform: $PLATFORM with profile: $PROFILE"
+
+      - name: Build Android
+        if: steps.build-params.outputs.platform == 'android' || steps.build-params.outputs.platform == 'all'
+        run: |
+          eas build --platform android --profile ${{ steps.build-params.outputs.profile }} --non-interactive
+
+      - name: Build iOS
+        if: steps.build-params.outputs.platform == 'ios' || steps.build-params.outputs.platform == 'all'
+        run: |
+          eas build --platform ios --profile ${{ steps.build-params.outputs.profile }} --non-interactive
