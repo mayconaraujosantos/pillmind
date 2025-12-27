@@ -9,6 +9,24 @@ config.watchFolders = config.watchFolders || [];
 config.resolver = {
   ...config.resolver,
   blockList: [...(config.resolver?.blockList || []), /\.trunk\/.*/],
+  assetExts: [
+    ...(config.resolver?.assetExts || []),
+    'png',
+    'jpg',
+    'jpeg',
+    'gif',
+    'svg',
+    'ttf',
+    'otf',
+  ],
+  sourceExts: [
+    ...(config.resolver?.sourceExts || []),
+    'js',
+    'jsx',
+    'ts',
+    'tsx',
+    'json',
+  ],
 };
 
 // Exclude .trunk from watcher
