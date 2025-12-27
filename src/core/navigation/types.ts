@@ -14,4 +14,3 @@ export type TabParamList = {
   ParentalTab: undefined;
   NearbyTab: undefined;
 };
-

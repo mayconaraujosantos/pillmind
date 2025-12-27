@@ -8,4 +8,3 @@ export class CreateMedicineUseCase {
     return this.medicineRepository.create(medicine);
   }
 }
-

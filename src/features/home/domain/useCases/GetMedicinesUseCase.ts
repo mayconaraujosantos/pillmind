@@ -8,4 +8,3 @@ export class GetMedicinesUseCase {
     return this.medicineRepository.getAll();
   }
 }
-

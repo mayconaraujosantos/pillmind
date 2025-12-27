@@ -9,4 +9,3 @@ export interface Appointment {
   doctorName?: string;
   type: 'consultation' | 'examination' | 'surgery' | 'other';
 }
-

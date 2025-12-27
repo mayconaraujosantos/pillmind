@@ -14,21 +14,32 @@ export const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       <Tab.Navigator>
-        <Tab.Screen name="HomeTab" component={HomeScreen} options={{ title: 'Home' }} />
+        <Tab.Screen
+          name="HomeTab"
+          component={HomeScreen}
+          options={{ title: 'Home' }}
+        />
         <Tab.Screen
           name="AppointmentsTab"
           component={AppointmentsScreen}
           options={{ title: 'Appointments' }}
         />
-        <Tab.Screen name="AccountTab" component={AccountScreen} options={{ title: 'Account' }} />
+        <Tab.Screen
+          name="AccountTab"
+          component={AccountScreen}
+          options={{ title: 'Account' }}
+        />
         <Tab.Screen
           name="ParentalTab"
           component={ParentalScreen}
           options={{ title: 'Parental' }}
         />
-        <Tab.Screen name="NearbyTab" component={NearbyScreen} options={{ title: 'Nearby' }} />
+        <Tab.Screen
+          name="NearbyTab"
+          component={NearbyScreen}
+          options={{ title: 'Nearby' }}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   );
 };
-
