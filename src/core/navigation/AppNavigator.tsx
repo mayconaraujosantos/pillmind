@@ -7,6 +7,7 @@ import { AppointmentsScreen } from '@features/appointments/presentation/screens/
 import { AccountScreen } from '@features/account/presentation/screens/AccountScreen';
 import { ParentalScreen } from '@features/parental/presentation/screens/ParentalScreen';
 import { NearbyScreen } from '@features/nearby/presentation/screens/NearbyScreen';
+import { Header } from '@shared/components/Header';
 import { TabParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -37,7 +38,11 @@ export const AppNavigator: React.FC = () => {
           },
           tabBarActiveTintColor: '#007AFF',
           tabBarInactiveTintColor: '#8E8E93',
-          headerShown: false,
+          headerShown: true,
+          header: () => <Header />,
+          headerStyle: {
+            backgroundColor: '#FFF',
+          },
         })}
       >
         <Tab.Screen
