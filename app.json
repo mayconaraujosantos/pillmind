@@ -19,7 +19,8 @@
       "expo-font"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pillmind.app"
     },
     "android": {
       "package": "com.pillmind.app",
