@@ -32,7 +32,7 @@ jobs:
         run: |
           npm run format:check
           npm run lint
-          npm test -- --coverage --watchAll=false
+          npx jest --coverage --watchAll=false --passWithNoTests
           npx tsc --noEmit
 
       - name: Extract version

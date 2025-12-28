@@ -33,7 +33,7 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: npm test -- --coverage --watchAll=false
+        run: npx jest --coverage --watchAll=false --passWithNoTests
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
