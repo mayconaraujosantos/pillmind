@@ -8,7 +8,12 @@ import {
   Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
+  StatusBar as RNStatusBar,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { OnboardingIndicator } from '../components/OnboardingIndicator';
 import { OnboardingStepComponent } from '../components/OnboardingStep';
 import {
@@ -30,6 +35,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 }) => {
   const scrollViewRef = useRef<ScrollView>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const insets = useSafeAreaInsets();
 
   const handleMomentumScrollEnd = (
     event: NativeSyntheticEvent<NativeScrollEvent>
@@ -58,8 +64,28 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={skip} style={styles.skipButton}>
+      <StatusBar style="dark" />
+      {Platform.OS === 'android' && (
+        <RNStatusBar
+          barStyle="dark-content"
+          backgroundColor={ONBOARDING_COLORS.BACKGROUND}
+          translucent={false}
+        />
+      )}
+      <View
+        style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 20 }]}
+      >
+        <TouchableOpacity
+          onPress={skip}
+          style={styles.skipButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="close"
+            size={20}
+            color={ONBOARDING_COLORS.TEXT_SECONDARY}
+            style={styles.skipIcon}
+          />
           <Text style={styles.skipText}>{ONBOARDING_TEXTS.SKIP}</Text>
         </TouchableOpacity>
       </View>
@@ -73,12 +99,9 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
         scrollEventThrottle={16}
         style={styles.scrollView}
       >
-        {ONBOARDING_STEPS.map((step, index) => (
+        {ONBOARDING_STEPS.map((step) => (
           <View key={step.id} style={styles.stepContainer}>
-            <OnboardingStepComponent
-              step={step}
-              isLastStep={index === ONBOARDING_STEPS.length - 1}
-            />
+            <OnboardingStepComponent step={step} />
           </View>
         ))}
       </ScrollView>
@@ -121,8 +144,7 @@ const styles = StyleSheet.create({
     backgroundColor: ONBOARDING_COLORS.BACKGROUND,
   },
   header: {
-    paddingTop: 60,
-    paddingHorizontal: 32,
+    paddingHorizontal: 24,
     paddingBottom: 8,
     alignItems: 'flex-end',
     zIndex: 1,
@@ -132,14 +154,23 @@ const styles = StyleSheet.create({
     left: 0,
   },
   skipButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+    minWidth: 80,
+  },
+  skipIcon: {
+    marginRight: 6,
   },
   skipText: {
-    fontSize: 15,
-    color: ONBOARDING_COLORS.SECONDARY,
+    fontSize: 14,
+    color: ONBOARDING_COLORS.TEXT_SECONDARY,
     fontWeight: '600',
-    letterSpacing: 0.3,
+    letterSpacing: 0.2,
   },
   scrollView: {
     flex: 1,

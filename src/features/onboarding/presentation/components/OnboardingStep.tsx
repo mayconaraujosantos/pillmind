@@ -8,26 +8,23 @@ const IMAGE_HEIGHT = Math.min(SCREEN_HEIGHT * 0.4, 320);
 
 interface OnboardingStepProps {
   step: OnboardingStepType;
-  isLastStep?: boolean;
 }
 
 export const OnboardingStepComponent: React.FC<OnboardingStepProps> = ({
   step,
-  isLastStep = false,
 }) => {
+  // Mostra a imagem se ela existir, independente de ser o último step
+  const shouldShowImage = step.image !== undefined && step.image !== null;
+
   return (
     <View style={styles.container}>
-      {!isLastStep && (
+      {shouldShowImage && (
         <View style={styles.imageContainer}>
-          {step.image ? (
-            <Image
-              source={{ uri: step.image }}
-              style={styles.image}
-              resizeMode="contain"
-            />
-          ) : (
-            <View style={styles.placeholderImage} />
-          )}
+          <Image
+            source={{ uri: step.image }}
+            style={styles.image}
+            resizeMode="contain"
+          />
         </View>
       )}
       <View style={styles.textContainer}>
