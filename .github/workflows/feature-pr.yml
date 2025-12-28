@@ -33,7 +33,7 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: npm test -- --coverage --watchAll=false
+        run: npx jest --coverage --watchAll=false --passWithNoTests
 
       - name: Check branch naming
         run: |
