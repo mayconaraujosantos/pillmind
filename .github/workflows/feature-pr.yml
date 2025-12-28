@@ -48,10 +48,20 @@ jobs:
       - name: Check commit messages
         run: |
           # Verifica se os commits seguem o padrão Conventional Commits
-          git log origin/develop..HEAD --pretty=format:"%s" | while read commit_msg; do
+          # Commits de merge são aceitos como válidos (gerados automaticamente pelo Git/GitHub)
+          git log origin/develop..HEAD --pretty=format:"%s" | while IFS= read -r commit_msg; do
+            if [[ -z "$commit_msg" ]]; then
+              continue
+            fi
+            # Commits de merge são válidos (formatos: "Merge ..." ou "Merge ... into ...")
+            if [[ "$commit_msg" =~ ^Merge[[:space:]] ]]; then
+              continue
+            fi
+            # Valida formato Conventional Commits
             if [[ ! "$commit_msg" =~ ^(feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert)(\(.+\))?: ]]; then
               echo "❌ Invalid commit message: $commit_msg"
-              echo "Commit messages must follow Conventional Commits format"
+              echo "Commit messages must follow Conventional Commits format: type(scope): description"
+              echo "Valid types: feat, fix, chore, docs, style, refactor, perf, test, build, ci, revert"
               exit 1
             fi
           done
