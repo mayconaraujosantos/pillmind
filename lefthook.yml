@@ -1,5 +1,4 @@
 source_dir: .git/hooks
-bin_path: node_modules/@evilmartians/lefthook/bin
 
 pre-commit:
   parallel: true

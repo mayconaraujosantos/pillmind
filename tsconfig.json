@@ -7,7 +7,8 @@
       "@shared/*": ["src/shared/*"],
       "@features/*": ["src/features/*"],
       "@core/*": ["src/core/*"],
-      "@src/*": ["src/*"]
+      "@src/*": ["src/*"],
+      "@assets/*": ["assets/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"],

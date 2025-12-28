@@ -42,3 +42,9 @@ yarn-error.*
 
 # Jest
 coverage
+
+# Trunk
+.trunk/
+
+# IDE
+.idea/

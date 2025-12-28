@@ -116,7 +116,9 @@ git flow hotfix finish nome-do-hotfix
    # ... fazer as alterações ...
    git add .
    git commit -m "feat: adicionar funcionalidade de lembrete"
-   git flow feature finish adicionar-lembrete-medicamento
+   git push origin feature/adicionar-lembrete-medicamento
+   # Criar Pull Request no GitHub
+   # Após merge, a feature será finalizada automaticamente pelo CI/CD
    ```
 
 2. Criar uma release:
@@ -125,6 +127,105 @@ git flow hotfix finish nome-do-hotfix
    # ... ajustar versão, changelog, etc ...
    git flow release finish 1.0.0
    ```
+
+## 🚀 CI/CD
+
+O projeto utiliza **GitHub Actions** para automatizar o Git Flow e garantir qualidade de código.
+
+### Workflows Automatizados
+
+#### 1. Feature PR Validation
+
+- **Trigger**: Quando um PR de feature é aberto ou atualizado
+- **Ações**:
+  - ✅ Valida formatação do código (Prettier)
+  - ✅ Executa linter (ESLint)
+  - ✅ Roda testes com cobertura
+  - ✅ Valida nome da branch (deve começar com `feature/`)
+  - ✅ Valida mensagens de commit (Conventional Commits)
+
+#### 2. Auto Finish Feature
+
+- **Trigger**: Quando um PR de feature é mergeado em `develop`
+- **Ações**:
+  - ✅ Limpa branch local da feature
+  - ✅ Deleta branch remota da feature
+  - ✅ Mantém histórico no GitHub
+
+#### 3. Develop CI
+
+- **Trigger**: Push ou PR para `develop`
+- **Ações**:
+  - ✅ Quality checks (format, lint, test)
+  - ✅ Verificação de build TypeScript
+  - ✅ Validação de configuração Expo
+
+#### 4. Release
+
+- **Trigger**: Push para `release/**` ou tag `v*`
+- **Ações**:
+  - ✅ Validação completa antes do release
+  - ✅ Geração automática de changelog
+  - ✅ Criação de GitHub Release
+
+#### 5. EAS Update Preview
+
+- **Trigger**: Quando um PR de feature é aberto ou atualizado
+- **Ações**:
+  - ✅ Publica preview de atualização EAS para o PR
+  - ✅ Adiciona comentário no PR com QR code para teste
+  - ✅ Permite testar mudanças sem build completo
+
+#### 6. EAS Build
+
+- **Trigger**:
+  - Manual (workflow_dispatch)
+  - Push para `develop` (build development)
+  - Push para `main` ou tag (build production)
+  - Push para `release/**` (build preview)
+- **Ações**:
+  - ✅ Build automático para Android/iOS
+  - ✅ Perfis: development, preview, production
+
+### Fluxo Completo com CI/CD
+
+1. **Criar Feature**:
+
+   ```bash
+   git flow feature start minha-feature
+   # ... desenvolver ...
+   git push origin feature/minha-feature
+   ```
+
+2. **Criar Pull Request**:
+   - Abra PR no GitHub de `feature/minha-feature` para `develop`
+   - CI/CD valida automaticamente (lint, test, format)
+   - EAS Update Preview é criado automaticamente para teste
+   - Após aprovação e merge, a feature é finalizada automaticamente
+
+3. **Release**:
+   ```bash
+   git flow release start 1.0.0
+   # ... ajustes finais ...
+   git flow release finish 1.0.0
+   # CI/CD cria release automaticamente no GitHub
+   ```
+
+### Configuração Necessária
+
+Para que o CI/CD funcione completamente, configure os seguintes secrets no GitHub:
+
+- `EXPO_TOKEN`: Token do Expo para builds EAS (obtenha em: https://expo.dev/accounts/[seu-usuario]/settings/access-tokens)
+
+### Benefícios
+
+- ✅ **Automação**: Git Flow executado automaticamente
+- ✅ **Qualidade**: Validações antes de cada merge
+- ✅ **Rastreabilidade**: Histórico completo no GitHub
+- ✅ **Builds Automáticos**: Builds EAS acionados automaticamente
+- ✅ **Previews em PRs**: Teste de mudanças sem build completo
+- ✅ **Consistência**: Padrões aplicados automaticamente
+- ✅ **Boas Práticas**: Segue recomendações oficiais do Expo ([docs.expo.dev/eas-update/github-actions](https://docs.expo.dev/eas-update/github-actions/))
 
 ## 📚 Documentação
 

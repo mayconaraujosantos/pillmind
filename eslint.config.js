@@ -17,6 +17,7 @@ export default tseslint.config(
       'commitlint.config.js',
       'babel.config.js',
       'metro.config.js',
+      'scripts/**',
     ],
   },
   eslint.configs.recommended,
@@ -32,6 +33,13 @@ export default tseslint.config(
           varsIgnorePattern: '^_',
         },
       ],
+      '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  {
+    files: ['**/assets/**/*.ts', '**/assets/**/*.tsx'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
     },
   }
 );
