@@ -1,5 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
-import { act } from '@testing-library/react-hooks';
+import { renderHook, waitFor, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useOnboardingStorage } from '../useOnboardingStorage';
 
