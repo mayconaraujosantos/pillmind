@@ -168,7 +168,15 @@ O projeto utiliza **GitHub Actions** para automatizar o Git Flow e garantir qual
   - ✅ Geração automática de changelog
   - ✅ Criação de GitHub Release
 
-#### 5. EAS Build
+#### 5. EAS Update Preview
+
+- **Trigger**: Quando um PR de feature é aberto ou atualizado
+- **Ações**:
+  - ✅ Publica preview de atualização EAS para o PR
+  - ✅ Adiciona comentário no PR com QR code para teste
+  - ✅ Permite testar mudanças sem build completo
+
+#### 6. EAS Build
 
 - **Trigger**:
   - Manual (workflow_dispatch)
@@ -192,6 +200,7 @@ O projeto utiliza **GitHub Actions** para automatizar o Git Flow e garantir qual
 2. **Criar Pull Request**:
    - Abra PR no GitHub de `feature/minha-feature` para `develop`
    - CI/CD valida automaticamente (lint, test, format)
+   - EAS Update Preview é criado automaticamente para teste
    - Após aprovação e merge, a feature é finalizada automaticamente
 
 3. **Release**:
@@ -214,7 +223,9 @@ Para que o CI/CD funcione completamente, configure os seguintes secrets no GitHu
 - ✅ **Qualidade**: Validações antes de cada merge
 - ✅ **Rastreabilidade**: Histórico completo no GitHub
 - ✅ **Builds Automáticos**: Builds EAS acionados automaticamente
+- ✅ **Previews em PRs**: Teste de mudanças sem build completo
 - ✅ **Consistência**: Padrões aplicados automaticamente
+- ✅ **Boas Práticas**: Segue recomendações oficiais do Expo ([docs.expo.dev/eas-update/github-actions](https://docs.expo.dev/eas-update/github-actions/))
 
 ## 📚 Documentação
 

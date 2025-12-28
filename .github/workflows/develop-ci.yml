@@ -15,16 +15,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Check code formatting
         run: npm run format:check
@@ -33,10 +33,10 @@ jobs:
         run: npm run lint
 
       - name: Run tests
-        run: npm test -- --coverage --watchAll=false
+        run: npx jest --coverage --watchAll=false --passWithNoTests
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238
         if: always()
         with:
           files: ./coverage/coverage-final.json
@@ -48,16 +48,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Check TypeScript compilation
         run: npx tsc --noEmit

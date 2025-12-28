@@ -15,7 +15,8 @@
           "image": "./assets/splash-icon.png",
           "resizeMode": "contain"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "ios": {
       "supportsTablet": true

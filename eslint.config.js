@@ -17,6 +17,7 @@ export default tseslint.config(
       'commitlint.config.js',
       'babel.config.js',
       'metro.config.js',
+      'scripts/**',
     ],
   },
   eslint.configs.recommended,

@@ -33,24 +33,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "⚠️  EXPO_TOKEN secret is not set. Builds will fail without it."
+            echo "Learn more: https://docs.expo.dev/eas-update/github-actions/"
+            exit 1
+          fi
+
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Setup Expo
-        uses: expo/expo-github-action@v8
+        uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e
         with:
-          expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Determine build parameters
         id: build-params
