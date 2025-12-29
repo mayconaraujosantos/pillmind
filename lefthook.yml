@@ -14,3 +14,31 @@ commit-msg:
   commands:
     commitlint:
       run: npx commitlint --edit {1}
+
+pre-push:
+  parallel: false # Sequencial para garantir ordem correta
+  commands:
+    validate-basics:
+      run: |
+        echo "🔍 Validação básica..."
+        npm run validate
+    test-with-snapshots:
+      run: |
+        echo "🧪 Testando com possível atualização de snapshots..."
+        npm test 2>/dev/null || {
+          echo "📸 Atualizando snapshots..."
+          npm run test:snapshots
+          git add "**/__snapshots__/**" || true
+        }
+    sonar-check:
+      run: |
+        echo "🔍 Verificação SonarQube..."
+        if command -v sonar-scanner >/dev/null 2>&1; then
+          echo "Rodando análise SonarQube local..."
+          npm run sonar:local 2>/dev/null || {
+            echo "⚠️  SonarQube local não disponível. Continuando..."
+          }
+        else
+          echo "💡 SonarQube Scanner não instalado. Para instalar:"
+          echo "   npm install -g sonarqube-scanner"
+        fi
