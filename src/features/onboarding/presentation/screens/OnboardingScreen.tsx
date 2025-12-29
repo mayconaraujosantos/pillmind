@@ -53,12 +53,12 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   };
 
   const handleSignIn = () => {
-    // TODO: Implementar navegação para Sign In
+    //  Implementar navegação para Sign In
     onFinish?.();
   };
 
   const handleSignUp = () => {
-    // TODO: Implementar navegação para Sign Up
+    //  Implementar navegação para Sign Up
     onFinish?.();
   };
 

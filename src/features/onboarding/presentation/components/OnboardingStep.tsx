@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
-import { OnboardingStep as OnboardingStepType } from '../constants/onboarding.constants';
-import { ONBOARDING_COLORS } from '../constants/onboarding.constants';
+import {
+  OnboardingStep as OnboardingStepType,
+  ONBOARDING_COLORS,
+} from '../constants/onboarding.constants';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.min(SCREEN_HEIGHT * 0.4, 320);

@@ -1,6 +1,6 @@
 // Flag para forçar exibição do onboarding (útil para desenvolvimento/testes)
 // Definir como false em produção
-export const FORCE_SHOW_ONBOARDING = true; // TODO: Mudar para false em produção
+export const FORCE_SHOW_ONBOARDING = true;
 
 export const ONBOARDING_COLORS = {
   BACKGROUND: '#FFFFFF',
