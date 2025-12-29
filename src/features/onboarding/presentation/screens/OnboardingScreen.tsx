@@ -64,12 +64,13 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 
   return (
     <View style={styles.container}>
-      <StatusBar style="dark" />
+      <StatusBar style="dark" backgroundColor={ONBOARDING_COLORS.BACKGROUND} />
       {Platform.OS === 'android' && (
         <RNStatusBar
           barStyle="dark-content"
           backgroundColor={ONBOARDING_COLORS.BACKGROUND}
           translucent={false}
+          hidden={false}
         />
       )}
       <View
