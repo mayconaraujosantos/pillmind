@@ -32,13 +32,13 @@ pre-push:
         }
     sonar-check:
       run: |
-        echo "🔍 Verificação SonarQube..."
-        if command -v sonar-scanner >/dev/null 2>&1; then
-          echo "Rodando análise SonarQube local..."
-          npm run sonar:local 2>/dev/null || {
-            echo "⚠️  SonarQube local não disponível. Continuando..."
-          }
+        echo "🔍 Executando análise SonarCloud..."
+        if [ -n "$SONAR_TOKEN" ]; then
+          echo "📊 Rodando SonarCloud Scanner..."
+          npx sonar-scanner
         else
-          echo "💡 SonarQube Scanner não instalado. Para instalar:"
-          echo "   npm install -g sonarqube-scanner"
+          echo "⚠️  SONAR_TOKEN não configurado"
+          echo "💡 Para rodar SonarCloud local, configure:"
+          echo "   export SONAR_TOKEN=your_token_here"
+          echo "✅ Continuando sem análise SonarCloud local..."
         fi
