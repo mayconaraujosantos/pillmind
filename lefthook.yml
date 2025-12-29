@@ -32,21 +32,24 @@ pre-push:
         }
     sonar-doublecheck:
       run: |
-        echo "🔍 SonarQube Double-Check via VS Code Extension..."
-        echo "📊 Executando análise de arquivos modificados..."
+        echo "🔍 SonarQube Double-Check..."
 
-        # Obter arquivos modificados
-        CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' || true)
+        # Obter arquivos modificados que ainda não foram commitados
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' || true)
 
-        if [ -z "$CHANGED_FILES" ]; then
+        # Obter arquivos modificados em relação ao commit anterior
+        MODIFIED_FILES=$(git diff HEAD~1 --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' || true)
+
+        ALL_FILES="$STAGED_FILES $MODIFIED_FILES"
+
+        if [ -z "$ALL_FILES" ]; then
           echo "ℹ️  Nenhum arquivo TS/JS modificado encontrado"
           echo "✅ Prosseguindo sem análise SonarQube"
         else
-          echo "📁 Arquivos a serem analisados:"
-          echo "$CHANGED_FILES"
-          echo ""
-          echo "🔍 Verificando issues de qualidade via SonarQube Extension..."
-          echo "💡 Abra o VS Code para ver os resultados detalhados!"
-          echo "📈 Relatório completo: https://sonarcloud.io/project/overview?id=mayconaraujosantos_pillmind"
-          echo "✅ Double-check concluído!"
+          echo "📊 Executando npm run sonar:doublecheck..."
+          npm run sonar:doublecheck
+          
+          echo "📈 Relatório: https://sonarcloud.io/project/overview?id=mayconaraujosantos_pillmind"
+          echo "💡 Verifique o Problems Panel (Ctrl+Shift+M) no VS Code para issues detalhadas"
+          echo "✅ SonarQube double-check concluído!"
         fi
