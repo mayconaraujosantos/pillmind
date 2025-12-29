@@ -24,6 +24,9 @@
     "sonar:cloud": "sonar-scanner",
     "pre-push": "npm run test:coverage && npm run sonar:cloud",
     "validate": "npm run lint && npm run format:check && npm run test && npx expo-doctor",
+    "sonar:setup": "echo 'Configure SONAR_TOKEN:' && echo '1. Acesse: https://sonarcloud.io/account/security' && echo '2. Gere um token' && echo '3. Export: export SONAR_TOKEN=seu_token' && echo '4. Ou adicione ao .env: SONAR_TOKEN=seu_token'",
+    "sonar:doublecheck": "echo '🔍 Double-checking with SonarQube Extension...' && echo '📋 Check PROBLEMS panel (Ctrl+Shift+M) for detailed issues'",
+    "sonar:report": "echo '📊 SonarCloud Report: https://sonarcloud.io/project/overview?id=mayconaraujosantos_pillmind' && echo '💡 Use VS Code SonarQube Extension for detailed analysis'",
     "build:dev:android": "eas build --profile development --platform android",
     "build:dev:ios": "eas build --profile development --platform ios",
     "prepare": "npx lefthook install && node scripts/fix-lefthook-hooks.js"
