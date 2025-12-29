@@ -501,12 +501,16 @@ exports[`OnboardingContainer deve renderizar corretamente sem erros visuais 1`] 
       >
         <Text
           style={
-            {
-              "color": "#00A896",
-              "fontSize": 16,
-              "fontWeight": "700",
-              "letterSpacing": 0.5,
-            }
+            [
+              {
+                "fontSize": 16,
+                "fontWeight": "700",
+                "letterSpacing": 0.5,
+              },
+              {
+                "color": "#00A896",
+              },
+            ]
           }
         >
           SIGN IN
@@ -563,12 +567,16 @@ exports[`OnboardingContainer deve renderizar corretamente sem erros visuais 1`] 
       >
         <Text
           style={
-            {
-              "color": "#FFFFFF",
-              "fontSize": 16,
-              "fontWeight": "700",
-              "letterSpacing": 0.5,
-            }
+            [
+              {
+                "fontSize": 16,
+                "fontWeight": "700",
+                "letterSpacing": 0.5,
+              },
+              {
+                "color": "#FFFFFF",
+              },
+            ]
           }
         >
           SIGN UP
