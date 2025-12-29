@@ -21,7 +21,7 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
           onPress={onSignIn}
           style={[styles.button, styles.signInButton]}
         >
-          <Text style={styles.signInButtonText}>
+          <Text style={[styles.buttonText, styles.signInButtonText]}>
             {ONBOARDING_TEXTS.SIGN_IN}
           </Text>
         </TouchableOpacity>
@@ -30,7 +30,7 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
           onPress={onSignUp}
           style={[styles.button, styles.signUpButton]}
         >
-          <Text style={styles.signUpButtonText}>
+          <Text style={[styles.buttonText, styles.signUpButtonText]}>
             {ONBOARDING_TEXTS.SIGN_UP}
           </Text>
         </TouchableOpacity>
@@ -58,16 +58,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 56,
   },
+  // Estilo base para texto dos botões
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
   signInButton: {
     backgroundColor: 'transparent',
     borderWidth: 2,
     borderColor: ONBOARDING_COLORS.PRIMARY,
   },
   signInButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
     color: ONBOARDING_COLORS.PRIMARY,
-    letterSpacing: 0.5,
   },
   signUpButton: {
     backgroundColor: ONBOARDING_COLORS.PRIMARY,
@@ -81,9 +84,6 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   signUpButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
     color: ONBOARDING_COLORS.BUTTON_TEXT,
-    letterSpacing: 0.5,
   },
 });

@@ -1,6 +1,29 @@
-// Flag para forçar exibição do onboarding (útil para desenvolvimento/testes)
-// Definir como false em produção
-export const FORCE_SHOW_ONBOARDING = true;
+// Configurações para desenvolvimento e produção
+const DEV_CONFIG = {
+  // true = sempre mostra onboarding (bom para testar onboarding)
+  // false = respeita o AsyncStorage (bom para testar fluxo de usuário existente)
+  FORCE_SHOW_ONBOARDING: false,
+
+  // true = pula splash screen (desenvolvimento mais rápido)
+  SKIP_SPLASH: false,
+
+  // true = adiciona botão de debug para resetar onboarding
+  SHOW_DEBUG_CONTROLS: true,
+};
+
+const PROD_CONFIG = {
+  FORCE_SHOW_ONBOARDING: true, // Sempre mostra onboarding na produção
+  SKIP_SPLASH: false,
+  SHOW_DEBUG_CONTROLS: false,
+};
+
+// Detecta se é desenvolvimento ou produção
+const IS_DEV = __DEV__;
+const CONFIG = IS_DEV ? DEV_CONFIG : PROD_CONFIG;
+
+export const FORCE_SHOW_ONBOARDING = CONFIG.FORCE_SHOW_ONBOARDING;
+export const SKIP_SPLASH = CONFIG.SKIP_SPLASH;
+export const SHOW_DEBUG_CONTROLS = CONFIG.SHOW_DEBUG_CONTROLS;
 
 export const ONBOARDING_COLORS = {
   BACKGROUND: '#FFFFFF',
