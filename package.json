@@ -20,7 +20,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:snapshots": "jest --updateSnapshot",
-    "sonar": "sonar-scanner",
+    "sonar-scanner": "sonar-scanner",
     "sonar:cloud": "sonar-scanner",
     "pre-push": "npm run test:coverage && npm run sonar:cloud",
     "validate": "npm run lint && npm run format:check && npm run test && npx expo-doctor",
