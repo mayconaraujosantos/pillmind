@@ -44,6 +44,9 @@ yarn-error.*
 # Jest
 coverage
 
+# SonarQube
+.scannerwork/
+
 # Trunk
 .trunk/
 
