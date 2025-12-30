@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { COMMON_STYLES } from '@shared/constants/styles';
 
 interface HeaderProps {
   userName?: string;
@@ -51,11 +52,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#FFF',
+    paddingHorizontal: COMMON_STYLES.padding.horizontal.medium,
+    paddingVertical: COMMON_STYLES.padding.vertical.medium,
+    backgroundColor: COMMON_STYLES.colors.background.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
+    borderBottomColor: COMMON_STYLES.colors.border.light,
   },
   userSection: {
     flexDirection: 'row',
@@ -66,22 +67,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: COMMON_STYLES.colors.background.light,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: COMMON_STYLES.padding.horizontal.small,
   },
   avatarText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#007AFF',
+    fontSize: COMMON_STYLES.fontSize.large,
+    fontWeight: COMMON_STYLES.fontWeight.bold,
+    color: COMMON_STYLES.colors.primary,
   },
   userName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
+    fontSize: COMMON_STYLES.fontSize.large,
+    fontWeight: COMMON_STYLES.fontWeight.semibold,
+    color: COMMON_STYLES.colors.text.primary,
   },
   notificationButton: {
-    padding: 8,
+    padding: COMMON_STYLES.padding.vertical.small,
   },
 });

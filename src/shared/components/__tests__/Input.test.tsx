@@ -1,27 +1,35 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { Input } from '../Input';
+import { TEST_DATA } from '../testHelpers';
 
 describe('Input', () => {
   it('should render input without label', () => {
-    const { getByPlaceholderText } = render(<Input placeholder="Enter text" />);
+    const { getByPlaceholderText } = render(
+      <Input placeholder={TEST_DATA.input.placeholder} />
+    );
 
-    expect(getByPlaceholderText('Enter text')).toBeTruthy();
+    expect(getByPlaceholderText(TEST_DATA.input.placeholder)).toBeTruthy();
   });
 
   it('should render input with label', () => {
     const { getByText, getByPlaceholderText } = render(
-      <Input label="Email" placeholder="Enter email" />
+      <Input
+        label={TEST_DATA.input.label}
+        placeholder={TEST_DATA.input.placeholder}
+      />
     );
 
-    expect(getByText('Email')).toBeTruthy();
-    expect(getByPlaceholderText('Enter email')).toBeTruthy();
+    expect(getByText(TEST_DATA.input.label)).toBeTruthy();
+    expect(getByPlaceholderText(TEST_DATA.input.placeholder)).toBeTruthy();
   });
 
   it('should display error message when error prop is provided', () => {
-    const { getByText } = render(<Input label="Email" error="Invalid email" />);
+    const { getByText } = render(
+      <Input label={TEST_DATA.input.label} error={TEST_DATA.input.error} />
+    );
 
-    expect(getByText('Invalid email')).toBeTruthy();
+    expect(getByText(TEST_DATA.input.error)).toBeTruthy();
   });
 
   it('should call onChangeText when text is entered', () => {
