@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Platform, StatusBar as RNStatusBar } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppNavigator } from '@core/navigation/AppNavigator';
@@ -30,6 +31,14 @@ export default function App() {
   if (!isAppReady) {
     return (
       <SafeAreaProvider>
+        <StatusBar style="auto" />
+        {Platform.OS === 'android' && (
+          <RNStatusBar
+            barStyle="dark-content"
+            backgroundColor="#ffffff"
+            translucent={false}
+          />
+        )}
         <SplashScreenComponent onFinish={handleSplashFinish} />
       </SafeAreaProvider>
     );
@@ -40,6 +49,13 @@ export default function App() {
     return (
       <SafeAreaProvider>
         <StatusBar style="auto" />
+        {Platform.OS === 'android' && (
+          <RNStatusBar
+            barStyle="dark-content"
+            backgroundColor="#ffffff"
+            translucent={false}
+          />
+        )}
       </SafeAreaProvider>
     );
   }
@@ -55,15 +71,21 @@ export default function App() {
           onFinish={handleOnboardingFinish}
           onSkip={handleOnboardingSkip}
         />
-        <StatusBar style="auto" />
       </SafeAreaProvider>
     );
   }
 
   return (
     <SafeAreaProvider>
-      <AppNavigator />
       <StatusBar style="auto" />
+      {Platform.OS === 'android' && (
+        <RNStatusBar
+          barStyle="dark-content"
+          backgroundColor="#ffffff"
+          translucent={false}
+        />
+      )}
+      <AppNavigator />
     </SafeAreaProvider>
   );
 }

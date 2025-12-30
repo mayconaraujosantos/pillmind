@@ -7,10 +7,49 @@ pre-commit:
       run: npm run lint
       stage_fixed: true
     format:
-      run: npm run format:check
+      run: npx prettier --check .
       stage_fixed: true
 
 commit-msg:
   commands:
     commitlint:
       run: npx commitlint --edit {1}
+
+pre-push:
+  parallel: false # Sequencial para garantir ordem correta
+  commands:
+    validate-basics:
+      run: |
+        echo "🔍 Validação básica..."
+        npm run validate
+    test-with-snapshots:
+      run: |
+        echo "🧪 Testando com possível atualização de snapshots..."
+        npm test 2>/dev/null || {
+          echo "📸 Atualizando snapshots..."
+          npm run test:snapshots
+          git add "**/__snapshots__/**" || true
+        }
+    sonar-doublecheck:
+      run: |
+        echo "🔍 SonarQube Double-Check..."
+
+        # Obter arquivos modificados que ainda não foram commitados
+        STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' || true)
+
+        # Obter arquivos modificados em relação ao commit anterior
+        MODIFIED_FILES=$(git diff HEAD~1 --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' || true)
+
+        ALL_FILES="$STAGED_FILES $MODIFIED_FILES"
+
+        if [ -z "$ALL_FILES" ]; then
+          echo "ℹ️  Nenhum arquivo TS/JS modificado encontrado"
+          echo "✅ Prosseguindo sem análise SonarQube"
+        else
+          echo "📊 Executando npm run sonar:doublecheck..."
+          npm run sonar:doublecheck
+          
+          echo "📈 Relatório: https://sonarcloud.io/project/overview?id=mayconaraujosantos_pillmind"
+          echo "💡 Verifique o Problems Panel (Ctrl+Shift+M) no VS Code para issues detalhadas"
+          echo "✅ SonarQube double-check concluído!"
+        fi

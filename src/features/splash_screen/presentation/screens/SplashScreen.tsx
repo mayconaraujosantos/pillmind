@@ -1,20 +1,22 @@
+import { Assets } from '@shared/assets';
 import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import { useSplashScreen } from '../hooks/useSplashScreen';
-import { SplashLogo } from '../components/SplashLogo';
+import { StyleSheet, Text, View } from 'react-native';
 import { SplashLoader } from '../components/SplashLoader';
+import { SplashLogo } from '../components/SplashLogo';
 import {
   SPLASH_SCREEN_COLORS,
   SPLASH_SCREEN_TEXTS,
 } from '../constants/splashScreen.constants';
-import { Assets } from '@shared/assets';
+import { useSplashScreen } from '../hooks/useSplashScreen';
 
 interface SplashScreenProps {
   onFinish?: () => void;
+  testID?: string;
 }
 
 export const SplashScreenComponent: React.FC<SplashScreenProps> = ({
   onFinish,
+  testID,
 }) => {
   const [logoAnimationComplete, setLogoAnimationComplete] = useState(false);
   const { isAppReady } = useSplashScreen({
@@ -28,7 +30,7 @@ export const SplashScreenComponent: React.FC<SplashScreenProps> = ({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID={testID}>
       <View style={styles.content}>
         <SplashLogo
           source={Assets.pillLogo}

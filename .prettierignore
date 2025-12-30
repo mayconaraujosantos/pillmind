@@ -8,3 +8,10 @@ android
 coverage
 *.log
 
+# Configuration files that don't need prettier formatting
+.gitignore
+.prettierignore
+*.properties
+*.code-workspace
+lefthook.yml
+

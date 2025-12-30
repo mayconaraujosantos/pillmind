@@ -1,33 +1,32 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
-import { OnboardingStep as OnboardingStepType } from '../constants/onboarding.constants';
-import { ONBOARDING_COLORS } from '../constants/onboarding.constants';
+import {
+  OnboardingStep as OnboardingStepType,
+  ONBOARDING_COLORS,
+} from '../constants/onboarding.constants';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.min(SCREEN_HEIGHT * 0.4, 320);
 
 interface OnboardingStepProps {
   step: OnboardingStepType;
-  isLastStep?: boolean;
 }
 
 export const OnboardingStepComponent: React.FC<OnboardingStepProps> = ({
   step,
-  isLastStep = false,
 }) => {
+  // Mostra a imagem se ela existir, independente de ser o último step
+  const shouldShowImage = step.image !== undefined && step.image !== null;
+
   return (
     <View style={styles.container}>
-      {!isLastStep && (
+      {shouldShowImage && (
         <View style={styles.imageContainer}>
-          {step.image ? (
-            <Image
-              source={{ uri: step.image }}
-              style={styles.image}
-              resizeMode="contain"
-            />
-          ) : (
-            <View style={styles.placeholderImage} />
-          )}
+          <Image
+            source={{ uri: step.image }}
+            style={styles.image}
+            resizeMode="contain"
+          />
         </View>
       )}
       <View style={styles.textContainer}>
