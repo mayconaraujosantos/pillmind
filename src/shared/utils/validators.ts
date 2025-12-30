@@ -13,10 +13,6 @@ export const isValidPhone = (phone: string): boolean => {
   if (!phone || phone.trim() === '') {
     return false;
   }
-  // Remove all non-digit characters and check length
-  // Using replace with global flag is correct for regex patterns
-  // replaceAll doesn't support regex, so we use replace with global flag
-  const digitsOnly = phone.replace(/\D/g, '');
 
   // Reject if has letters (like 'abcd567890')
   if (/[a-zA-Z]/.test(phone)) {
@@ -29,6 +25,11 @@ export const isValidPhone = (phone: string): boolean => {
   if (hífens && hífens.length > 2) {
     return false;
   }
+
+  // Extract only digits using a functional approach (SonarQube compliant)
+  const digitsOnly = Array.from(phone)
+    .filter((char) => /\d/.test(char))
+    .join('');
 
   // Must have 10 or 11 digits for local numbers
   if (digitsOnly.length >= 10 && digitsOnly.length <= 11) {
