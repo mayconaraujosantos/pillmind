@@ -12,7 +12,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   userName = 'Usuário',
-  userAvatar,
+  userAvatar: _userAvatar,
   onNotificationPress,
   onProfilePress,
 }) => {
@@ -26,16 +26,10 @@ export const Header: React.FC<HeaderProps> = ({
         activeOpacity={0.7}
       >
         <View style={styles.avatar}>
-          {userAvatar ? (
-            // Aqui pode ser adicionada uma Image quando necessário
-            <Text style={styles.avatarText}>
-              {userName.charAt(0).toUpperCase()}
-            </Text>
-          ) : (
-            <Text style={styles.avatarText}>
-              {userName.charAt(0).toUpperCase()}
-            </Text>
-          )}
+          {/* TODO: Adicionar Image quando userAvatar for fornecido */}
+          <Text style={styles.avatarText}>
+            {userName.charAt(0).toUpperCase()}
+          </Text>
         </View>
         <Text style={styles.userName}>{userName}</Text>
       </TouchableOpacity>
