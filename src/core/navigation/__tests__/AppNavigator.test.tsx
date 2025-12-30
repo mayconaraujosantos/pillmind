@@ -4,15 +4,16 @@ import { AppNavigator } from '../AppNavigator';
 
 // Mock dependencies
 jest.mock('@react-navigation/native', () => ({
-  NavigationContainer: ({ children }) => children,
+  NavigationContainer: ({ children }: { children: unknown }) => children,
 }));
 
 jest.mock('@react-navigation/bottom-tabs', () => {
   const React = require('react');
   return {
     createBottomTabNavigator: () => ({
-      Navigator: ({ children }) => children,
-      Screen: ({ component: Component }) => React.createElement(Component),
+      Navigator: ({ children }: { children: unknown }) => children,
+      Screen: ({ component: Component }: { component: React.ComponentType }) =>
+        React.createElement(Component),
     }),
   };
 });
@@ -103,7 +104,7 @@ jest.mock('@expo/vector-icons', () => {
   const React = require('react');
   const RN = require('react-native');
   return {
-    Ionicons: (props) =>
+    Ionicons: (props: { name: string; size: number; color: string }) =>
       React.createElement(
         RN.View,
         {

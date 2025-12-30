@@ -1,8 +1,8 @@
-import React from 'react';
 import { render } from '@testing-library/react-native';
-import { SplashScreenComponent } from '../SplashScreen';
-import { useSplashScreen } from '../../hooks/useSplashScreen';
+import React from 'react';
 import { SPLASH_SCREEN_TEXTS } from '../../constants/splashScreen.constants';
+import { useSplashScreen } from '../../hooks/useSplashScreen';
+import { SplashScreenComponent } from '../SplashScreen';
 
 // Mock dependencies
 jest.mock('../../hooks/useSplashScreen');
@@ -24,7 +24,10 @@ describe('SplashScreenComponent', () => {
   });
 
   it('renders correctly when app is not ready', () => {
-    mockUseSplashScreen.mockReturnValue({ isAppReady: false });
+    mockUseSplashScreen.mockReturnValue({
+      isAppReady: false,
+      isSplashReady: false,
+    });
 
     const { getByText } = render(<SplashScreenComponent />);
 
@@ -33,7 +36,10 @@ describe('SplashScreenComponent', () => {
   });
 
   it('returns null when app is ready', () => {
-    mockUseSplashScreen.mockReturnValue({ isAppReady: true });
+    mockUseSplashScreen.mockReturnValue({
+      isAppReady: true,
+      isSplashReady: true,
+    });
 
     const { toJSON } = render(<SplashScreenComponent />);
 
@@ -42,7 +48,10 @@ describe('SplashScreenComponent', () => {
 
   it('calls onFinish callback when provided', () => {
     const mockOnFinish = jest.fn();
-    mockUseSplashScreen.mockReturnValue({ isAppReady: false });
+    mockUseSplashScreen.mockReturnValue({
+      isAppReady: false,
+      isSplashReady: false,
+    });
 
     render(<SplashScreenComponent onFinish={mockOnFinish} />);
 
@@ -52,7 +61,10 @@ describe('SplashScreenComponent', () => {
   });
 
   it('calls useSplashScreen without onFinish when not provided', () => {
-    mockUseSplashScreen.mockReturnValue({ isAppReady: false });
+    mockUseSplashScreen.mockReturnValue({
+      isAppReady: false,
+      isSplashReady: false,
+    });
 
     render(<SplashScreenComponent />);
 
@@ -62,7 +74,10 @@ describe('SplashScreenComponent', () => {
   });
 
   it('has correct container styles', () => {
-    mockUseSplashScreen.mockReturnValue({ isAppReady: false });
+    mockUseSplashScreen.mockReturnValue({
+      isAppReady: false,
+      isSplashReady: false,
+    });
 
     const { getByTestId } = render(
       <SplashScreenComponent testID="splash-screen" />
