@@ -1,23 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Card, ScreenWrapper } from '@shared/components';
+import { Text } from 'react-native';
+import { BaseScreen } from '@shared/components';
 
 export const NearbyScreen: React.FC = () => {
   return (
-    <ScreenWrapper>
-      <View style={styles.container}>
-        <Card>
-          <Text>Nearby Screen Content</Text>
-        </Card>
-      </View>
-    </ScreenWrapper>
+    <BaseScreen title="Nearby">
+      <Text>Nearby Screen Content</Text>
+    </BaseScreen>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#F5F5F5',
-  },
-});
