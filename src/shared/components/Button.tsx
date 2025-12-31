@@ -6,6 +6,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
+import { COMMON_STYLES } from '@shared/constants/styles';
 
 interface ButtonProps {
   title: string;
@@ -44,37 +45,37 @@ export const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+    paddingVertical: COMMON_STYLES.padding.vertical.medium,
+    paddingHorizontal: COMMON_STYLES.padding.horizontal.large,
+    borderRadius: COMMON_STYLES.borderRadius.small,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primary: {
-    backgroundColor: '#007AFF',
+    backgroundColor: COMMON_STYLES.colors.primary,
   },
   secondary: {
-    backgroundColor: '#5856D6',
+    backgroundColor: COMMON_STYLES.colors.secondary,
   },
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: COMMON_STYLES.colors.primary,
   },
   disabled: {
     opacity: 0.5,
   },
   text: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: COMMON_STYLES.fontSize.large,
+    fontWeight: COMMON_STYLES.fontWeight.semibold,
   },
   primaryText: {
-    color: '#FFFFFF',
+    color: COMMON_STYLES.colors.text.white,
   },
   secondaryText: {
-    color: '#FFFFFF',
+    color: COMMON_STYLES.colors.text.white,
   },
   outlineText: {
-    color: '#007AFF',
+    color: COMMON_STYLES.colors.primary,
   },
 });

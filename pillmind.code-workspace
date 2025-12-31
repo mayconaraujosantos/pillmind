@@ -1,0 +1,24 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "sonarlint.connectedMode.project": {
+      "connectionId": "mayconaraujosantos",
+      "projectKey": "mayconaraujosantos_pillmind"
+    },
+    "sonarlint.rules": {
+      "javascript:S1481": "info",
+      "typescript:S1481": "info",
+      "javascript:S1854": "info", 
+      "typescript:S1854": "info",
+      "javascript:S2console": "info",
+      "typescript:S2console": "info"
+    },
+    "sonarlint.focusOnNewCode": false,
+    "sonarlint.output.showAnalyzerLogs": true,
+    "sonarlint.trace.server": "verbose"
+  }
+}

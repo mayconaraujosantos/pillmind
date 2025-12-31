@@ -34,8 +34,10 @@ jobs:
 
     steps:
       - name: Check for EXPO_TOKEN
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+          if [ -z "$EXPO_TOKEN" ]; then
             echo "⚠️  EXPO_TOKEN secret is not set. Builds will fail without it."
             echo "Learn more: https://docs.expo.dev/eas-update/github-actions/"
             exit 1

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TextInputProps,
 } from 'react-native';
+import { COMMON_STYLES } from '@shared/constants/styles';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -33,29 +34,29 @@ export const Input: React.FC<InputProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 16,
+    marginBottom: COMMON_STYLES.padding.vertical.large,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#000',
+    fontSize: COMMON_STYLES.fontSize.medium,
+    fontWeight: COMMON_STYLES.fontWeight.semibold,
+    marginBottom: COMMON_STYLES.padding.vertical.small,
+    color: COMMON_STYLES.colors.text.primary,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    backgroundColor: '#FFF',
+    borderColor: COMMON_STYLES.colors.border.default,
+    borderRadius: COMMON_STYLES.borderRadius.small,
+    paddingHorizontal: COMMON_STYLES.padding.horizontal.medium,
+    paddingVertical: COMMON_STYLES.padding.vertical.medium,
+    fontSize: COMMON_STYLES.fontSize.large,
+    backgroundColor: COMMON_STYLES.colors.background.white,
   },
   inputError: {
-    borderColor: '#FF3B30',
+    borderColor: COMMON_STYLES.colors.error,
   },
   errorText: {
-    color: '#FF3B30',
-    fontSize: 12,
+    color: COMMON_STYLES.colors.error,
+    fontSize: COMMON_STYLES.fontSize.small,
     marginTop: 4,
   },
 });
