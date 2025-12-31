@@ -89,7 +89,7 @@ jobs:
         run: |
           eas build --platform android --profile ${{ steps.build-params.outputs.profile }} --non-interactive
 
-      - name: Build iOS
-        if: steps.build-params.outputs.platform == 'ios' || steps.build-params.outputs.platform == 'all'
-        run: |
-          eas build --platform ios --profile ${{ steps.build-params.outputs.profile }} --non-interactive
+      # - name: Build iOS
+      #   if: steps.build-params.outputs.platform == 'ios' || steps.build-params.outputs.platform == 'all'
+      #   run: |
+      #     eas build --platform ios --profile ${{ steps.build-params.outputs.profile }} --non-interactive
