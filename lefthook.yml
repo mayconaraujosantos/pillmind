@@ -22,14 +22,32 @@ pre-push:
       run: |
         echo "🔍 Validação básica..."
         npm run validate
-    test-with-snapshots:
+    test:
       run: |
-        echo "🧪 Testando com possível atualização de snapshots..."
-        npm test 2>/dev/null || {
-          echo "📸 Atualizando snapshots..."
+        echo "🧪 Rodando testes..."
+        npm test -- --passWithNoTests
+        TEST_EXIT_CODE=$?
+        
+        if [ $TEST_EXIT_CODE -ne 0 ]; then
+          echo "⚠️  Testes falharam. Tentando atualizar snapshots..."
           npm run test:snapshots
-          git add "**/__snapshots__/**" || true
-        }
+          SNAPSHOT_EXIT_CODE=$?
+          
+          if [ $SNAPSHOT_EXIT_CODE -eq 0 ]; then
+            echo "✅ Snapshots atualizados com sucesso!"
+            git add "**/__snapshots__/**" 2>/dev/null || true
+            echo "📸 Snapshots adicionados ao commit"
+            exit 0
+          else
+            echo "❌ TESTES FALHARAM mesmo após atualizar snapshots!"
+            echo "❌ Corrija os erros de teste antes de fazer push."
+            exit 1
+          fi
+        else
+          echo "✅ Todos os testes passaram!"
+          exit 0
+        fi
+      fail_text: "❌ PUSH BLOQUEADO! Há testes falhando. Corrija antes de fazer push."
     sonar-doublecheck:
       run: |
         echo "🔍 SonarQube Double-Check..."
