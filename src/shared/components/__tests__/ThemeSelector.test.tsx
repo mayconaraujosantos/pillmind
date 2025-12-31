@@ -9,9 +9,13 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
 }));
 
-jest.mock('react-native', () => ({
-  ...jest.requireActual('react-native'),
-  useColorScheme: jest.fn(() => 'light'),
+jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({
+  default: jest.fn(() => 'light'),
+}));
+
+jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
+  getColorScheme: jest.fn(() => 'light'),
+  addChangeListener: jest.fn(() => ({ remove: jest.fn() })),
 }));
 
 describe('ThemeSelector', () => {

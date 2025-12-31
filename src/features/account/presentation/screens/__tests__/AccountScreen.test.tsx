@@ -9,9 +9,13 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
 }));
 
-jest.mock('react-native', () => ({
-  ...jest.requireActual('react-native'),
-  useColorScheme: jest.fn(() => 'light'),
+jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({
+  default: jest.fn(() => 'light'),
+}));
+
+jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
+  getColorScheme: jest.fn(() => 'light'),
+  addChangeListener: jest.fn(() => ({ remove: jest.fn() })),
 }));
 
 describe('AccountScreen', () => {
@@ -36,14 +40,15 @@ describe('AccountScreen', () => {
   });
 
   it('should render theme selector section', async () => {
-    const { getByText } = render(
+    const { getByText, getAllByText } = render(
       <ThemeProvider>
         <AccountScreen />
       </ThemeProvider>
     );
 
     await waitFor(() => {
-      expect(getByText('Aparência')).toBeTruthy();
+      // Há dois elementos "Aparência": título da seção e título do ThemeSelector
+      expect(getAllByText('Aparência').length).toBeGreaterThan(0);
     });
 
     expect(getByText('Automático')).toBeTruthy();
