@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Platform, StatusBar as RNStatusBar } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppNavigator } from '@core/navigation/AppNavigator';
 import { SplashScreenComponent } from '@features/splash_screen';
 import { OnboardingScreen } from '@features/onboarding';
 import { useOnboardingStorage } from '@features/onboarding/presentation/hooks/useOnboardingStorage';
 import { FORCE_SHOW_ONBOARDING } from '@features/onboarding/presentation/constants/onboarding.constants';
+import { ThemeProvider } from '@shared/theme';
+import { ThemedStatusBar } from '@shared/components';
 
 export default function App() {
   const [isAppReady, setIsAppReady] = useState(false);
@@ -30,33 +30,23 @@ export default function App() {
 
   if (!isAppReady) {
     return (
-      <SafeAreaProvider>
-        <StatusBar style="auto" />
-        {Platform.OS === 'android' && (
-          <RNStatusBar
-            barStyle="dark-content"
-            backgroundColor="#ffffff"
-            translucent={false}
-          />
-        )}
-        <SplashScreenComponent onFinish={handleSplashFinish} />
-      </SafeAreaProvider>
+      <ThemeProvider>
+        <SafeAreaProvider>
+          <ThemedStatusBar />
+          <SplashScreenComponent onFinish={handleSplashFinish} />
+        </SafeAreaProvider>
+      </ThemeProvider>
     );
   }
 
   // Aguardar carregar o estado do AsyncStorage antes de decidir se mostra onboarding
   if (isLoadingOnboarding) {
     return (
-      <SafeAreaProvider>
-        <StatusBar style="auto" />
-        {Platform.OS === 'android' && (
-          <RNStatusBar
-            barStyle="dark-content"
-            backgroundColor="#ffffff"
-            translucent={false}
-          />
-        )}
-      </SafeAreaProvider>
+      <ThemeProvider>
+        <SafeAreaProvider>
+          <ThemedStatusBar />
+        </SafeAreaProvider>
+      </ThemeProvider>
     );
   }
 
@@ -66,26 +56,24 @@ export default function App() {
 
   if (shouldShowOnboarding) {
     return (
-      <SafeAreaProvider>
-        <OnboardingScreen
-          onFinish={handleOnboardingFinish}
-          onSkip={handleOnboardingSkip}
-        />
-      </SafeAreaProvider>
+      <ThemeProvider>
+        <SafeAreaProvider>
+          <ThemedStatusBar />
+          <OnboardingScreen
+            onFinish={handleOnboardingFinish}
+            onSkip={handleOnboardingSkip}
+          />
+        </SafeAreaProvider>
+      </ThemeProvider>
     );
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="auto" />
-      {Platform.OS === 'android' && (
-        <RNStatusBar
-          barStyle="dark-content"
-          backgroundColor="#ffffff"
-          translucent={false}
-        />
-      )}
-      <AppNavigator />
-    </SafeAreaProvider>
+    <ThemeProvider>
+      <SafeAreaProvider>
+        <ThemedStatusBar />
+        <AppNavigator />
+      </SafeAreaProvider>
+    </ThemeProvider>
   );
 }

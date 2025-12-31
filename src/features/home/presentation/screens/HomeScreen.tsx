@@ -3,16 +3,22 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card, ScreenWrapper } from '@shared/components';
 import { useOnboardingStorage } from '@features/onboarding';
 import { SHOW_DEBUG_CONTROLS } from '@features/onboarding/presentation/constants/onboarding.constants';
+import { useTheme } from '@shared/theme';
 
 export const HomeScreen: React.FC = () => {
   const { resetOnboarding } = useOnboardingStorage();
+  const { theme } = useTheme();
 
   return (
     <ScreenWrapper>
       <View style={styles.container}>
         <Card>
-          <Text style={styles.title}>PillMind Home</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: theme.colors.text }]}>
+            PillMind Home
+          </Text>
+          <Text
+            style={[styles.subtitle, { color: theme.colors.textSecondary }]}
+          >
             Bem-vindo ao seu assistente de medicamentos!
           </Text>
         </Card>
@@ -41,18 +47,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F5F5F5',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#2C3E50',
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#5A6C7D',
     textAlign: 'center',
   },
   debugCard: {
