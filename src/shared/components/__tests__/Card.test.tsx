@@ -1,50 +1,69 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card } from '../Card';
 import { Text } from 'react-native';
+import { ThemeProvider } from '@shared/theme';
+
+const renderWithTheme = (component: React.ReactElement) => {
+  return render(<ThemeProvider>{component}</ThemeProvider>);
+};
 
 describe('Card', () => {
-  it('should render children correctly', () => {
-    const { getByText } = render(
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValue('automatic');
+  });
+
+  it('should render children correctly', async () => {
+    const { getByText } = renderWithTheme(
       <Card>
         <Text>Card Content</Text>
       </Card>
     );
 
-    expect(getByText('Card Content')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText('Card Content')).toBeTruthy();
+    });
   });
 
-  it('should apply default styles', () => {
-    const { getByTestId } = render(
+  it('should apply default styles', async () => {
+    const { getByTestId } = renderWithTheme(
       <Card>
         <Text testID="card-content">Test Content</Text>
       </Card>
     );
 
-    expect(getByTestId('card-content')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId('card-content')).toBeTruthy();
+    });
   });
 
-  it('should apply custom styles when provided', () => {
+  it('should apply custom styles when provided', async () => {
     const customStyle = { backgroundColor: '#FF0000' };
 
-    const { getByTestId } = render(
+    const { getByTestId } = renderWithTheme(
       <Card style={customStyle}>
         <Text testID="card-content">Custom Style Content</Text>
       </Card>
     );
 
-    expect(getByTestId('card-content')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId('card-content')).toBeTruthy();
+    });
   });
 
-  it('should render multiple children', () => {
-    const { getByText } = render(
+  it('should render multiple children', async () => {
+    const { getByText } = renderWithTheme(
       <Card>
         <Text>First Child</Text>
         <Text>Second Child</Text>
       </Card>
     );
 
-    expect(getByText('First Child')).toBeTruthy();
-    expect(getByText('Second Child')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText('First Child')).toBeTruthy();
+      expect(getByText('Second Child')).toBeTruthy();
+    });
   });
 });
