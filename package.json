@@ -68,6 +68,7 @@
     "eslint-plugin-react-native": "^5.0.0",
     "jest": "^29.7.0",
     "jest-expo": "~54.0.1",
+    "lefthook": "^2.0.13",
     "prettier": "^3.7.4",
     "sonarqube-scanner": "^4.3.0",
     "typescript": "~5.9.2",

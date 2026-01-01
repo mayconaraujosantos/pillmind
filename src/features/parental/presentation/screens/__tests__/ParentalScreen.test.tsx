@@ -1,12 +1,24 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ParentalScreen } from '../ParentalScreen';
+import { ThemeProvider } from '@shared/theme';
 
 describe('ParentalScreen', () => {
-  it('should render correctly', () => {
-    const { getByText } = render(<ParentalScreen />);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValue('automatic');
+  });
 
-    expect(getByText('Parental')).toBeTruthy();
-    expect(getByText('Parental Screen Content')).toBeTruthy();
+  it('should render correctly', async () => {
+    const { getByText } = render(
+      <ThemeProvider>
+        <ParentalScreen />
+      </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      expect(getByText('Controle Parental')).toBeTruthy();
+    });
   });
 });
