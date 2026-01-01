@@ -19,7 +19,7 @@ describe('OnboardingView', () => {
   it('deve renderizar todos os componentes principais', () => {
     const { getByText } = render(<OnboardingView {...mockProps} />);
 
-    expect(getByText('Pular')).toBeTruthy(); // Header
+    expect(getByText('Skip')).toBeTruthy(); // Header
     expect(getByText('SIGN IN')).toBeTruthy(); // Footer
     expect(getByText('SIGN UP')).toBeTruthy(); // Footer
   });
@@ -27,7 +27,7 @@ describe('OnboardingView', () => {
   it('deve chamar onSkip quando botão Skip é pressionado', () => {
     const { getByText } = render(<OnboardingView {...mockProps} />);
 
-    fireEvent.press(getByText('Pular'));
+    fireEvent.press(getByText('Skip'));
 
     expect(mockProps.onSkip).toHaveBeenCalledTimes(1);
   });

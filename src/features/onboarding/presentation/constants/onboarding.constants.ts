@@ -39,10 +39,10 @@ export const ONBOARDING_COLORS = {
 } as const;
 
 export const ONBOARDING_TEXTS = {
-  SKIP: 'Pular',
-  NEXT: 'Próximo',
-  GET_STARTED: 'Começar',
-  BACK: 'Voltar',
+  SKIP: 'Skip',
+  NEXT: 'Next',
+  GET_STARTED: 'Get Started',
+  BACK: 'Back',
   SIGN_IN: 'SIGN IN',
   SIGN_UP: 'SIGN UP',
 } as const;

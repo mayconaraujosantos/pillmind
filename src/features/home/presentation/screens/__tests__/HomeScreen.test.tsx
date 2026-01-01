@@ -25,9 +25,7 @@ describe('HomeScreen', () => {
 
     await waitFor(() => {
       expect(getByText('PillMind Home')).toBeTruthy();
-      expect(
-        getByText('Bem-vindo ao seu assistente de medicamentos!')
-      ).toBeTruthy();
+      expect(getByText('Welcome to your medication assistant!')).toBeTruthy();
     });
   });
 

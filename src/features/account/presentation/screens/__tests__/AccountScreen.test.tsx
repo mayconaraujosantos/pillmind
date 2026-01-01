@@ -18,10 +18,10 @@ describe('AccountScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('Perfil')).toBeTruthy();
+      expect(getByText('Profile')).toBeTruthy();
     });
 
-    expect(getByText('Usuário')).toBeTruthy();
+    expect(getByText('User')).toBeTruthy();
     expect(getByText('usuario@pillmind.com')).toBeTruthy();
   });
 
@@ -50,12 +50,12 @@ describe('AccountScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('Configurações')).toBeTruthy();
+      expect(getByText('Settings')).toBeTruthy();
     });
 
-    expect(getByText('Notificações')).toBeTruthy();
-    expect(getByText('Privacidade')).toBeTruthy();
-    expect(getByText('Sobre')).toBeTruthy();
+    expect(getByText('Notifications')).toBeTruthy();
+    expect(getByText('Privacy')).toBeTruthy();
+    expect(getByText('About')).toBeTruthy();
   });
 
   it('should render logout button', async () => {
@@ -66,7 +66,7 @@ describe('AccountScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('Sair')).toBeTruthy();
+      expect(getByText('Logout')).toBeTruthy();
     });
   });
 });

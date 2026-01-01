@@ -18,7 +18,7 @@ describe('ParentalScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('Controle Parental')).toBeTruthy();
+      expect(getByText('Parental Control')).toBeTruthy();
     });
   });
 });

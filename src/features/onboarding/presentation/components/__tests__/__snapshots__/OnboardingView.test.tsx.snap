@@ -85,7 +85,7 @@ exports[`OnboardingView deve renderizar corretamente sem erros visuais 1`] = `
           }
         }
       >
-        Pular
+        Skip
       </Text>
     </View>
   </View>

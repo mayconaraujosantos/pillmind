@@ -6,7 +6,7 @@ describe('OnboardingContainer', () => {
   it('deve renderizar o componente sem erros', () => {
     const { getByText } = render(<OnboardingContainer />);
 
-    expect(getByText('Pular')).toBeTruthy();
+    expect(getByText('Skip')).toBeTruthy();
     expect(getByText('SIGN IN')).toBeTruthy();
     expect(getByText('SIGN UP')).toBeTruthy();
   });
@@ -15,7 +15,7 @@ describe('OnboardingContainer', () => {
     const onSkip = jest.fn();
     const { getByText } = render(<OnboardingContainer onSkip={onSkip} />);
 
-    fireEvent.press(getByText('Pular'));
+    fireEvent.press(getByText('Skip'));
 
     expect(onSkip).toHaveBeenCalledTimes(1);
   });
@@ -48,7 +48,7 @@ describe('OnboardingContainer', () => {
     const { getByText } = render(<OnboardingContainer />);
 
     // Não deve lançar erro ao pressionar botões sem callbacks
-    fireEvent.press(getByText('Pular'));
+    fireEvent.press(getByText('Skip'));
     fireEvent.press(getByText('SIGN IN'));
     fireEvent.press(getByText('SIGN UP'));
 

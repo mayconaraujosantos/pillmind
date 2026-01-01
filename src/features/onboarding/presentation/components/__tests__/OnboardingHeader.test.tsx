@@ -7,14 +7,14 @@ describe('OnboardingHeader', () => {
     const onSkip = jest.fn();
     const { getByText } = render(<OnboardingHeader onSkip={onSkip} />);
 
-    expect(getByText('Pular')).toBeTruthy();
+    expect(getByText('Skip')).toBeTruthy();
   });
 
   it('deve chamar onSkip ao pressionar o botão', () => {
     const onSkip = jest.fn();
     const { getByText } = render(<OnboardingHeader onSkip={onSkip} />);
 
-    fireEvent.press(getByText('Pular'));
+    fireEvent.press(getByText('Skip'));
 
     expect(onSkip).toHaveBeenCalledTimes(1);
   });

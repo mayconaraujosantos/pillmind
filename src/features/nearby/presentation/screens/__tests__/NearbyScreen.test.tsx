@@ -18,7 +18,7 @@ describe('NearbyScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('Locais Próximos')).toBeTruthy();
+      expect(getByText('Nearby')).toBeTruthy();
     });
   });
 });

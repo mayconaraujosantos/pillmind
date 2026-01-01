@@ -7,6 +7,7 @@ import { useOnboardingStorage } from '@features/onboarding/presentation/hooks/us
 import { FORCE_SHOW_ONBOARDING } from '@features/onboarding/presentation/constants/onboarding.constants';
 import { ThemeProvider } from '@shared/theme';
 import { ThemedStatusBar } from '@shared/components';
+import '@shared/i18n';
 
 export default function App() {
   const [isAppReady, setIsAppReady] = useState(false);

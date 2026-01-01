@@ -18,7 +18,7 @@ describe('AppointmentsScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('Consultas')).toBeTruthy();
+      expect(getByText('Appointments')).toBeTruthy();
     });
   });
 });
