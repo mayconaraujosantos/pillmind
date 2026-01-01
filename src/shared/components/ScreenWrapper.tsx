@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, ViewStyle } from 'react-native';
+import { useTheme } from '@shared/theme';
 
 interface ScreenWrapperProps {
   children: React.ReactNode;
@@ -10,7 +11,19 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   children,
   style,
 }) => {
-  return <View style={[styles.container, style]}>{children}</View>;
+  const { theme } = useTheme();
+
+  return (
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.background },
+        style,
+      ]}
+    >
+      {children}
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({

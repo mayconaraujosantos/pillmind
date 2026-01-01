@@ -5,3 +5,5 @@ export * from './Input';
 export * from './Card';
 export * from './ScreenWrapper';
 export * from './Header';
+export * from './ThemeSelector';
+export * from './ThemedStatusBar';
