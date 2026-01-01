@@ -1,6 +1,5 @@
 /* eslint-disable no-undef, @typescript-eslint/no-require-imports */
 import '@testing-library/jest-native/extend-expect';
-import React from 'react';
 import { render } from '@testing-library/react-native';
 
 // Mock AsyncStorage globally
@@ -23,7 +22,7 @@ jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
 }));
 
 // Global render helper with ThemeProvider
-global.renderWithTheme = (component) => {
+globalThis.renderWithTheme = (component) => {
   const { ThemeProvider } = require('./src/shared/theme');
   return render(<ThemeProvider>{component}</ThemeProvider>);
 };
