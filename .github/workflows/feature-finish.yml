@@ -41,7 +41,8 @@ jobs:
         run: |
           FEATURE_NAME="${BRANCH_NAME#feature/}"
           echo "feature_name=$FEATURE_NAME" >> $GITHUB_OUTPUT
-          echo "Feature name: $FEATURE_NAME"
+          echo "🔍 Branch: $BRANCH_NAME"
+          echo "🔍 Feature: $FEATURE_NAME"
 
       - name: Checkout develop
         run: |
@@ -53,18 +54,26 @@ jobs:
         env:
           FEATURE_NAME: ${{ steps.extract-feature.outputs.feature_name }}
         run: |
-          # O merge já foi feito pelo GitHub, apenas limpamos a branch local se existir
+          echo "🔍 Verificando branch local: feature/$FEATURE_NAME"
           if git show-ref --verify --quiet "refs/heads/feature/$FEATURE_NAME"; then
+            echo "🗑️  Deletando branch local..."
             git branch -D "feature/$FEATURE_NAME" || true
+          else
+            echo "ℹ️  Branch local não existe"
           fi
-          echo "✅ Feature branch cleaned up locally"
+          echo "✅ Cleanup local concluído"
 
       - name: Delete remote feature branch
         env:
           FEATURE_NAME: ${{ steps.extract-feature.outputs.feature_name }}
         run: |
-          git push origin --delete "feature/$FEATURE_NAME" || echo "Branch already deleted"
-          echo "✅ Remote feature branch deleted"
+          echo "🗑️  Deletando branch remota: feature/$FEATURE_NAME"
+          if git push origin --delete "feature/$FEATURE_NAME" 2>&1; then
+            echo "✅ Branch remota deletada com sucesso"
+          else
+            echo "⚠️  Falha ao deletar (pode já ter sido deletada)"
+            exit 0
+          fi
 
       - name: Post summary
         env:
