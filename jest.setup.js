@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, @typescript-eslint/no-require-imports */
 import '@testing-library/jest-native/extend-expect';
 import React from 'react';
 import { render } from '@testing-library/react-native';
