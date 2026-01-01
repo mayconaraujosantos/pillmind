@@ -134,6 +134,24 @@ describe('AppNavigator', () => {
     expect(toJSON()).toBeTruthy();
   });
 
+  it('should render all screens', () => {
+    const { getByTestId } = render(<AppNavigator />);
+    expect(getByTestId('home-screen')).toBeTruthy();
+    expect(getByTestId('appointments-screen')).toBeTruthy();
+    expect(getByTestId('account-screen')).toBeTruthy();
+    expect(getByTestId('parental-screen')).toBeTruthy();
+    expect(getByTestId('nearby-screen')).toBeTruthy();
+  });
+
+  it('should render all screen texts', () => {
+    const { getByText } = render(<AppNavigator />);
+    expect(getByText('Home Screen')).toBeTruthy();
+    expect(getByText('Appointments Screen')).toBeTruthy();
+    expect(getByText('Account Screen')).toBeTruthy();
+    expect(getByText('Parental Screen')).toBeTruthy();
+    expect(getByText('Nearby Screen')).toBeTruthy();
+  });
+
   // Note: Testing the actual icon selection logic and navigation behavior
   // would require more complex mocking of React Navigation's internal state
   // and context. For coverage purposes, we're testing the component renders
