@@ -6,6 +6,10 @@ on:
       - develop
     types: [closed]
 
+permissions:
+  contents: write
+  pull-requests: read
+
 jobs:
   finish-feature:
     name: Auto Finish Feature
