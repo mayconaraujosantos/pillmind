@@ -4,20 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeSelector } from '../ThemeSelector';
 import { ThemeProvider } from '../../theme';
 
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-}));
-
-jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({
-  default: jest.fn(() => 'light'),
-}));
-
-jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
-  getColorScheme: jest.fn(() => 'light'),
-  addChangeListener: jest.fn(() => ({ remove: jest.fn() })),
-}));
-
 describe('ThemeSelector', () => {
   beforeEach(() => {
     jest.clearAllMocks();

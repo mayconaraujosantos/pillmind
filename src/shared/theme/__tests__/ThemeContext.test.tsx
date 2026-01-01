@@ -5,22 +5,6 @@ import { ThemeProvider } from '../ThemeContext';
 import { useTheme } from '../useTheme';
 import { Text } from 'react-native';
 
-// Mock AsyncStorage
-jest.mock('@react-native-async-storage/async-storage', () => ({
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-}));
-
-// Mock useColorScheme and Appearance
-jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({
-  default: jest.fn(() => 'light'),
-}));
-
-jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
-  getColorScheme: jest.fn(() => 'light'),
-  addChangeListener: jest.fn(() => ({ remove: jest.fn() })),
-}));
-
 const TestComponent = () => {
   const { theme, themeMode, isDark } = useTheme();
 
