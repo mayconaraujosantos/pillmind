@@ -30,7 +30,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const systemColorScheme = useColorScheme();
   const [themeMode, setThemeMode] = useState<ThemeMode>('automatic');
   const [isReady, setIsReady] = useState(false);
-  const [detectedTheme, setDetectedTheme] = useState<'light' | 'dark'>('light');
+
+  // Detecta o tema do sistema IMEDIATAMENTE na inicialização (síncrono)
+  const initialSystemTheme =
+    Appearance.getColorScheme() || systemColorScheme || 'light';
+  const [detectedTheme, setDetectedTheme] = useState<'light' | 'dark'>(
+    initialSystemTheme === 'dark' ? 'dark' : 'light'
+  );
 
   // Força detecção inicial e monitora mudanças
   useEffect(() => {
@@ -39,13 +45,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       const appearanceScheme = Appearance.getColorScheme();
       const hookScheme = systemColorScheme;
 
-      console.log('🔍 Detecção de tema:');
-      console.log('  - Appearance.getColorScheme():', appearanceScheme);
-      console.log('  - useColorScheme():', hookScheme);
-
       // Prioriza Appearance.getColorScheme() que é mais confiável
       const finalTheme = appearanceScheme || hookScheme || 'light';
-      console.log('  - Tema final detectado:', finalTheme);
 
       setDetectedTheme(finalTheme === 'dark' ? 'dark' : 'light');
     };
@@ -55,7 +56,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     // Listener para mudanças
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      console.log('📱 Sistema mudou para:', colorScheme);
       const newTheme = colorScheme || 'light';
       setDetectedTheme(newTheme === 'dark' ? 'dark' : 'light');
     });
@@ -68,14 +68,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     themeMode === 'automatic' ? detectedTheme === 'dark' : themeMode === 'dark';
 
   const theme = createTheme(isDark);
-
-  // Log final do estado
-  useEffect(() => {
-    console.log('🎨 Estado do tema:');
-    console.log('  - Modo selecionado:', themeMode);
-    console.log('  - Tema detectado do sistema:', detectedTheme);
-    console.log('  - Aplicando tema:', isDark ? 'DARK' : 'LIGHT');
-  }, [themeMode, detectedTheme, isDark]);
 
   // Carrega o tema salvo ao iniciar
   useEffect(() => {
