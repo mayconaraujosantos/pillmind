@@ -1,6 +1,7 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { OnboardingFooter } from '../OnboardingFooter';
+import { WithThemeProvider } from '../WithThemeProvider';
 
 describe('OnboardingFooter', () => {
   const mockProps = {
@@ -12,34 +13,58 @@ describe('OnboardingFooter', () => {
     jest.clearAllMocks();
   });
 
-  it('deve renderizar botões Sign In e Sign Up', () => {
-    const { getByText } = render(<OnboardingFooter {...mockProps} />);
+  it('deve renderizar botões Sign In e Sign Up', async () => {
+    const { getByText } = render(
+      <WithThemeProvider>
+        <OnboardingFooter {...mockProps} />
+      </WithThemeProvider>
+    );
 
-    expect(getByText('SIGN IN')).toBeTruthy();
-    expect(getByText('SIGN UP')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText('SIGN IN')).toBeTruthy();
+      expect(getByText('SIGN UP')).toBeTruthy();
+    });
   });
 
-  it('deve chamar onSignIn ao pressionar botão Sign In', () => {
-    const { getByText } = render(<OnboardingFooter {...mockProps} />);
+  it('deve chamar onSignIn ao pressionar botão Sign In', async () => {
+    const { getByText } = render(
+      <WithThemeProvider>
+        <OnboardingFooter {...mockProps} />
+      </WithThemeProvider>
+    );
 
-    fireEvent.press(getByText('SIGN IN'));
+    await waitFor(() => {
+      fireEvent.press(getByText('SIGN IN'));
+    });
 
     expect(mockProps.onSignIn).toHaveBeenCalledTimes(1);
     expect(mockProps.onSignUp).not.toHaveBeenCalled();
   });
 
-  it('deve chamar onSignUp ao pressionar botão Sign Up', () => {
-    const { getByText } = render(<OnboardingFooter {...mockProps} />);
+  it('deve chamar onSignUp ao pressionar botão Sign Up', async () => {
+    const { getByText } = render(
+      <WithThemeProvider>
+        <OnboardingFooter {...mockProps} />
+      </WithThemeProvider>
+    );
 
-    fireEvent.press(getByText('SIGN UP'));
+    await waitFor(() => {
+      fireEvent.press(getByText('SIGN UP'));
+    });
 
     expect(mockProps.onSignUp).toHaveBeenCalledTimes(1);
     expect(mockProps.onSignIn).not.toHaveBeenCalled();
   });
 
-  it('deve renderizar corretamente sem erros visuais', () => {
-    const { toJSON } = render(<OnboardingFooter {...mockProps} />);
+  it('deve renderizar corretamente sem erros visuais', async () => {
+    const { toJSON } = render(
+      <WithThemeProvider>
+        <OnboardingFooter {...mockProps} />
+      </WithThemeProvider>
+    );
 
-    expect(toJSON()).toMatchSnapshot();
+    await waitFor(() => {
+      expect(toJSON()).toMatchSnapshot();
+    });
   });
 });
