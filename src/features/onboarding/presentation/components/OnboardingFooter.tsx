@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { useTheme } from '@shared/theme';
 import {
-  ONBOARDING_COLORS,
+  getOnboardingColors,
   ONBOARDING_TEXTS,
 } from '../constants/onboarding.constants';
 
@@ -14,23 +15,37 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
   onSignIn,
   onSignUp,
 }) => {
+  const { isDark } = useTheme();
+  const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
+
   return (
     <View style={styles.footer}>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           onPress={onSignIn}
-          style={[styles.button, styles.signInButton]}
+          style={[
+            styles.button,
+            styles.signInButton,
+            { borderColor: colors.PRIMARY },
+          ]}
         >
-          <Text style={[styles.buttonText, styles.signInButtonText]}>
+          <Text style={[styles.buttonText, { color: colors.PRIMARY }]}>
             {ONBOARDING_TEXTS.SIGN_IN}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={onSignUp}
-          style={[styles.button, styles.signUpButton]}
+          style={[
+            styles.button,
+            styles.signUpButton,
+            {
+              backgroundColor: colors.PRIMARY,
+              shadowColor: colors.PRIMARY,
+            },
+          ]}
         >
-          <Text style={[styles.buttonText, styles.signUpButtonText]}>
+          <Text style={[styles.buttonText, { color: colors.BUTTON_TEXT }]}>
             {ONBOARDING_TEXTS.SIGN_UP}
           </Text>
         </TouchableOpacity>
@@ -67,14 +82,8 @@ const styles = StyleSheet.create({
   signInButton: {
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: ONBOARDING_COLORS.PRIMARY,
-  },
-  signInButtonText: {
-    color: ONBOARDING_COLORS.PRIMARY,
   },
   signUpButton: {
-    backgroundColor: ONBOARDING_COLORS.PRIMARY,
-    shadowColor: ONBOARDING_COLORS.PRIMARY,
     shadowOffset: {
       width: 0,
       height: 4,
@@ -82,8 +91,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-  },
-  signUpButtonText: {
-    color: ONBOARDING_COLORS.BUTTON_TEXT,
   },
 });
