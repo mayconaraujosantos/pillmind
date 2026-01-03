@@ -86,7 +86,7 @@ describe('ThemeProvider', () => {
 
     await waitFor(() => {
       expect(getByTestId('is-dark').props.children).toBe('light');
-      expect(getByTestId('primary-color').props.children).toBe('#007AFF');
+      expect(getByTestId('primary-color').props.children).toBe('#1256DB');
     });
   });
 
@@ -101,7 +101,7 @@ describe('ThemeProvider', () => {
 
     await waitFor(() => {
       expect(getByTestId('is-dark').props.children).toBe('dark');
-      expect(getByTestId('primary-color').props.children).toBe('#0A84FF');
+      expect(getByTestId('primary-color').props.children).toBe('#3674EE');
     });
   });
 
@@ -132,7 +132,7 @@ describe('ThemeProvider', () => {
 
       expect(getByTestId('theme-mode').props.children).toBe('automatic');
       expect(getByTestId('is-dark').props.children).toBe('light');
-      expect(getByTestId('primary-color').props.children).toBe('#007AFF'); // light theme color
+      expect(getByTestId('primary-color').props.children).toBe('#1256DB'); // light theme color
     });
 
     it('should detect dark theme from system when no theme is saved (first launch)', async () => {
@@ -151,7 +151,7 @@ describe('ThemeProvider', () => {
 
       expect(getByTestId('theme-mode').props.children).toBe('automatic');
       expect(getByTestId('is-dark').props.children).toBe('dark');
-      expect(getByTestId('primary-color').props.children).toBe('#0A84FF'); // dark theme color
+      expect(getByTestId('primary-color').props.children).toBe('#3674EE'); // dark theme color
     });
 
     it('should follow system theme when mode is automatic', async () => {
@@ -272,7 +272,7 @@ describe('ThemeProvider', () => {
 
         // Valida que foi dark desde o início
         expect(getByTestId('is-dark').props.children).toBe('dark');
-        expect(getByTestId('primary-color').props.children).toBe('#0A84FF');
+        expect(getByTestId('primary-color').props.children).toBe('#3674EE');
       });
 
       it('should IMMEDIATELY apply light theme on first render if system is light (no flash)', async () => {
@@ -292,7 +292,7 @@ describe('ThemeProvider', () => {
         });
 
         expect(getByTestId('is-dark').props.children).toBe('light');
-        expect(getByTestId('primary-color').props.children).toBe('#007AFF');
+        expect(getByTestId('primary-color').props.children).toBe('#1256DB');
       });
 
       it('should work correctly when AsyncStorage takes time to respond', async () => {
