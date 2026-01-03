@@ -3,6 +3,8 @@ source_dir: .git/hooks
 pre-commit:
   parallel: true
   commands:
+    typecheck:
+      run: npm run typecheck
     lint:
       run: npm run lint
       stage_fixed: true
@@ -27,12 +29,12 @@ pre-push:
         echo "🧪 Rodando testes..."
         npm test -- --passWithNoTests
         TEST_EXIT_CODE=$?
-        
+
         if [ $TEST_EXIT_CODE -ne 0 ]; then
           echo "⚠️  Testes falharam. Tentando atualizar snapshots..."
           npm run test:snapshots
           SNAPSHOT_EXIT_CODE=$?
-          
+
           if [ $SNAPSHOT_EXIT_CODE -eq 0 ]; then
             echo "✅ Snapshots atualizados com sucesso!"
             git add "**/__snapshots__/**" 2>/dev/null || true
@@ -66,7 +68,7 @@ pre-push:
         else
           echo "📊 Executando npm run sonar:doublecheck..."
           npm run sonar:doublecheck
-          
+
           echo "📈 Relatório: https://sonarcloud.io/project/overview?id=mayconaraujosantos_pillmind"
           echo "💡 Verifique o Problems Panel (Ctrl+Shift+M) no VS Code para issues detalhadas"
           echo "✅ SonarQube double-check concluído!"
