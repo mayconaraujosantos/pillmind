@@ -36,9 +36,7 @@ As fontes já estão configuradas e serão carregadas automaticamente quando o a
 import { Text, StyleSheet } from 'react-native';
 import { typography } from '@shared/theme';
 
-const MyComponent = () => (
-  <Text style={styles.title}>Meu Título</Text>
-);
+const MyComponent = () => <Text style={styles.title}>Meu Título</Text>;
 
 const styles = StyleSheet.create({
   title: {
@@ -64,6 +62,7 @@ const styles = StyleSheet.create({
    ```
 
 2. **Verificar Renderização**:
+
    - As fontes devem aparecer consistentes em iOS e Android
    - Verifique se não há avisos de "font not found" no console
 

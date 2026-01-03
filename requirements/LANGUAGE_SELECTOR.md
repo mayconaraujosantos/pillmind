@@ -62,20 +62,24 @@ Implement a manual language selector in the Account Settings screen to allow use
 ### Files to Create/Modify
 
 1. **Create**: `src/shared/components/LanguageSelector.tsx`
+
    - Component similar to ThemeSelector
    - List of available languages
    - Checkmark for selected language
 
 2. **Create**: `src/shared/components/__tests__/LanguageSelector.test.tsx`
+
    - Unit tests for LanguageSelector component
    - Test language switching
    - Test persistence
 
 3. **Modify**: `src/shared/i18n/i18n.config.ts`
+
    - Add function to load saved language preference
    - Update initialization logic
 
 4. **Modify**: `src/features/account/presentation/screens/AccountScreen.tsx`
+
    - Add Language section after Appearance
    - Integrate LanguageSelector component
 
@@ -180,9 +184,7 @@ export const LanguageSelector: React.FC = () => {
 
   return (
     <View>
-      <Text style={{ color: theme.colors.text }}>
-        {t('language.title')}
-      </Text>
+      <Text style={{ color: theme.colors.text }}>{t('language.title')}</Text>
       <ScrollView>
         {LANGUAGES.map((lang) => (
           <TouchableOpacity
@@ -221,12 +223,14 @@ export const LanguageSelector: React.FC = () => {
 ### Testing Requirements
 
 1. **Unit Tests**
+
    - Language selection changes i18n language
    - Language preference is saved to AsyncStorage
    - Checkmark appears on selected language
    - All languages render correctly
 
 2. **Integration Tests**
+
    - Language change reflects across all screens
    - Saved language loads on app restart
    - Theme selector still works after language change

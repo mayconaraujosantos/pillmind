@@ -175,6 +175,9 @@ describe('Grid System', () => {
     });
   });
 
+  const sumSpans = (preset: readonly { span: number }[]) =>
+    preset.reduce((sum, col) => sum + col.span, 0);
+
   describe('layoutPresets', () => {
     it('should have fourColumns preset', () => {
       expect(layoutPresets.fourColumns).toHaveLength(4);
@@ -207,9 +210,6 @@ describe('Grid System', () => {
     });
 
     it('should verify all presets sum to 4 columns', () => {
-      const sumSpans = (preset: readonly { span: number }[]) =>
-        preset.reduce((sum, col) => sum + col.span, 0);
-
       expect(sumSpans(layoutPresets.fourColumns)).toBe(4);
       expect(sumSpans(layoutPresets.twoColumns)).toBe(4);
       expect(sumSpans(layoutPresets.sidebarRight)).toBe(4);

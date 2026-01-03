@@ -12,7 +12,9 @@ const resources = {
 // Detecta o idioma do dispositivo
 const deviceLanguage = Localization.getLocales()[0]?.languageTag || 'en';
 
-i18n.use(initReactI18next).init({
+const i18nInstance = i18n.createInstance();
+
+i18nInstance.use(initReactI18next).init({
   resources,
   lng: deviceLanguage,
   fallbackLng: 'en',
@@ -22,4 +24,4 @@ i18n.use(initReactI18next).init({
   },
 });
 
-export default i18n;
+export default i18nInstance;

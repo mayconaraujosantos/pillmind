@@ -128,7 +128,9 @@ function MyComponent() {
   return (
     <>
       <Text style={typography.heading.h1}>Título Principal</Text>
-      <Text style={typography.body.mRegular}>Este é um parágrafo de texto.</Text>
+      <Text style={typography.body.mRegular}>
+        Este é um parágrafo de texto.
+      </Text>
     </>
   );
 }
@@ -172,16 +174,11 @@ export const Heading: React.FC<HeadingProps> = ({
   style,
   ...props
 }) => {
-  return (
-    <Text
-      style={[typography.heading[variant], style]}
-      {...props}
-    />
-  );
+  return <Text style={[typography.heading[variant], style]} {...props} />;
 };
 
 // Uso
-<Heading variant="h2">Meu Título</Heading>
+<Heading variant="h2">Meu Título</Heading>;
 ```
 
 ## 📝 Exemplos Práticos
@@ -236,9 +233,7 @@ import { typography, styleGuide } from '@shared/theme';
 const InfoCard = () => (
   <View style={styles.card}>
     <Text style={styles.cardTitle}>Lembrete de Medicamento</Text>
-    <Text style={styles.cardBody}>
-      Tome seu medicamento às 14:00
-    </Text>
+    <Text style={styles.cardBody}>Tome seu medicamento às 14:00</Text>
     <Text style={styles.cardTime}>Há 2 horas</Text>
   </View>
 );
