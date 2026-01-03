@@ -12,7 +12,7 @@ const DEV_CONFIG = {
 };
 
 const PROD_CONFIG = {
-  FORCE_SHOW_ONBOARDING: true, // Sempre mostra onboarding na produção
+  FORCE_SHOW_ONBOARDING: false, // Produção respeita o estado salvo do usuário
   SKIP_SPLASH: false,
   SHOW_DEBUG_CONTROLS: false,
 };
@@ -56,7 +56,7 @@ export const getOnboardingColors = (isDark: boolean) => {
       INDICATOR_ACTIVE: '#00A896',
       INDICATOR_INACTIVE: '#3A3A3C',
       SKIP_BUTTON_BG: 'rgba(58, 58, 60, 0.9)',
-      SKIP_BUTTON_BORDER: 'rgba(152, 152, 157, 0.25)',
+      SKIP_BUTTON_BORDER: '#FFFFFF',
     };
   }
 

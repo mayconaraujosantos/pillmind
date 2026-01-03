@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   useFonts as useGoogleFonts,
   Roboto_400Regular,
@@ -22,7 +23,17 @@ export function useFonts() {
     'Roboto-Bold': Roboto_700Bold,
   });
 
-  return { fontsLoaded, error: error || null };
+  // If registration fails (e.g., duplicate font on iOS), warn and allow fallback to system fonts
+  useEffect(() => {
+    if (error) {
+      console.warn(
+        'Failed to load Roboto fonts, falling back to system fonts.',
+        error
+      );
+    }
+  }, [error]);
+
+  return { fontsLoaded: fontsLoaded || Boolean(error), error: error || null };
 }
 
 /**
