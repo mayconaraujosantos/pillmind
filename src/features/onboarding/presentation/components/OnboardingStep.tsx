@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import { useTheme } from '@shared/theme';
 import {
   OnboardingStep as OnboardingStepType,
-  ONBOARDING_COLORS,
+  getOnboardingColors,
 } from '../constants/onboarding.constants';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -15,6 +16,9 @@ interface OnboardingStepProps {
 export const OnboardingStepComponent: React.FC<OnboardingStepProps> = ({
   step,
 }) => {
+  const { isDark } = useTheme();
+  const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
+
   // Mostra a imagem se ela existir, independente de ser o último step
   const shouldShowImage = step.image !== undefined && step.image !== null;
 
@@ -30,8 +34,12 @@ export const OnboardingStepComponent: React.FC<OnboardingStepProps> = ({
         </View>
       )}
       <View style={styles.textContainer}>
-        <Text style={styles.title}>{step.title}</Text>
-        <Text style={styles.description}>{step.description}</Text>
+        <Text style={[styles.title, { color: colors.TEXT_PRIMARY }]}>
+          {step.title}
+        </Text>
+        <Text style={[styles.description, { color: colors.TEXT_SECONDARY }]}>
+          {step.description}
+        </Text>
       </View>
     </View>
   );
@@ -58,11 +66,6 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'contain',
   },
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: ONBOARDING_COLORS.INDICATOR_INACTIVE,
-  },
   textContainer: {
     width: '100%',
     alignItems: 'center',
@@ -72,7 +75,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '800',
-    color: ONBOARDING_COLORS.TEXT_PRIMARY,
     marginBottom: 16,
     textAlign: 'center',
     letterSpacing: 0.3,
@@ -82,7 +84,6 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     fontWeight: '400',
-    color: ONBOARDING_COLORS.TEXT_SECONDARY,
     textAlign: 'center',
     lineHeight: 24,
     width: '100%',

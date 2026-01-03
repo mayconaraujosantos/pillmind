@@ -26,7 +26,11 @@ export const SplashLoader: React.FC<SplashLoaderProps> = ({
 
   return (
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-      <ActivityIndicator size="large" color={color} />
+      <ActivityIndicator
+        testID="splash-loader-indicator"
+        size="large"
+        color={color}
+      />
     </Animated.View>
   );
 };

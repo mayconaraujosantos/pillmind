@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { render, waitFor, fireEvent } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AccountScreen } from '../AccountScreen';
 import { ThemeProvider } from '@shared/theme';
@@ -18,10 +17,10 @@ describe('AccountScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('Perfil')).toBeTruthy();
+      expect(getByText('Profile')).toBeTruthy();
     });
 
-    expect(getByText('Usuário')).toBeTruthy();
+    expect(getByText('User')).toBeTruthy();
     expect(getByText('usuario@pillmind.com')).toBeTruthy();
   });
 
@@ -50,12 +49,12 @@ describe('AccountScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('Configurações')).toBeTruthy();
+      expect(getByText('Settings')).toBeTruthy();
     });
 
-    expect(getByText('Notificações')).toBeTruthy();
-    expect(getByText('Privacidade')).toBeTruthy();
-    expect(getByText('Sobre')).toBeTruthy();
+    expect(getByText('Notifications')).toBeTruthy();
+    expect(getByText('Privacy')).toBeTruthy();
+    expect(getByText('About')).toBeTruthy();
   });
 
   it('should render logout button', async () => {
@@ -66,7 +65,36 @@ describe('AccountScreen', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('Sair')).toBeTruthy();
+      expect(getByText('Logout')).toBeTruthy();
     });
+  });
+
+  it('should trigger debug alert with theme info', async () => {
+    const globalWithAlert = globalThis as typeof globalThis & {
+      alert?: (...args: unknown[]) => unknown;
+    };
+    const originalAlert = globalWithAlert.alert;
+    const alertMock = jest.fn();
+    globalWithAlert.alert = alertMock;
+
+    const { getByText } = render(
+      <ThemeProvider>
+        <AccountScreen />
+      </ThemeProvider>
+    );
+
+    const debugButton = await waitFor(() =>
+      getByText('🐛 Debug: View theme detection')
+    );
+
+    fireEvent.press(debugButton);
+
+    expect(alertMock).toHaveBeenCalled();
+
+    if (originalAlert) {
+      globalWithAlert.alert = originalAlert;
+    } else {
+      globalWithAlert.alert = () => undefined;
+    }
   });
 });

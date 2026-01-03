@@ -25,12 +25,20 @@ export const OnboardingScreen = ({ onFinish, onSkip }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
   // Lógica de scroll
-  const handleScroll = (event) => { /* ... */ };
+  const handleScroll = (event) => {
+    /* ... */
+  };
 
   // Handlers
-  const skip = () => { onSkip?.(); };
-  const handleSignIn = () => { onFinish?.(); };
-  const handleSignUp = () => { onFinish?.(); };
+  const skip = () => {
+    onSkip?.();
+  };
+  const handleSignIn = () => {
+    onFinish?.();
+  };
+  const handleSignUp = () => {
+    onFinish?.();
+  };
 
   // UI completa (Header, Carousel, Indicator, Footer)
   return (
@@ -319,7 +327,7 @@ interface OnboardingHeaderProps {
 ```typescript
 // ✅ Depende de abstrações
 const { currentStep, handleScroll } = useOnboardingScroll(3); // Hook abstração
-<OnboardingView onScroll={handleScroll} /> // Props abstração
+<OnboardingView onScroll={handleScroll} />; // Props abstração
 ```
 
 ---

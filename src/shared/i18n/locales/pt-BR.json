@@ -1,0 +1,66 @@
+{
+  "common": {
+    "skip": "Pular",
+    "next": "Próximo",
+    "back": "Voltar",
+    "getStarted": "Começar",
+    "logout": "Sair"
+  },
+  "tabs": {
+    "home": "Início",
+    "appointments": "Consultas",
+    "account": "Perfil",
+    "parental": "Parental",
+    "nearby": "Próximo"
+  },
+  "home": {
+    "title": "PillMind Início",
+    "welcome": "Bem-vindo ao seu assistente de medicamentos!",
+    "debugControls": "🛠️ Controles de Debug",
+    "resetOnboarding": "↻ Resetar Onboarding",
+    "resetInfo": "Pressione para testar o onboarding novamente"
+  },
+  "appointments": {
+    "title": "Consultas",
+    "subtitle": "Gerencie suas consultas médicas"
+  },
+  "nearby": {
+    "title": "Locais Próximos",
+    "subtitle": "Encontre farmácias e hospitais próximos"
+  },
+  "parental": {
+    "title": "Controle Parental",
+    "subtitle": "Gerencie os medicamentos da família"
+  },
+  "account": {
+    "title": "Perfil",
+    "user": "Usuário",
+    "email": "usuario@pillmind.com",
+    "appearance": "Aparência",
+    "settings": "Configurações",
+    "notifications": "Notificações",
+    "privacy": "Privacidade",
+    "about": "Sobre",
+    "debugTheme": "🐛 Debug: Ver detecção do tema"
+  },
+  "theme": {
+    "automatic": "Automático",
+    "light": "Claro",
+    "dark": "Escuro",
+    "title": "Tema"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "NÃO ESQUEÇA SEUS MEDICAMENTOS.",
+      "description": "Lembre-se do que tomar. Lembre-se quando tomar. Lembre-se quando reabastecer. Tudo na ponta dos dedos."
+    },
+    "step2": {
+      "title": "NÃO ESQUEÇA SUAS CONSULTAS.",
+      "description": "Lembre-se para onde ir. Lembre-se de onde ir. Lembre-se do motivo. Tudo na ponta dos dedos."
+    },
+    "step3": {
+      "title": "ENCONTRE OS MELHORES E MAIS PRÓXIMOS SERVIÇOS",
+      "description": "Encontre o telefone de ajuda mais próximo com facilidade. Encontre o hospital mais próximo. Encontre os melhores médicos. Tudo na ponta dos dedos."
+    }
+  }
+}

@@ -19,7 +19,7 @@ export const HomeScreen: React.FC = () => {
           <Text
             style={[styles.subtitle, { color: theme.colors.textSecondary }]}
           >
-            Bem-vindo ao seu assistente de medicamentos!
+            Welcome to your medication assistant!
           </Text>
         </Card>
 
@@ -31,11 +31,9 @@ export const HomeScreen: React.FC = () => {
               style={styles.debugButton}
               onPress={resetOnboarding}
             >
-              <Text style={styles.debugButtonText}>↻ Resetar Onboarding</Text>
+              <Text style={styles.debugButtonText}>↻ Reset Onboarding</Text>
             </TouchableOpacity>
-            <Text style={styles.debugInfo}>
-              Aperte para testar o onboarding novamente
-            </Text>
+            <Text style={styles.debugInfo}>Press to test onboarding again</Text>
           </Card>
         )}
       </View>

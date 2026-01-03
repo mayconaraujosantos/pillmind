@@ -9,11 +9,9 @@ export const NearbyScreen: React.FC = () => {
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>
-          Locais Próximos
-        </Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Nearby</Text>
         <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-          Encontre farmácias e hospitais próximos
+          Find nearby pharmacies and hospitals
         </Text>
       </View>
     </ScreenWrapper>

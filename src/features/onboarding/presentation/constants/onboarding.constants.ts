@@ -12,7 +12,7 @@ const DEV_CONFIG = {
 };
 
 const PROD_CONFIG = {
-  FORCE_SHOW_ONBOARDING: true, // Sempre mostra onboarding na produção
+  FORCE_SHOW_ONBOARDING: false, // Produção respeita o estado salvo do usuário
   SKIP_SPLASH: false,
   SHOW_DEBUG_CONTROLS: false,
 };
@@ -25,7 +25,10 @@ export const FORCE_SHOW_ONBOARDING = CONFIG.FORCE_SHOW_ONBOARDING;
 export const SKIP_SPLASH = CONFIG.SKIP_SPLASH;
 export const SHOW_DEBUG_CONTROLS = CONFIG.SHOW_DEBUG_CONTROLS;
 
+// Cores fixas para onboarding (não mudam com o tema)
 export const ONBOARDING_COLORS = {
+  // NOTA: O onboarding sempre usa tema claro por design
+  // Se quiser que o onboarding siga o tema do sistema, use useTheme() nos componentes
   BACKGROUND: '#FFFFFF',
   PRIMARY: '#00A896', // Teal color similar to the example
   SECONDARY: '#8E8E93',
@@ -38,11 +41,46 @@ export const ONBOARDING_COLORS = {
   INDICATOR_INACTIVE: '#E5E5E5',
 } as const;
 
+// Função para obter cores adaptáveis baseadas no tema
+export const getOnboardingColors = (isDark: boolean) => {
+  if (isDark) {
+    return {
+      BACKGROUND: '#1C1C1E', // Dark background
+      PRIMARY: '#00A896',
+      SECONDARY: '#98989D',
+      TEXT_PRIMARY: '#FFFFFF',
+      TEXT_SECONDARY: '#8E8E93',
+      BUTTON_BACKGROUND: '#00A896',
+      BUTTON_TEXT: '#FFFFFF',
+      BUTTON_BORDER: '#00A896',
+      INDICATOR_ACTIVE: '#00A896',
+      INDICATOR_INACTIVE: '#3A3A3C',
+      SKIP_BUTTON_BG: 'rgba(58, 58, 60, 0.9)',
+      SKIP_BUTTON_BORDER: '#FFFFFF',
+    };
+  }
+
+  return {
+    BACKGROUND: '#FFFFFF',
+    PRIMARY: '#00A896',
+    SECONDARY: '#8E8E93',
+    TEXT_PRIMARY: '#2C3E50',
+    TEXT_SECONDARY: '#5A6C7D',
+    BUTTON_BACKGROUND: '#00A896',
+    BUTTON_TEXT: '#FFFFFF',
+    BUTTON_BORDER: '#00A896',
+    INDICATOR_ACTIVE: '#00A896',
+    INDICATOR_INACTIVE: '#E5E5E5',
+    SKIP_BUTTON_BG: 'rgba(255, 255, 255, 0.9)',
+    SKIP_BUTTON_BORDER: 'rgba(142, 142, 147, 0.25)',
+  };
+};
+
 export const ONBOARDING_TEXTS = {
-  SKIP: 'Pular',
-  NEXT: 'Próximo',
-  GET_STARTED: 'Começar',
-  BACK: 'Voltar',
+  SKIP: 'Skip',
+  NEXT: 'Next',
+  GET_STARTED: 'Get Started',
+  BACK: 'Back',
   SIGN_IN: 'SIGN IN',
   SIGN_UP: 'SIGN UP',
 } as const;

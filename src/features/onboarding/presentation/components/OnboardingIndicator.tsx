@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { ONBOARDING_COLORS } from '../constants/onboarding.constants';
+import { useTheme } from '@shared/theme';
+import { getOnboardingColors } from '../constants/onboarding.constants';
 
 interface OnboardingIndicatorProps {
   totalSteps: number;
@@ -11,6 +12,9 @@ export const OnboardingIndicator: React.FC<OnboardingIndicatorProps> = ({
   totalSteps,
   currentStep,
 }) => {
+  const { isDark } = useTheme();
+  const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
+
   return (
     <View style={styles.container}>
       {Array.from({ length: totalSteps }).map((_, index) => (
@@ -18,7 +22,12 @@ export const OnboardingIndicator: React.FC<OnboardingIndicatorProps> = ({
           key={index}
           style={[
             styles.dot,
-            index === currentStep ? styles.activeDot : styles.inactiveDot,
+            index === currentStep
+              ? [styles.activeDot, { backgroundColor: colors.INDICATOR_ACTIVE }]
+              : [
+                  styles.inactiveDot,
+                  { backgroundColor: colors.INDICATOR_INACTIVE },
+                ],
           ]}
         />
       ))}
@@ -40,9 +49,6 @@ const styles = StyleSheet.create({
   },
   activeDot: {
     width: 24,
-    backgroundColor: ONBOARDING_COLORS.INDICATOR_ACTIVE,
   },
-  inactiveDot: {
-    backgroundColor: ONBOARDING_COLORS.INDICATOR_INACTIVE,
-  },
+  inactiveDot: {},
 });
