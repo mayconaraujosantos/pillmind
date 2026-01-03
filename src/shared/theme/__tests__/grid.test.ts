@@ -52,7 +52,7 @@ describe('Grid System', () => {
     it('should use default values when not provided', () => {
       jest
         .spyOn(Dimensions, 'get')
-        .mockReturnValue({ width: 440, height: 956 });
+        .mockReturnValue({ width: 440, height: 956, scale: 1, fontScale: 1 });
       const columnWidth = getColumnWidth();
       expect(columnWidth).toBe(88);
     });
@@ -167,7 +167,7 @@ describe('Grid System', () => {
     it('should use current screen width when not provided', () => {
       jest
         .spyOn(Dimensions, 'get')
-        .mockReturnValue({ width: 375, height: 667 });
+        .mockReturnValue({ width: 375, height: 667, scale: 1, fontScale: 1 });
       const generatedColumns = generateColumnStyles();
 
       const expectedColumnWidth = getColumnWidth(4, 16, 20, 375);

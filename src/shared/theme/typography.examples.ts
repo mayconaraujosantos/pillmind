@@ -83,7 +83,7 @@ export const cardStyles = StyleSheet.create({
   cardBody: {
     ...typography.body.mRegular,
     color: styleGuide.neutral[700],
-    lineHeight: typography.body.mRegular.fontSize * 1.5, // Aumentar para parágrafos
+    lineHeight: (typography.body.mRegular.fontSize ?? 14) * 1.5, // Aumentar para parágrafos
   } as TextStyle,
   cardCaption: {
     ...typography.caption.lRegular,
@@ -249,7 +249,7 @@ export const navigationStyles = StyleSheet.create({
     color: styleGuide.neutral[600],
   } as TextStyle,
   breadcrumbActive: {
-    ...typography.body.mMedium,
+    ...typography.body.lMedium,
     color: styleGuide.neutral[900],
   } as TextStyle,
 });
@@ -361,7 +361,7 @@ export const medicineStyles = StyleSheet.create({
   medicineNotes: {
     ...typography.body.mRegular,
     color: styleGuide.neutral[600],
-    lineHeight: typography.body.mRegular.fontSize * 1.5,
+    lineHeight: (typography.body.mRegular.fontSize ?? 14) * 1.5,
   } as TextStyle,
   medicineTime: {
     ...typography.heading.h6,

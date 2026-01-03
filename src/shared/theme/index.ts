@@ -35,7 +35,7 @@ export {
   useResponsiveGrid,
   layoutPresets,
 } from './grid';
-export type { GridSpan, SpacingSize, BreakpointName } from './grid';
+export type { GridSpan, BreakpointName } from './grid';
 export {
   borderRadius,
   borderRadiusPresets,
