@@ -4,3 +4,6 @@ export { OnboardingHeader } from './OnboardingHeader';
 export { OnboardingFooter } from './OnboardingFooter';
 export { OnboardingCarousel } from './OnboardingCarousel';
 export { OnboardingView } from './OnboardingView';
+export { OnboardingSignUp } from './OnboardingSignUp';
+export { OnboardingSignIn } from './OnboardingSignIn';
+export { OnboardingSuccess } from './OnboardingSuccess';

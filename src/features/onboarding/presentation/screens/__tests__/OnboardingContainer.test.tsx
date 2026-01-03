@@ -13,8 +13,8 @@ describe('OnboardingContainer', () => {
 
     await waitFor(() => {
       expect(getByText('Skip')).toBeTruthy();
-      expect(getByText('SIGN IN')).toBeTruthy();
-      expect(getByText('SIGN UP')).toBeTruthy();
+      expect(getByText('Login')).toBeTruthy();
+      expect(getByText('Create an account')).toBeTruthy();
     });
   });
 
@@ -33,7 +33,7 @@ describe('OnboardingContainer', () => {
     expect(onSkip).toHaveBeenCalledTimes(1);
   });
 
-  it('deve chamar onFinish quando Sign In é pressionado', async () => {
+  it('deve chamar onFinish quando Login é pressionado', async () => {
     const onFinish = jest.fn();
     const { getByText } = render(
       <WithThemeProvider>
@@ -42,13 +42,13 @@ describe('OnboardingContainer', () => {
     );
 
     await waitFor(() => {
-      fireEvent.press(getByText('SIGN IN'));
+      fireEvent.press(getByText('Login'));
     });
 
     expect(onFinish).toHaveBeenCalledTimes(1);
   });
 
-  it('deve chamar onFinish quando Sign Up é pressionado', async () => {
+  it('deve chamar onFinish quando Create an account é pressionado', async () => {
     const onFinish = jest.fn();
     const { getByText } = render(
       <WithThemeProvider>
@@ -57,7 +57,7 @@ describe('OnboardingContainer', () => {
     );
 
     await waitFor(() => {
-      fireEvent.press(getByText('SIGN UP'));
+      fireEvent.press(getByText('Create an account'));
     });
 
     expect(onFinish).toHaveBeenCalledTimes(1);
@@ -85,8 +85,8 @@ describe('OnboardingContainer', () => {
     // Não deve lançar erro ao pressionar botões sem callbacks
     await waitFor(() => {
       fireEvent.press(getByText('Skip'));
-      fireEvent.press(getByText('SIGN IN'));
-      fireEvent.press(getByText('SIGN UP'));
+      fireEvent.press(getByText('Login'));
+      fireEvent.press(getByText('Create an account'));
     });
 
     expect(true).toBe(true);

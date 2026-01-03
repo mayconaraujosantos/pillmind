@@ -34,6 +34,9 @@ export default tseslint.config(
         },
       ],
       '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/prefer-promise-reject-errors': 'off',
+      'unicorn/prefer-top-level-await': 'off',
     },
   },
   {

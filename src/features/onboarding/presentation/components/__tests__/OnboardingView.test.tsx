@@ -5,8 +5,8 @@ import { WithThemeProvider } from '../WithThemeProvider';
 
 describe('OnboardingView', () => {
   const mockProps = {
-    currentStep: 0,
-    totalSteps: 3,
+    currentStep: 2, // Step 2 mostra os botões Login e Create an account
+    totalSteps: 6,
     onScroll: jest.fn(),
     onSkip: jest.fn(),
     onSignIn: jest.fn(),
@@ -26,7 +26,7 @@ describe('OnboardingView', () => {
 
     await waitFor(() => {
       expect(getByText('Skip')).toBeTruthy(); // Header
-      expect(getByText('SIGN IN')).toBeTruthy(); // Footer
+      expect(getByText('Login')).toBeTruthy(); // Footer
       expect(getByText('SIGN UP')).toBeTruthy(); // Footer
     });
   });
@@ -45,7 +45,7 @@ describe('OnboardingView', () => {
     expect(mockProps.onSkip).toHaveBeenCalledTimes(1);
   });
 
-  it('deve chamar onSignIn quando botão Sign In é pressionado', async () => {
+  it('deve chamar onSignIn quando botão Login é pressionado', async () => {
     const { getByText } = render(
       <WithThemeProvider>
         <OnboardingView {...mockProps} />
@@ -53,13 +53,13 @@ describe('OnboardingView', () => {
     );
 
     await waitFor(() => {
-      fireEvent.press(getByText('SIGN IN'));
+      fireEvent.press(getByText('Login'));
     });
 
     expect(mockProps.onSignIn).toHaveBeenCalledTimes(1);
   });
 
-  it('deve chamar onSignUp quando botão Sign Up é pressionado', async () => {
+  it('deve chamar onSignUp quando botão Create an account é pressionado', async () => {
     const { getByText } = render(
       <WithThemeProvider>
         <OnboardingView {...mockProps} />
@@ -67,7 +67,7 @@ describe('OnboardingView', () => {
     );
 
     await waitFor(() => {
-      fireEvent.press(getByText('SIGN UP'));
+      fireEvent.press(getByText('Create an account'));
     });
 
     expect(mockProps.onSignUp).toHaveBeenCalledTimes(1);

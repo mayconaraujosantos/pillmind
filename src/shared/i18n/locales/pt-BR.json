@@ -51,16 +51,58 @@
   },
   "onboarding": {
     "step1": {
-      "title": "NÃO ESQUEÇA SEUS MEDICAMENTOS.",
-      "description": "Lembre-se do que tomar. Lembre-se quando tomar. Lembre-se quando reabastecer. Tudo na ponta dos dedos."
+      "title": "Sua saúde, no horário",
+      "description": "Assuma o controle do seu bem-estar com lembretes de medicamentos sem esforço."
     },
     "step2": {
-      "title": "NÃO ESQUEÇA SUAS CONSULTAS.",
-      "description": "Lembre-se para onde ir. Lembre-se de onde ir. Lembre-se do motivo. Tudo na ponta dos dedos."
+      "title": "Lembretes avançados, Uso fácil",
+      "description": "Mantenha-se no caminho certo com facilidade e tranquilidade, garantindo que você nunca perca uma dose."
     },
     "step3": {
-      "title": "ENCONTRE OS MELHORES E MAIS PRÓXIMOS SERVIÇOS",
-      "description": "Encontre o telefone de ajuda mais próximo com facilidade. Encontre o hospital mais próximo. Encontre os melhores médicos. Tudo na ponta dos dedos."
+      "title": "Para você, família e amigos",
+      "description": "Gerencie facilmente medicamentos para todos que você ama com troca perfeita de perfis."
+    },
+    "signUp": {
+      "title": "Cadastrar",
+      "subtitle": "Preencha os detalhes para criar sua conta",
+      "name": "Nome",
+      "namePlaceholder": "Digite seu nome",
+      "email": "E-mail",
+      "emailPlaceholder": "Digite seu endereço de e-mail",
+      "password": "Senha",
+      "passwordPlaceholder": "Digite sua senha",
+      "or": "Ou",
+      "continueWithApple": "Continuar com Apple",
+      "continueWithGoogle": "Continuar com Google",
+      "terms": "Ao se cadastrar, você concorda com os",
+      "termsOfService": "Termos de Serviço",
+      "and": "e",
+      "privacyPolicy": "Política de Privacidade",
+      "alreadyHaveAccount": "Já tem uma conta?",
+      "signIn": "Entrar"
+    },
+    "signIn": {
+      "title": "Entrar",
+      "subtitle": "Entre na sua conta",
+      "email": "E-mail",
+      "emailPlaceholder": "Digite seu endereço de e-mail",
+      "password": "Senha",
+      "passwordPlaceholder": "Digite sua senha",
+      "or": "Ou",
+      "continueWithApple": "Continuar com Apple",
+      "continueWithGoogle": "Continuar com Google",
+      "signInButton": "Entrar",
+      "dontHaveAccount": "Não tem uma conta?",
+      "signUp": "Cadastre-se"
+    },
+    "success": {
+      "title": "Cadastro Concluído!",
+      "subtitle": "Conta criada com sucesso",
+      "getStarted": "Começar"
+    },
+    "buttons": {
+      "createAccount": "Criar uma conta",
+      "login": "Entrar"
     }
   }
 }

@@ -28,8 +28,10 @@ describe('OnboardingCarousel', () => {
     );
 
     await waitFor(() => {
-      expect(getByText("DON'T FORGET YOUR MEDICINES.")).toBeTruthy();
-      expect(getByText("DON'T FORGET YOUR APPOINTMENTS.")).toBeTruthy();
+      // Verifica se renderiza steps traduzidos (inglês por padrão nos testes)
+      expect(getByText('Your health, on schedule')).toBeTruthy();
+      expect(getByText('Advanced reminders, Easy use')).toBeTruthy();
+      expect(getByText('For yourself, family and friends')).toBeTruthy();
     });
   });
 

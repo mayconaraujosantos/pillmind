@@ -51,16 +51,58 @@
   },
   "onboarding": {
     "step1": {
-      "title": "DON'T FORGET YOUR MEDICINES.",
-      "description": "Remember what to take. Remember when to take. Remember when to refill. All on your fingertips."
+      "title": "Your health, on schedule",
+      "description": "Take control of your well being with effortless medication reminders."
     },
     "step2": {
-      "title": "DON'T FORGET YOUR APPOINTMENTS.",
-      "description": "Remember what to go. Remember where to go. Remember what to go for. All on your fingertips."
+      "title": "Advanced reminders, Easy use",
+      "description": "Stay on track with ease and peace of mind, ensuring you never miss a dose."
     },
     "step3": {
-      "title": "FIND THE BEST AND NEAREST SERVICES",
-      "description": "Find the nearest helpline with ease. Find the nearest hospital. Find the best doctors. All on your fingertips."
+      "title": "For yourself, family and friends",
+      "description": "Easily manage medication for everyone you care about with seamless profile switching."
+    },
+    "signUp": {
+      "title": "Sign Up",
+      "subtitle": "Fill in the details to create your account",
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email address",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "or": "Or",
+      "continueWithApple": "Continue with Apple",
+      "continueWithGoogle": "Continue with Google",
+      "terms": "By signing up, you agree to the",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign In"
+    },
+    "signIn": {
+      "title": "Sign In",
+      "subtitle": "Sign in to your account",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email address",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "or": "Or",
+      "continueWithApple": "Continue with Apple",
+      "continueWithGoogle": "Continue with Google",
+      "signInButton": "Sign In",
+      "dontHaveAccount": "Don't have an account?",
+      "signUp": "Sign up"
+    },
+    "success": {
+      "title": "Sign Up Completed!",
+      "subtitle": "Account has been created successfully",
+      "getStarted": "Get Started"
+    },
+    "buttons": {
+      "createAccount": "Create an account",
+      "login": "Login"
     }
   }
 }
