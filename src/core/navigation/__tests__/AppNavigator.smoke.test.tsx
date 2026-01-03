@@ -15,14 +15,6 @@ jest.mock('@react-navigation/bottom-tabs', () => {
   const React = require('react');
   return {
     createBottomTabNavigator: () => {
-      type TabIcon = (props: {
-        focused: boolean;
-        color: string;
-        size: number;
-      }) => unknown;
-
-      type Header = (props: { navigation: unknown; route: unknown }) => unknown;
-
       const Screen = ({
         name,
         component,
@@ -58,10 +50,10 @@ jest.mock('@react-navigation/bottom-tabs', () => {
         if (screenOptions) {
           const options = screenOptions({ route: { name: 'HomeTab' } });
 
-          const tabIcon = options?.tabBarIcon as TabIcon | undefined;
+          const tabIcon = options?.tabBarIcon as jest.Mock | undefined;
           tabIcon?.({ focused: true, color: 'blue', size: 24 });
 
-          const header = options?.header as Header | undefined;
+          const header = options?.header as jest.Mock | undefined;
           header?.({
             navigation: {} as unknown,
             route: {} as unknown,
