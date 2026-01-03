@@ -3,17 +3,26 @@ import { render } from '@testing-library/react-native';
 import { AppNavigator } from '../AppNavigator';
 
 jest.mock('@react-navigation/native', () => {
+  const React = require('react');
   return {
-    NavigationContainer: ({ children }: { children: React.ReactNode }) => (
-      <>{children}</>
-    ),
+    NavigationContainer: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
     useNavigation: () => ({ navigate: jest.fn() }),
   };
 });
 
 jest.mock('@react-navigation/bottom-tabs', () => {
+  const React = require('react');
   return {
     createBottomTabNavigator: () => {
+      type TabIcon = (props: {
+        focused: boolean;
+        color: string;
+        size: number;
+      }) => unknown;
+
+      type Header = (props: { navigation: unknown; route: unknown }) => unknown;
+
       const Screen = ({
         name,
         component,
@@ -49,28 +58,17 @@ jest.mock('@react-navigation/bottom-tabs', () => {
         if (screenOptions) {
           const options = screenOptions({ route: { name: 'HomeTab' } });
 
-          if (options?.tabBarIcon) {
-            (
-              options.tabBarIcon as (props: {
-                focused: boolean;
-                color: string;
-                size: number;
-              }) => unknown
-            )({ focused: true, color: 'blue', size: 24 });
-          }
+          const tabIcon = options?.tabBarIcon as TabIcon | undefined;
+          tabIcon?.({ focused: true, color: 'blue', size: 24 });
 
-          (
-            options?.header as (props: {
-              navigation: unknown;
-              route: unknown;
-            }) => unknown
-          )?.({
+          const header = options?.header as Header | undefined;
+          header?.({
             navigation: {} as unknown,
             route: {} as unknown,
           });
         }
 
-        return <>{children}</>;
+        return React.createElement(React.Fragment, null, children);
       };
       return { Navigator, Screen } as const;
     },

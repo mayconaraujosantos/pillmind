@@ -1,54 +1,62 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import App from '../App';
-const globalWithSplash = globalThis as typeof globalThis & {
-  __splashAutoFinish?: boolean;
-};
 
 jest.mock('@shared/i18n', () => ({}));
 
-jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
+type SplashGlobal = typeof globalThis & { __splashAutoFinish?: boolean };
 
-jest.mock('@shared/theme', () => ({
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
+const getSplashGlobal = (): SplashGlobal => globalThis as SplashGlobal;
+
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react');
+  return {
+    SafeAreaProvider: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
+
+jest.mock('@shared/theme', () => {
+  const React = require('react');
+  return {
+    ThemeProvider: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+  };
+});
 
 jest.mock('@shared/components', () => {
+  const React = require('react');
   const { Text } = require('react-native');
   return {
-    ThemedStatusBar: () => <Text>status-bar</Text>,
+    ThemedStatusBar: () => React.createElement(Text, null, 'status-bar'),
   };
 });
 
 jest.mock('@core/navigation/AppNavigator', () => {
+  const React = require('react');
   const { Text } = require('react-native');
   return {
-    AppNavigator: () => <Text>app-navigator</Text>,
+    AppNavigator: () => React.createElement(Text, null, 'app-navigator'),
   };
 });
 
 jest.mock('@features/splash_screen', () => {
+  const React = require('react');
   const { Text } = require('react-native');
   return {
     SplashScreenComponent: ({ onFinish }: { onFinish: () => void }) => {
       React.useEffect(() => {
-        if (globalWithSplash.__splashAutoFinish) {
+        if (getSplashGlobal().__splashAutoFinish) {
           onFinish?.();
         }
       }, [onFinish]);
-      return <Text>splash-screen</Text>;
+      return React.createElement(Text, null, 'splash-screen');
     },
   };
 });
 
 const setSplashAutoFinish = (value: boolean) => {
-  globalWithSplash.__splashAutoFinish = value;
+  getSplashGlobal().__splashAutoFinish = value;
 };
 
 jest.mock(
@@ -59,6 +67,7 @@ jest.mock(
 );
 
 jest.mock('@features/onboarding', () => {
+  const React = require('react');
   const { Text } = require('react-native');
   return {
     OnboardingScreen: ({
@@ -67,17 +76,18 @@ jest.mock('@features/onboarding', () => {
     }: {
       onFinish: () => void;
       onSkip: () => void;
-    }) => (
-      <>
-        <Text>onboarding-screen</Text>
-        <Text testID="finish" onPress={onFinish}>
-          finish
-        </Text>
-        <Text testID="skip" onPress={onSkip}>
-          skip
-        </Text>
-      </>
-    ),
+    }) =>
+      React.createElement(
+        React.Fragment,
+        null,
+        React.createElement(Text, null, 'onboarding-screen'),
+        React.createElement(
+          Text,
+          { testID: 'finish', onPress: onFinish },
+          'finish'
+        ),
+        React.createElement(Text, { testID: 'skip', onPress: onSkip }, 'skip')
+      ),
   };
 });
 
