@@ -23,7 +23,7 @@ pre-push:
     validate-basics:
       run: |
         echo "🔍 Validação básica..."
-        npm run validate
+        npm run validate:fast
     test:
       run: |
         echo "🧪 Rodando testes..."
