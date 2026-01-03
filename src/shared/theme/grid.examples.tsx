@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 /**
  * Grid System - Exemplos de Uso
  *

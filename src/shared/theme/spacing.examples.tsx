@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 /**
  * Spacing System - Exemplos de Uso
  *

@@ -44,7 +44,12 @@ export const SplashLogo: React.FC<SplashLogoProps> = ({
         },
       ]}
     >
-      <Image source={source} style={styles.logo} resizeMode="contain" />
+      <Image
+        testID="splash-logo-image"
+        source={source}
+        style={styles.logo}
+        resizeMode="contain"
+      />
     </Animated.View>
   );
 };

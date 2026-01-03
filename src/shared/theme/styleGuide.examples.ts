@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 /**
  * Exemplo de uso do Style Guide
  *

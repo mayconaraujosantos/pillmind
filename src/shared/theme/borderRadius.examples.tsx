@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 /**
  * Border Radius System - Exemplos de Uso
  *

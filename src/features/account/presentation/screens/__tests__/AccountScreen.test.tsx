@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { render, waitFor, fireEvent } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AccountScreen } from '../AccountScreen';
 import { ThemeProvider } from '@shared/theme';
@@ -68,5 +67,34 @@ describe('AccountScreen', () => {
     await waitFor(() => {
       expect(getByText('Logout')).toBeTruthy();
     });
+  });
+
+  it('should trigger debug alert with theme info', async () => {
+    const globalWithAlert = globalThis as typeof globalThis & {
+      alert?: (...args: unknown[]) => unknown;
+    };
+    const originalAlert = globalWithAlert.alert;
+    const alertMock = jest.fn();
+    globalWithAlert.alert = alertMock;
+
+    const { getByText } = render(
+      <ThemeProvider>
+        <AccountScreen />
+      </ThemeProvider>
+    );
+
+    const debugButton = await waitFor(() =>
+      getByText('🐛 Debug: View theme detection')
+    );
+
+    fireEvent.press(debugButton);
+
+    expect(alertMock).toHaveBeenCalled();
+
+    if (originalAlert) {
+      globalWithAlert.alert = originalAlert;
+    } else {
+      globalWithAlert.alert = () => undefined;
+    }
   });
 });

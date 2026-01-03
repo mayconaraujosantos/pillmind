@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 /**
  * Typography Usage Examples
  *
