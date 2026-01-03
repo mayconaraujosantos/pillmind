@@ -7,10 +7,12 @@ import { useOnboardingStorage } from '@features/onboarding/presentation/hooks/us
 import { FORCE_SHOW_ONBOARDING } from '@features/onboarding/presentation/constants/onboarding.constants';
 import { ThemeProvider } from '@shared/theme';
 import { ThemedStatusBar } from '@shared/components';
+import { useFonts } from '@shared/hooks';
 import '@shared/i18n';
 
 export default function App() {
   const [isAppReady, setIsAppReady] = useState(false);
+  const { fontsLoaded } = useFonts();
   const {
     hasSeenOnboarding,
     isLoading: isLoadingOnboarding,
@@ -28,6 +30,11 @@ export default function App() {
   const handleOnboardingSkip = () => {
     markOnboardingAsSeen();
   };
+
+  // Aguardar carregamento das fontes
+  if (!fontsLoaded) {
+    return null; // Ou um loading screen
+  }
 
   if (!isAppReady) {
     return (
