@@ -24,14 +24,15 @@ const renderTabBarIcon =
     focused: boolean;
     color: string;
     size: number;
-  }) => (
-    <TabBarIcon
-      routeName={routeName}
-      focused={focused}
-      color={color}
-      size={size}
-    />
-  );
+  }) =>
+    (
+      <TabBarIcon
+        routeName={routeName}
+        focused={focused}
+        color={color}
+        size={size}
+      />
+    );
 
 export const AppNavigator: React.FC = () => {
   return (

@@ -57,7 +57,7 @@ OnboardingCarousel.tsx    → Renderiza carousel
 
 ```typescript
 // Pode substituir Header por versão customizada
-<CustomHeader onSkip={onSkip} />  // Mesmo contrato
+<CustomHeader onSkip={onSkip} /> // Mesmo contrato
 ```
 
 ### **I - Interface Segregation Principle** ✅
@@ -82,7 +82,7 @@ interface OnboardingHeaderProps {
 const { currentStep, handleScroll } = useOnboardingScroll(totalSteps);
 
 // View recebe props (abstração)
-<OnboardingView onScroll={handleScroll} />
+<OnboardingView onScroll={handleScroll} />;
 ```
 
 ---
@@ -209,7 +209,7 @@ onboarding/
 // Componentes podem ser reutilizados em outros contextos
 import { OnboardingHeader } from '@features/onboarding';
 
-<OnboardingHeader onSkip={handleCustomSkip} />
+<OnboardingHeader onSkip={handleCustomSkip} />;
 ```
 
 ### **4. Extensibilidade** ✅
@@ -313,7 +313,7 @@ const handleScroll = (event) => {
 ```typescript
 // Usar i18n nos textos
 const { t } = useTranslation();
-<Text>{t('onboarding.skip')}</Text>
+<Text>{t('onboarding.skip')}</Text>;
 ```
 
 ---
@@ -341,7 +341,7 @@ A refatoração com TDD:
 ```typescript
 import { OnboardingScreen } from '@features/onboarding';
 
-<OnboardingScreen onFinish={handleFinish} onSkip={handleSkip} />
+<OnboardingScreen onFinish={handleFinish} onSkip={handleSkip} />;
 ```
 
 ### **Uso Avançado** (componentes individuais)
@@ -350,7 +350,7 @@ import { OnboardingScreen } from '@features/onboarding';
 import {
   OnboardingView,
   OnboardingHeader,
-  useOnboardingScroll
+  useOnboardingScroll,
 } from '@features/onboarding';
 
 const CustomOnboarding = () => {

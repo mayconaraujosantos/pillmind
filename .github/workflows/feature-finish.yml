@@ -6,6 +6,10 @@ on:
       - develop
     types: [closed]
 
+permissions:
+  contents: write
+  pull-requests: read
+
 jobs:
   finish-feature:
     name: Auto Finish Feature
@@ -32,11 +36,13 @@ jobs:
 
       - name: Extract feature name
         id: extract-feature
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref }}
         run: |
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          FEATURE_NAME=${BRANCH_NAME#feature/}
+          FEATURE_NAME="${BRANCH_NAME#feature/}"
           echo "feature_name=$FEATURE_NAME" >> $GITHUB_OUTPUT
-          echo "Feature name: $FEATURE_NAME"
+          echo "🔍 Branch: $BRANCH_NAME"
+          echo "🔍 Feature: $FEATURE_NAME"
 
       - name: Checkout develop
         run: |
@@ -45,25 +51,37 @@ jobs:
           git pull origin develop
 
       - name: Finish feature (cleanup only)
+        env:
+          FEATURE_NAME: ${{ steps.extract-feature.outputs.feature_name }}
         run: |
-          FEATURE_NAME="${{ steps.extract-feature.outputs.feature_name }}"
-          # O merge já foi feito pelo GitHub, apenas limpamos a branch local se existir
-          if git show-ref --verify --quiet refs/heads/feature/$FEATURE_NAME; then
-            git branch -D feature/$FEATURE_NAME || true
+          echo "🔍 Verificando branch local: feature/$FEATURE_NAME"
+          if git show-ref --verify --quiet "refs/heads/feature/$FEATURE_NAME"; then
+            echo "🗑️  Deletando branch local..."
+            git branch -D "feature/$FEATURE_NAME" || true
+          else
+            echo "ℹ️  Branch local não existe"
           fi
-          echo "✅ Feature branch cleaned up locally"
+          echo "✅ Cleanup local concluído"
 
       - name: Delete remote feature branch
+        env:
+          FEATURE_NAME: ${{ steps.extract-feature.outputs.feature_name }}
         run: |
-          FEATURE_NAME="${{ steps.extract-feature.outputs.feature_name }}"
-          git push origin --delete feature/$FEATURE_NAME || echo "Branch already deleted"
-          echo "✅ Remote feature branch deleted"
+          echo "🗑️  Deletando branch remota: feature/$FEATURE_NAME"
+          if git push origin --delete "feature/$FEATURE_NAME" 2>&1; then
+            echo "✅ Branch remota deletada com sucesso"
+          else
+            echo "⚠️  Falha ao deletar (pode já ter sido deletada)"
+            exit 0
+          fi
 
       - name: Post summary
+        env:
+          FEATURE_NAME: ${{ steps.extract-feature.outputs.feature_name }}
         run: |
           echo "## ✅ Feature Auto-Finished" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Feature **${{ steps.extract-feature.outputs.feature_name }}** has been automatically finished." >> $GITHUB_STEP_SUMMARY
+          echo "Feature **$FEATURE_NAME** has been automatically finished." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Merged to develop" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Feature branch cleaned up" >> $GITHUB_STEP_SUMMARY

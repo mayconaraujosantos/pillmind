@@ -34,7 +34,7 @@ splash_screen/
 ```typescript
 import { SplashScreenComponent } from '@features/splash_screen';
 
-<SplashScreenComponent onFinish={() => setIsReady(true)} />
+<SplashScreenComponent onFinish={() => setIsReady(true)} />;
 ```
 
 ## Customização

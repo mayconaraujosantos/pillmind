@@ -1,0 +1,66 @@
+{
+  "common": {
+    "skip": "Skip",
+    "next": "Next",
+    "back": "Back",
+    "getStarted": "Get Started",
+    "logout": "Logout"
+  },
+  "tabs": {
+    "home": "Home",
+    "appointments": "Appointments",
+    "account": "Account",
+    "parental": "Parental",
+    "nearby": "Nearby"
+  },
+  "home": {
+    "title": "PillMind Home",
+    "welcome": "Welcome to your medication assistant!",
+    "debugControls": "🛠️ Debug Controls",
+    "resetOnboarding": "↻ Reset Onboarding",
+    "resetInfo": "Press to test onboarding again"
+  },
+  "appointments": {
+    "title": "Appointments",
+    "subtitle": "Manage your medical appointments"
+  },
+  "nearby": {
+    "title": "Nearby",
+    "subtitle": "Find nearby pharmacies and hospitals"
+  },
+  "parental": {
+    "title": "Parental Control",
+    "subtitle": "Manage family medications"
+  },
+  "account": {
+    "title": "Profile",
+    "user": "User",
+    "email": "usuario@pillmind.com",
+    "appearance": "Appearance",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "privacy": "Privacy",
+    "about": "About",
+    "debugTheme": "🐛 Debug: View theme detection"
+  },
+  "theme": {
+    "automatic": "Automatic",
+    "light": "Light",
+    "dark": "Dark",
+    "title": "Theme"
+  },
+  "onboarding": {
+    "step1": {
+      "title": "DON'T FORGET YOUR MEDICINES.",
+      "description": "Remember what to take. Remember when to take. Remember when to refill. All on your fingertips."
+    },
+    "step2": {
+      "title": "DON'T FORGET YOUR APPOINTMENTS.",
+      "description": "Remember what to go. Remember where to go. Remember what to go for. All on your fingertips."
+    },
+    "step3": {
+      "title": "FIND THE BEST AND NEAREST SERVICES",
+      "description": "Find the nearest helpline with ease. Find the nearest hospital. Find the best doctors. All on your fingertips."
+    }
+  }
+}

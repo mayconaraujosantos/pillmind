@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,11 +8,12 @@ import {
   StatusBar as RNStatusBar,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from '@shared/theme';
 import { OnboardingHeader } from './OnboardingHeader';
 import { OnboardingCarousel } from './OnboardingCarousel';
 import { OnboardingIndicator } from './OnboardingIndicator';
 import { OnboardingFooter } from './OnboardingFooter';
-import { ONBOARDING_COLORS } from '../constants/onboarding.constants';
+import { getOnboardingColors } from '../constants/onboarding.constants';
 
 interface OnboardingViewProps {
   currentStep: number;
@@ -31,13 +32,19 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({
   onSignIn,
   onSignUp,
 }) => {
+  const { isDark } = useTheme();
+  const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
+
   return (
-    <View style={styles.container}>
-      <StatusBar style="dark" backgroundColor={ONBOARDING_COLORS.BACKGROUND} />
+    <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
+      <StatusBar
+        style={isDark ? 'light' : 'dark'}
+        backgroundColor={colors.BACKGROUND}
+      />
       {Platform.OS === 'android' && (
         <RNStatusBar
-          barStyle="dark-content"
-          backgroundColor={ONBOARDING_COLORS.BACKGROUND}
+          barStyle={isDark ? 'light-content' : 'dark-content'}
+          backgroundColor={colors.BACKGROUND}
           translucent={false}
           hidden={false}
         />
@@ -62,7 +69,6 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: ONBOARDING_COLORS.BACKGROUND,
   },
   indicatorContainer: {
     paddingVertical: 24,

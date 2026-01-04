@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { useTheme } from '@shared/theme';
 import {
-  ONBOARDING_COLORS,
+  getOnboardingColors,
   ONBOARDING_TEXTS,
 } from '../constants/onboarding.constants';
 
@@ -12,18 +13,29 @@ interface OnboardingHeaderProps {
 export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
   onSkip,
 }) => {
+  const { isDark } = useTheme();
+  const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
+
   return (
     <View style={styles.header}>
       <TouchableOpacity
         onPress={onSkip}
-        style={styles.skipButton}
+        style={[
+          styles.skipButton,
+          {
+            backgroundColor: colors.SKIP_BUTTON_BG,
+            borderColor: colors.SKIP_BUTTON_BORDER,
+          },
+        ]}
         activeOpacity={0.6}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         accessibilityLabel="Pular onboarding"
         accessibilityRole="button"
         accessibilityHint="Pula a introdução e vai direto para o app"
       >
-        <Text style={styles.skipText}>{ONBOARDING_TEXTS.SKIP}</Text>
+        <Text style={[styles.skipText, { color: colors.SECONDARY }]}>
+          {ONBOARDING_TEXTS.SKIP}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -46,12 +58,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: 'rgba(142, 142, 147, 0.25)',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
   },
   skipText: {
     fontSize: 14,
-    color: ONBOARDING_COLORS.SECONDARY,
     fontWeight: '600',
     letterSpacing: 0.5,
   },

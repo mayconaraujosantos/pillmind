@@ -7,8 +7,16 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "cache": {
+        "key": "dev-cache",
+        "paths": ["node_modules", ".expo"]
+      },
       "android": {
-        "gradleCommand": ":app:assembleDebug"
+        "gradleCommand": ":app:assembleDebug",
+        "cache": {
+          "key": "android-dev-cache",
+          "paths": ["android/app/build/intermediates"]
+        }
       },
       "ios": {
         "simulator": true
@@ -16,11 +24,19 @@
     },
     "preview": {
       "distribution": "internal",
+      "cache": {
+        "key": "preview-cache",
+        "paths": ["node_modules", ".expo"]
+      },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
+      "cache": {
+        "key": "prod-cache",
+        "paths": ["node_modules", ".expo"]
+      },
       "android": {
         "buildType": "apk"
       }

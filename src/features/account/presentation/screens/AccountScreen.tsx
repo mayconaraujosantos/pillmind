@@ -9,9 +9,11 @@ import {
 } from 'react-native';
 import { ThemeSelector } from '@shared/components';
 import { useTheme } from '@shared/theme';
+import { useTranslation } from '@shared/i18n';
 
 export const AccountScreen: React.FC = () => {
   const { theme, isDark, themeMode } = useTheme();
+  const { t } = useTranslation();
 
   const handleDebugTheme = () => {
     const systemTheme = Appearance.getColorScheme();
@@ -27,7 +29,7 @@ export const AccountScreen: React.FC = () => {
       style={[styles.wrapper, { backgroundColor: theme.colors.background }]}
     >
       <Text style={[styles.screenTitle, { color: theme.colors.text }]}>
-        Perfil
+        {t('account.title')}
       </Text>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* User Info Section */}
@@ -42,19 +44,19 @@ export const AccountScreen: React.FC = () => {
             </View>
           </View>
           <Text style={[styles.userName, { color: theme.colors.text }]}>
-            Usuário
+            {t('account.user')}
           </Text>
           <Text
             style={[styles.userEmail, { color: theme.colors.textSecondary }]}
           >
-            usuario@pillmind.com
+            {t('account.email')}
           </Text>
         </View>
 
         {/* Theme Section */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Aparência
+            {t('account.appearance')}
           </Text>
           <ThemeSelector />
 
@@ -70,7 +72,7 @@ export const AccountScreen: React.FC = () => {
             onPress={handleDebugTheme}
           >
             <Text style={styles.debugButtonText}>
-              🐛 Debug: Ver detecção do tema
+              {t('account.debugTheme')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -78,7 +80,7 @@ export const AccountScreen: React.FC = () => {
         {/* Settings Options */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Configurações
+            {t('account.settings')}
           </Text>
 
           <TouchableOpacity
@@ -92,7 +94,7 @@ export const AccountScreen: React.FC = () => {
             activeOpacity={0.7}
           >
             <Text style={[styles.optionText, { color: theme.colors.text }]}>
-              Notificações
+              {t('account.notifications')}
             </Text>
             <Text style={styles.optionArrow}>›</Text>
           </TouchableOpacity>
@@ -108,7 +110,7 @@ export const AccountScreen: React.FC = () => {
             activeOpacity={0.7}
           >
             <Text style={[styles.optionText, { color: theme.colors.text }]}>
-              Privacidade
+              {t('account.privacy')}
             </Text>
             <Text style={styles.optionArrow}>›</Text>
           </TouchableOpacity>
@@ -124,7 +126,7 @@ export const AccountScreen: React.FC = () => {
             activeOpacity={0.7}
           >
             <Text style={[styles.optionText, { color: theme.colors.text }]}>
-              Sobre
+              {t('account.about')}
             </Text>
             <Text style={styles.optionArrow}>›</Text>
           </TouchableOpacity>
@@ -139,7 +141,7 @@ export const AccountScreen: React.FC = () => {
             ]}
             activeOpacity={0.7}
           >
-            <Text style={styles.logoutText}>Sair</Text>
+            <Text style={styles.logoutText}>{t('common.logout')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
