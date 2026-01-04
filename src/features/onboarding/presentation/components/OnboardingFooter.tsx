@@ -1,8 +1,11 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@shared/theme';
+import { spacing } from '@shared/theme/spacing';
 import { useTranslation } from '@shared/i18n';
 import { getOnboardingColors } from '../constants/onboarding.constants';
+import { OnboardingPrimaryButton } from './OnboardingPrimaryButton';
+import { OnboardingSecondaryButton } from './OnboardingSecondaryButton';
 
 interface OnboardingFooterProps {
   currentStep: number;
@@ -40,35 +43,24 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
   if (isLastInfoScreen) {
     return (
       <View style={styles.footer}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
+        <View style={styles.buttonRow}>
+          <OnboardingPrimaryButton
+            label={t('onboarding.buttons.createAccount')}
             onPress={onSignUp}
-            style={[
-              styles.button,
-              styles.createButton,
-              {
-                backgroundColor: colors.PRIMARY,
-                shadowColor: colors.PRIMARY,
-              },
-            ]}
-          >
-            <Text style={[styles.buttonText, { color: colors.BUTTON_TEXT }]}>
-              {t('onboarding.buttons.createAccount')}
-            </Text>
-          </TouchableOpacity>
+            backgroundColor={colors.PRIMARY}
+            textColor={colors.BUTTON_TEXT}
+            shadowColor={colors.PRIMARY}
+            style={styles.button}
+          />
 
-          <TouchableOpacity
+          <OnboardingSecondaryButton
+            label={t('onboarding.buttons.login')}
             onPress={onSignIn}
-            style={[
-              styles.button,
-              styles.loginButton,
-              { borderColor: colors.PRIMARY },
-            ]}
-          >
-            <Text style={[styles.buttonText, { color: colors.PRIMARY }]}>
-              {t('onboarding.buttons.login')}
-            </Text>
-          </TouchableOpacity>
+            borderColor={colors.PRIMARY}
+            textColor={colors.PRIMARY}
+            backgroundColor={colors.BACKGROUND}
+            style={styles.button}
+          />
         </View>
       </View>
     );
@@ -76,22 +68,15 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
 
   return (
     <View style={styles.footer}>
-      <View style={styles.buttonContainerNext}>
-        <TouchableOpacity
+      <View style={styles.singleButtonContainer}>
+        <OnboardingPrimaryButton
+          label={t('common.next')}
           onPress={handleNextPress}
-          style={[
-            styles.button,
-            styles.nextButton,
-            {
-              backgroundColor: colors.PRIMARY,
-              shadowColor: colors.PRIMARY,
-            },
-          ]}
-        >
-          <Text style={[styles.buttonText, { color: colors.BUTTON_TEXT }]}>
-            {t('common.next')}
-          </Text>
-        </TouchableOpacity>
+          backgroundColor={colors.PRIMARY}
+          textColor={colors.BUTTON_TEXT}
+          shadowColor={colors.PRIMARY}
+          style={styles.button}
+        />
       </View>
     </View>
   );
@@ -99,67 +84,21 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
 
 const styles = StyleSheet.create({
   footer: {
-    paddingHorizontal: 32,
-    paddingBottom: 48,
-    paddingTop: 0,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.xxl,
+    paddingTop: spacing.none,
   },
-  buttonContainer: {
+  buttonRow: {
     flexDirection: 'row',
-    gap: 16,
+    gap: spacing.sm,
     alignItems: 'center',
   },
-  buttonContainerNext: {
+  singleButtonContainer: {
     flexDirection: 'row',
-    gap: 16,
+    gap: spacing.sm,
     alignItems: 'center',
   },
   button: {
     flex: 1,
-    paddingVertical: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-  },
-  // Estilo base para texto dos botões
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  signInButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-  },
-  signUpButton: {
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  createButton: {
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  loginButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-  },
-  nextButton: {
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
 });

@@ -7,3 +7,7 @@ export { OnboardingView } from './OnboardingView';
 export { OnboardingSignUp } from './OnboardingSignUp';
 export { OnboardingSignIn } from './OnboardingSignIn';
 export { OnboardingSuccess } from './OnboardingSuccess';
+export { OnboardingAuth } from './OnboardingAuth';
+export { OnboardingTitleBlock } from './OnboardingTitleBlock';
+export { OnboardingPrimaryButton } from './OnboardingPrimaryButton';
+export { OnboardingSecondaryButton } from './OnboardingSecondaryButton';

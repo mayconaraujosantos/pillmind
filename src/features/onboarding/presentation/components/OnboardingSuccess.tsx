@@ -1,9 +1,11 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@shared/theme';
 import { useTranslation } from '@shared/i18n';
 import { getOnboardingColors } from '../constants/onboarding.constants';
 import { Ionicons } from '@expo/vector-icons';
+import { OnboardingTitleBlock } from './OnboardingTitleBlock';
+import { OnboardingPrimaryButton } from './OnboardingPrimaryButton';
 
 interface OnboardingSuccessProps {
   onFinish?: () => void;
@@ -23,28 +25,23 @@ export const OnboardingSuccess: React.FC<OnboardingSuccessProps> = ({
           <Ionicons name="checkmark" size={64} color={colors.BUTTON_TEXT} />
         </View>
 
-        <Text style={[styles.title, { color: colors.TEXT_PRIMARY }]}>
-          {t('onboarding.success.title')}
-        </Text>
+        <OnboardingTitleBlock
+          title={t('onboarding.success.title')}
+          subtitle={t('onboarding.success.subtitle')}
+          titleColor={colors.TEXT_PRIMARY}
+          subtitleColor={colors.TEXT_SECONDARY}
+          containerMarginBottom={0}
+          subtitleMarginBottom={48}
+        />
 
-        <Text style={[styles.subtitle, { color: colors.TEXT_SECONDARY }]}>
-          {t('onboarding.success.subtitle')}
-        </Text>
-
-        <TouchableOpacity
+        <OnboardingPrimaryButton
+          label={t('onboarding.success.button')}
           onPress={onFinish}
-          style={[
-            styles.button,
-            {
-              backgroundColor: colors.PRIMARY,
-              shadowColor: colors.PRIMARY,
-            },
-          ]}
-        >
-          <Text style={[styles.buttonText, { color: colors.BUTTON_TEXT }]}>
-            {t('onboarding.success.button')}
-          </Text>
-        </TouchableOpacity>
+          backgroundColor={colors.PRIMARY}
+          textColor={colors.BUTTON_TEXT}
+          shadowColor={colors.PRIMARY}
+          style={{ width: '100%' }}
+        />
       </View>
     </View>
   );
@@ -75,40 +72,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '800',
-    marginBottom: 12,
-    textAlign: 'center',
-    letterSpacing: 0.3,
-    lineHeight: 36,
-  },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: '400',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 48,
-  },
-  button: {
-    width: '100%',
-    paddingVertical: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
   },
 });
