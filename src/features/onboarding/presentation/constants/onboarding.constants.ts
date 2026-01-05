@@ -90,31 +90,53 @@ export interface OnboardingStep {
   title: string;
   description: string;
   image?: string; // URL da imagem
+  type?: 'info' | 'signup' | 'signin' | 'success'; // Tipo de step: informativo, signup, signin ou success
 }
 
 export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: '1',
-    title: "DON'T FORGET YOUR MEDICINES.",
+    title: 'Your health, on schedule',
     description:
-      'Remember what to take. Remember when to take. Remember when to refill. All on your fingertips.',
+      'Take control of your well being with effortless medication reminders.',
     image:
       'https://static.vecteezy.com/system/resources/previews/006/787/432/non_2x/hand-drawn-doodle-time-taking-dose-medication-icon-illustration-isolated-vector.jpg',
+    type: 'info',
   },
   {
     id: '2',
-    title: "DON'T FORGET YOUR APPOINTMENTS.",
+    title: 'Advanced reminders, Easy use',
     description:
-      'Remember what to go. Remember where to go. Remember what to go for. All on your fingertips.',
+      'Stay on track with ease and peace of mind, ensuring you never miss a dose.',
     image:
       'https://static.vecteezy.com/system/resources/previews/008/985/375/non_2x/happy-doctor-and-patient-holding-alarm-clock-woman-and-man-in-uniform-setting-time-for-medication-or-appointment-flat-illustration-health-medicine-concept-for-banner-or-landing-web-page-vector.jpg',
+    type: 'info',
   },
   {
     id: '3',
-    title: 'FIND THE BEST AND NEAREST SERVICES',
+    title: 'For yourself, family and friends',
     description:
-      'Find the nearest helpline with ease. Find the nearest hospital. Find the best doctors. All on your fingertips.',
+      'Easily manage medication for everyone you care about with seamless profile switching.',
     image:
       'https://static.vecteezy.com/system/resources/previews/044/632/641/non_2x/weekend-holiday-flat-illustration-design-vector.jpg',
+    type: 'info',
+  },
+  {
+    id: '4',
+    title: 'Sign Up',
+    description: 'Fill in the details to create your account',
+    type: 'signup',
+  },
+  {
+    id: '5',
+    title: 'Sign In',
+    description: 'Sign in to your account',
+    type: 'signin',
+  },
+  {
+    id: '6',
+    title: 'Sign Up Completed',
+    description: 'Account has been created successfully',
+    type: 'success',
   },
 ];

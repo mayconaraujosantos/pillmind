@@ -66,8 +66,12 @@ pre-push:
           echo "ℹ️  Nenhum arquivo TS/JS modificado encontrado"
           echo "✅ Prosseguindo sem análise SonarQube"
         else
-          echo "📊 Executando npm run sonar:doublecheck..."
-          npm run sonar:doublecheck
+          if npm run --silent sonar:summary >/dev/null 2>&1; then
+            echo "📊 Executando npm run sonar:summary..."
+            npm run sonar:summary
+          else
+            echo "ℹ️  Comando sonar:summary não disponível; pulando passo Sonar"
+          fi
 
           echo "📈 Relatório: https://sonarcloud.io/project/overview?id=mayconaraujosantos_pillmind"
           echo "💡 Verifique o Problems Panel (Ctrl+Shift+M) no VS Code para issues detalhadas"

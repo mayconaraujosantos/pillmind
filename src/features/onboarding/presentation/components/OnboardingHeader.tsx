@@ -1,23 +1,39 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { useTheme } from '@shared/theme';
+import { useTranslation } from '@shared/i18n';
 import {
   getOnboardingColors,
-  ONBOARDING_TEXTS,
+  ONBOARDING_STEPS,
 } from '../constants/onboarding.constants';
+import { LanguageSelector } from './LanguageSelector';
 
 interface OnboardingHeaderProps {
   onSkip: () => void;
+  currentStep?: number;
+  _totalSteps?: number;
 }
 
 export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
   onSkip,
+  currentStep = 0,
+  _totalSteps = ONBOARDING_STEPS.length,
 }) => {
   const { isDark } = useTheme();
+  const { t } = useTranslation();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
+
+  // Oculta o botão Skip a partir do step 2
+  // Mostrar apenas nos steps 0 e 1
+  const shouldHideSkip = currentStep >= 2;
+
+  if (shouldHideSkip) {
+    return null;
+  }
 
   return (
     <View style={styles.header}>
+      <LanguageSelector />
       <TouchableOpacity
         onPress={onSkip}
         style={[
@@ -34,7 +50,7 @@ export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
         accessibilityHint="Pula a introdução e vai direto para o app"
       >
         <Text style={[styles.skipText, { color: colors.SECONDARY }]}>
-          {ONBOARDING_TEXTS.SKIP}
+          {t('common.skip')}
         </Text>
       </TouchableOpacity>
     </View>
@@ -46,7 +62,9 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 32,
     paddingBottom: 8,
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     zIndex: 1,
     position: 'absolute',
     top: 0,

@@ -5,19 +5,19 @@ import { WithThemeProvider } from '../WithThemeProvider';
 
 describe('OnboardingView', () => {
   const mockProps = {
-    currentStep: 0,
-    totalSteps: 3,
+    currentStep: 0, // Skip aparece apenas nos steps iniciais
+    totalSteps: 6,
     onScroll: jest.fn(),
     onSkip: jest.fn(),
-    onSignIn: jest.fn(),
-    onSignUp: jest.fn(),
+    onLogin: jest.fn(),
+    onCreateAccount: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('deve renderizar todos os componentes principais', async () => {
+  it('deve renderizar componentes principais no step inicial', async () => {
     const { getByText } = render(
       <WithThemeProvider>
         <OnboardingView {...mockProps} />
@@ -26,8 +26,7 @@ describe('OnboardingView', () => {
 
     await waitFor(() => {
       expect(getByText('Skip')).toBeTruthy(); // Header
-      expect(getByText('SIGN IN')).toBeTruthy(); // Footer
-      expect(getByText('SIGN UP')).toBeTruthy(); // Footer
+      expect(getByText('Next')).toBeTruthy(); // Footer inicial
     });
   });
 
@@ -45,32 +44,44 @@ describe('OnboardingView', () => {
     expect(mockProps.onSkip).toHaveBeenCalledTimes(1);
   });
 
-  it('deve chamar onSignIn quando botão Sign In é pressionado', async () => {
-    const { getByText } = render(
+  it('deve chamar onLogin quando botão Login é pressionado', async () => {
+    const { getByText, rerender } = render(
       <WithThemeProvider>
         <OnboardingView {...mockProps} />
       </WithThemeProvider>
     );
 
+    rerender(
+      <WithThemeProvider>
+        <OnboardingView {...mockProps} currentStep={2} />
+      </WithThemeProvider>
+    );
+
     await waitFor(() => {
-      fireEvent.press(getByText('SIGN IN'));
+      fireEvent.press(getByText('Login'));
     });
 
-    expect(mockProps.onSignIn).toHaveBeenCalledTimes(1);
+    expect(mockProps.onLogin).toHaveBeenCalledTimes(1);
   });
 
-  it('deve chamar onSignUp quando botão Sign Up é pressionado', async () => {
-    const { getByText } = render(
+  it('deve chamar onCreateAccount quando botão Create an account é pressionado', async () => {
+    const { getByText, rerender } = render(
       <WithThemeProvider>
         <OnboardingView {...mockProps} />
       </WithThemeProvider>
     );
 
+    rerender(
+      <WithThemeProvider>
+        <OnboardingView {...mockProps} currentStep={2} />
+      </WithThemeProvider>
+    );
+
     await waitFor(() => {
-      fireEvent.press(getByText('SIGN UP'));
+      fireEvent.press(getByText('Create an account'));
     });
 
-    expect(mockProps.onSignUp).toHaveBeenCalledTimes(1);
+    expect(mockProps.onCreateAccount).toHaveBeenCalledTimes(1);
   });
 
   it('deve renderizar indicador com passo atual correto', async () => {

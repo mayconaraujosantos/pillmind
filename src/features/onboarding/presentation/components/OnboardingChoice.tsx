@@ -1,68 +1,38 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from 'react-native';
 import { useTheme } from '@shared/theme';
 import {
   OnboardingStep as OnboardingStepType,
   getOnboardingColors,
 } from '../constants/onboarding.constants';
-import { OnboardingSignUp } from './OnboardingSignUp';
-import { OnboardingSignIn } from './OnboardingSignIn';
-import { OnboardingSuccess } from './OnboardingSuccess';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IMAGE_HEIGHT = Math.min(SCREEN_HEIGHT * 0.4, 320);
 
-interface OnboardingStepProps {
+interface OnboardingChoiceProps {
   step: OnboardingStepType;
-  onSignUpComplete?: () => void;
-  onSignInComplete?: () => void;
-  onGoToSignUpFromSignIn?: () => void;
-  onGoToSignInFromSignUp?: () => void;
-  onFinish?: () => void;
+  onCreateAccount?: () => void;
+  onLogin?: () => void;
 }
 
-export const OnboardingStepComponent: React.FC<OnboardingStepProps> = ({
+export const OnboardingChoice: React.FC<OnboardingChoiceProps> = ({
   step,
-  onSignUpComplete,
-  onSignInComplete,
-  onGoToSignUpFromSignIn,
-  onGoToSignInFromSignUp,
-  onFinish,
+  onCreateAccount,
+  onLogin,
 }) => {
   const { isDark } = useTheme();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
 
-  // Se for uma tela de signup, renderiza o componente de signup
-  if (step.type === 'signup') {
-    return (
-      <OnboardingSignUp
-        onSignUpComplete={onSignUpComplete}
-        onGoToSignIn={onGoToSignInFromSignUp}
-      />
-    );
-  }
-
-  // Se for uma tela de signin, renderiza o componente de signin
-  if (step.type === 'signin') {
-    return (
-      <OnboardingSignIn
-        onSignInComplete={onSignInComplete}
-        onGoToSignUp={onGoToSignUpFromSignIn}
-      />
-    );
-  }
-
-  // Se for uma tela de success, renderiza o componente de success
-  if (step.type === 'success') {
-    return <OnboardingSuccess onFinish={onFinish} />;
-  }
-
-  // Renderiza a tela informativa padrão
-  const shouldShowImage = step.image !== undefined && step.image !== null;
-
   return (
     <View style={styles.container}>
-      {shouldShowImage && (
+      {step.image && (
         <View style={styles.imageContainer}>
           <Image
             source={{ uri: step.image }}
@@ -78,6 +48,37 @@ export const OnboardingStepComponent: React.FC<OnboardingStepProps> = ({
         <Text style={[styles.description, { color: colors.TEXT_SECONDARY }]}>
           {step.description}
         </Text>
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          onPress={onCreateAccount}
+          style={[
+            styles.button,
+            styles.createButton,
+            {
+              backgroundColor: colors.PRIMARY,
+              shadowColor: colors.PRIMARY,
+            },
+          ]}
+        >
+          <Text style={[styles.buttonText, { color: colors.BUTTON_TEXT }]}>
+            Create an account
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={onLogin}
+          style={[
+            styles.button,
+            styles.loginButton,
+            { borderColor: colors.PRIMARY },
+          ]}
+        >
+          <Text style={[styles.buttonText, { color: colors.PRIMARY }]}>
+            Login
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   textContainer: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 48,
     marginTop: 0,
   },
   title: {
@@ -125,5 +126,34 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     width: '100%',
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: 16,
+  },
+  button: {
+    paddingVertical: 18,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 56,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  createButton: {
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  loginButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 2,
   },
 });

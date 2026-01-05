@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@shared/theme';
-import { getOnboardingColors } from '../constants/onboarding.constants';
+import {
+  getOnboardingColors,
+  ONBOARDING_STEPS,
+} from '../constants/onboarding.constants';
 
 interface OnboardingIndicatorProps {
   totalSteps: number;
@@ -9,17 +12,28 @@ interface OnboardingIndicatorProps {
 }
 
 export const OnboardingIndicator: React.FC<OnboardingIndicatorProps> = ({
-  totalSteps,
+  totalSteps: _totalSteps,
   currentStep,
 }) => {
   const { isDark } = useTheme();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
 
+  // Mostrar apenas os 3 primeiros dots (telas de onboarding)
+  // Desaparecer quando chegar nos formulários (step 3+)
+  const INDICATOR_STEPS = 3;
+  const shouldShowIndicator = currentStep < INDICATOR_STEPS;
+
+  const steps = useMemo(() => ONBOARDING_STEPS.slice(0, INDICATOR_STEPS), []);
+
+  if (!shouldShowIndicator) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
-      {Array.from({ length: totalSteps }).map((_, index) => (
+      {steps.map((step, index) => (
         <View
-          key={index}
+          key={step.id}
           style={[
             styles.dot,
             index === currentStep
