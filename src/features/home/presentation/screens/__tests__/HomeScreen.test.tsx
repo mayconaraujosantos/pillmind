@@ -10,6 +10,31 @@ jest.mock('@features/onboarding', () => ({
   }),
 }));
 
+jest.mock(
+  '@features/onboarding/presentation/contexts/AuthContext',
+  () => ({
+    useAuthContext: () => ({
+      isAuthenticated: true,
+      isLoading: false,
+      user: { id: '1', email: 'test@example.com' },
+      token: 'token',
+      login: jest.fn(),
+      logout: jest.fn(),
+    }),
+  })
+);
+
+jest.mock('../../hooks/useHomeData', () => ({
+  useHomeData: jest.fn(() => ({
+    medicines: [],
+    loading: false,
+    refreshing: false,
+    error: null,
+    refetch: jest.fn(),
+    refresh: jest.fn(),
+  })),
+}));
+
 const renderWithTheme = (component: React.ReactElement) => {
   return render(<ThemeProvider>{component}</ThemeProvider>);
 };
