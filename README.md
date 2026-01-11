@@ -11,10 +11,15 @@ Aplicativo de gerenciamento de medicamentos e lembretes desenvolvido com React N
 - **Jest** - Framework de testes
 - **ESLint** - Linter de código
 - **Prettier** - Formatador de código
+- **Node-RED** - Mock backend para autenticação (desenvolvimento)
 
 ## 📁 Estrutura do Projeto
 
 O projeto utiliza uma arquitetura **Feature-Based com Clean Architecture**. Para mais detalhes, consulte a [documentação de arquitetura](./doc/ARCHITECTURE.md).
+
+## ⚡ Quick Start
+
+👉 **Novo no projeto?** Leia o [Guia de Startup](./STARTUP.md) para configuração inicial.
 
 ## 🛠️ Instalação
 
@@ -32,6 +37,17 @@ npm run android
 npm run ios
 ```
 
+### ⚠️ Importante: Node-RED Backend
+
+Para que a autenticação funcione, você precisa iniciar o Node-RED em um terminal separado:
+
+```bash
+npm run nodered
+# Node-RED estará disponível em http://localhost:1880
+```
+
+Veja [NODERED_SETUP.md](./doc/NODERED_SETUP.md) para mais detalhes.
+
 ## 📝 Scripts Disponíveis
 
 ```bash
@@ -39,6 +55,7 @@ npm run ios
 npm start              # Inicia o servidor Expo
 npm start:clear        # Inicia com cache limpo
 npm reset              # Reseta o cache completamente
+npm run nodered        # Inicia o backend Node-RED (para autenticação)
 
 # Build
 npm run build:dev:android  # Build de desenvolvimento para Android

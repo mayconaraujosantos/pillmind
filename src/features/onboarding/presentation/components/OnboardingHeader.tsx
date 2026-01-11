@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { useTheme } from '@shared/theme';
 import { useTranslation } from '@shared/i18n';
+import { logger } from '@shared/utils/logger';
 import {
   getOnboardingColors,
   ONBOARDING_STEPS,
@@ -28,6 +29,7 @@ export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
   const shouldHideSkip = currentStep >= 2;
 
   if (shouldHideSkip) {
+    logger.debug('OnboardingHeader', 'Header hidden (shouldHideSkip)');
     return null;
   }
 

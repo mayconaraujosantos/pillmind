@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, forwardRef } from 'react';
+import React, { useMemo, useRef, forwardRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '@shared/theme';
+import { adaptiveSpacing, deviceSize } from '@shared/utils/dimensions';
+import { logger } from '@shared/utils/logger';
 import { OnboardingHeader } from './OnboardingHeader';
 import { OnboardingCarousel } from './OnboardingCarousel';
 import { OnboardingIndicator } from './OnboardingIndicator';
@@ -51,7 +53,16 @@ export const OnboardingView = forwardRef<ScrollView, OnboardingViewProps>(
     const localRef = useRef<ScrollView>(null);
     const scrollViewRef = ref || localRef;
 
+    useEffect(() => {
+      logger.debug('OnboardingView', 'OnboardingView mounted', {
+        currentStep,
+        totalSteps,
+        isDark,
+      });
+    }, []);
+
     const handleNext = () => {
+      logger.debug('OnboardingView', 'Next button pressed');
       const nextPosition = (currentStep + 1) * SCREEN_WIDTH;
       if (scrollViewRef && 'current' in scrollViewRef) {
         scrollViewRef.current?.scrollTo({
@@ -60,6 +71,14 @@ export const OnboardingView = forwardRef<ScrollView, OnboardingViewProps>(
         });
       }
     };
+
+    // Scroll sempre habilitado - apenas 3 telas no carousel
+    const scrollEnabled = true;
+
+    logger.debug('OnboardingView', 'Rendering OnboardingView', {
+      backgroundColor: colors.BACKGROUND,
+      isDark,
+    });
 
     return (
       <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
@@ -85,6 +104,7 @@ export const OnboardingView = forwardRef<ScrollView, OnboardingViewProps>(
         <OnboardingCarousel
           ref={scrollViewRef}
           onScroll={onScroll}
+          scrollEnabled={scrollEnabled}
           _onCreateAccount={onCreateAccount}
           _onLogin={onLogin}
           onSignUpComplete={onSignUpComplete}
@@ -118,8 +138,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   indicatorContainer: {
-    paddingVertical: 24,
-    paddingBottom: 32,
+    paddingVertical: adaptiveSpacing.md,
     alignItems: 'center',
+    minHeight: deviceSize(60, 70, 80),
   },
 });

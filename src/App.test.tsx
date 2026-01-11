@@ -29,6 +29,7 @@ jest.mock('@shared/components', () => {
   const { Text } = require('react-native');
   return {
     ThemedStatusBar: () => React.createElement(Text, null, 'status-bar'),
+    DebugConsole: () => null,
   };
 });
 
@@ -102,18 +103,36 @@ jest.mock('@shared/hooks', () => ({
   useFonts: jest.fn(),
 }));
 
+jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) =>
+    require('react').createElement(require('react').Fragment, null, children),
+  useAuthContext: jest.fn(),
+}));
+
 const mockUseFonts = jest.requireMock('@shared/hooks').useFonts as jest.Mock;
 const mockUseOnboardingStorage = jest.requireMock(
   '@features/onboarding/presentation/hooks/useOnboardingStorage'
 ).useOnboardingStorage as jest.Mock;
+const mockUseAuthContext = jest.requireMock(
+  '@features/onboarding/presentation/contexts/AuthContext'
+).useAuthContext as jest.Mock;
 
 describe('App', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setSplashAutoFinish(false);
+    // Default mock for AuthContext
+    mockUseAuthContext.mockReturnValue({
+      isAuthenticated: false,
+      isLoading: false,
+      user: null,
+      token: null,
+      login: jest.fn(),
+      logout: jest.fn(),
+    });
   });
 
-  it('renders nothing when fonts are not loaded', () => {
+  it('renders status bar when fonts are not loaded', () => {
     mockUseFonts.mockReturnValue({ fontsLoaded: false });
     mockUseOnboardingStorage.mockReturnValue({
       hasSeenOnboarding: false,
@@ -121,9 +140,9 @@ describe('App', () => {
       markOnboardingAsSeen: jest.fn(),
     });
 
-    const { toJSON } = render(<App />);
+    const { getByText } = render(<App />);
 
-    expect(toJSON()).toBeNull();
+    expect(getByText('status-bar')).toBeTruthy();
   });
 
   it('shows splash screen before app is ready', () => {
@@ -179,6 +198,14 @@ describe('App', () => {
       hasSeenOnboarding: true,
       isLoading: false,
       markOnboardingAsSeen: jest.fn(),
+    });
+    mockUseAuthContext.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      user: { id: '1', email: 'test@example.com' },
+      token: 'token',
+      login: jest.fn(),
+      logout: jest.fn(),
     });
     setSplashAutoFinish(true);
 
