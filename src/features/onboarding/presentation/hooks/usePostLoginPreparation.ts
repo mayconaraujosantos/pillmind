@@ -6,6 +6,7 @@ export interface UsePostLoginPreparationResult {
   isPreparing: boolean;
   error: string | null;
   progress: number; // 0-100
+  retry: () => void; // Function to retry preparation
 }
 
 /**
@@ -96,6 +97,13 @@ export const usePostLoginPreparation = (): UsePostLoginPreparationResult => {
     }
   }, [authContext.user?.id]);
 
+  const retry = useCallback(() => {
+    logger.info('usePostLoginPreparation', '🔄 Retry requested');
+    hasStartedRef.current = false; // Allow preparation to restart
+    setError(null); // Clear error state
+    prepareSession(); // Call prepareSession again
+  }, [prepareSession]);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -117,5 +125,6 @@ export const usePostLoginPreparation = (): UsePostLoginPreparationResult => {
     isPreparing,
     error,
     progress,
+    retry,
   };
 };

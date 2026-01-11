@@ -1,7 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { spacing } from '@shared/theme/spacing';
-import { heading, body } from '@shared/theme/typography';
+import {
+  adaptiveSpacing,
+  adaptiveFontSizes,
+  deviceSize,
+} from '@shared/utils/dimensions';
 
 type OnboardingTitleBlockProps = {
   title: string;
@@ -40,12 +44,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    ...heading.h2,
-    marginBottom: spacing.sm,
+    fontSize: adaptiveFontSizes.xxl,
+    fontWeight: '700',
+    marginBottom: adaptiveSpacing.sm,
     textAlign: 'center',
+    lineHeight: deviceSize(32, 36, 40),
   },
   subtitle: {
-    ...body.xlMedium,
+    fontSize: adaptiveFontSizes.md,
+    fontWeight: '500',
     textAlign: 'center',
+    lineHeight: deviceSize(20, 22, 24),
+    paddingHorizontal: adaptiveSpacing.sm,
   },
 });

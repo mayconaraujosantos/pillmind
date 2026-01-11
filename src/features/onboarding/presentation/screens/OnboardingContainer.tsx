@@ -120,16 +120,7 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
 
   if (currentScreen === 'postLoginLoading') {
     logger.debug('OnboardingContainer', 'Rendering post-login loading screen');
-    return (
-      <PostLoginLoadingScreen
-        onComplete={handleFinish}
-        onError={(error) => {
-          logger.error('OnboardingContainer', 'Post-login error', { error });
-          // On error, navigate anyway after showing alert
-          handleFinish();
-        }}
-      />
-    );
+    return <PostLoginLoadingScreen onComplete={handleFinish} />;
   }
 
   if (currentScreen === 'success') {

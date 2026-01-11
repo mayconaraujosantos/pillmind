@@ -62,7 +62,14 @@ export const OnboardingChoice: React.FC<OnboardingChoiceProps> = ({
             },
           ]}
         >
-          <Text style={[styles.buttonText, { color: colors.BUTTON_TEXT }]}>
+          <Text
+            style={[styles.buttonText, { color: colors.BUTTON_TEXT }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            adjustsFontSizeToFit
+            minimumFontScale={0.9}
+            allowFontScaling
+          >
             Create an account
           </Text>
         </TouchableOpacity>
@@ -133,10 +140,12 @@ const styles = StyleSheet.create({
   },
   button: {
     paddingVertical: 18,
+    paddingHorizontal: 24,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 56,
+    width: '100%',
   },
   buttonText: {
     fontSize: 16,

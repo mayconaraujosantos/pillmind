@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { ScreenWrapper, Loader } from '@shared/components';
 import { usePostLoginPreparation } from '../hooks/usePostLoginPreparation';
@@ -8,7 +8,6 @@ import { logger } from '@shared/utils/logger';
 
 interface PostLoginLoadingScreenProps {
   onComplete: () => void;
-  onError?: (error: string) => void;
 }
 
 /**
@@ -25,12 +24,17 @@ interface PostLoginLoadingScreenProps {
  */
 export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
   onComplete,
-  onError,
 }) => {
   const { theme } = useTheme();
   const authContext = useAuthContext();
-  const { isPreparing, error, progress } = usePostLoginPreparation();
+  const { isPreparing, error, progress, retry } = usePostLoginPreparation();
   const hasCompletedRef = useRef(false);
+  const errorShownRef = useRef<string | null>(null);
+
+  // Stable callbacks using useCallback to prevent effect re-runs
+  const stableOnComplete = useCallback(() => {
+    onComplete();
+  }, [onComplete]);
 
   // If user is not authenticated, navigate to completion immediately
   // This handles edge cases where user navigates here without being logged in
@@ -41,9 +45,9 @@ export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
         'User not authenticated, navigating to completion'
       );
       hasCompletedRef.current = true;
-      onComplete();
+      stableOnComplete();
     }
-  }, [authContext.isAuthenticated, onComplete]);
+  }, [authContext.isAuthenticated, stableOnComplete]);
 
   useEffect(() => {
     if (!isPreparing && !error && !hasCompletedRef.current) {
@@ -54,15 +58,17 @@ export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
       hasCompletedRef.current = true;
       // Minimal delay for instant transition (50ms for smooth feel)
       const timer = setTimeout(() => {
-        onComplete();
+        stableOnComplete();
       }, 50);
       return () => clearTimeout(timer);
     }
-  }, [isPreparing, error, onComplete]);
+  }, [isPreparing, error, stableOnComplete]);
 
   useEffect(() => {
-    if (error) {
+    // Only show alert if error exists, is different from last shown error, and hasn't been shown yet
+    if (error && error !== errorShownRef.current) {
       logger.error('PostLoginLoadingScreen', '❌ Preparation error', { error });
+      errorShownRef.current = error;
 
       Alert.alert(
         'Loading Error',
@@ -72,8 +78,9 @@ export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
             text: 'Retry',
             onPress: () => {
               logger.info('PostLoginLoadingScreen', '🔄 Retrying preparation');
-              // Retry by reloading the component or calling onError
-              onError?.(error);
+              errorShownRef.current = null; // Reset to allow showing again on new error
+              // Call the retry function from the hook to actually retry preparation
+              retry();
             },
           },
           {
@@ -84,14 +91,17 @@ export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
                 'PostLoginLoadingScreen',
                 '⚠️ Continuing despite error'
               );
-              onComplete();
+              stableOnComplete();
             },
           },
         ],
         { cancelable: false }
       );
+    } else if (!error) {
+      // Reset error tracking when error clears
+      errorShownRef.current = null;
     }
-  }, [error, onError, onComplete]);
+  }, [error, retry, stableOnComplete]);
 
   return (
     <ScreenWrapper>

@@ -166,11 +166,11 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   confirmButton: {
-    backgroundColor: '#E5E5E5',
+    backgroundColor: COMMON_STYLES.colors.primary,
   },
   confirmButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#000',
+    color: COMMON_STYLES.colors.text.white,
   },
 });

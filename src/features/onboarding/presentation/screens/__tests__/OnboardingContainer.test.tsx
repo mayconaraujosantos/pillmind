@@ -17,9 +17,7 @@ const mockUseOnboardingScroll = () =>
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <WithThemeProvider>
-      <AuthProvider>
-        {component}
-      </AuthProvider>
+      <AuthProvider>{component}</AuthProvider>
     </WithThemeProvider>
   );
 };
@@ -44,7 +42,9 @@ describe('OnboardingContainer', () => {
       handleScroll: jest.fn(),
     });
     const onSkip = jest.fn();
-    const { getByText } = renderWithProviders(<OnboardingContainer onSkip={onSkip} />);
+    const { getByText } = renderWithProviders(
+      <OnboardingContainer onSkip={onSkip} />
+    );
 
     await waitFor(() => {
       fireEvent.press(getByText('Skip'));
@@ -72,7 +72,9 @@ describe('OnboardingContainer', () => {
       handleScroll: jest.fn(),
     });
     const onFinish = jest.fn();
-    const { getByText } = renderWithProviders(<OnboardingContainer onFinish={onFinish} />);
+    const { getByText } = renderWithProviders(
+      <OnboardingContainer onFinish={onFinish} />
+    );
 
     await waitFor(() => {
       expect(getByText('Login')).toBeTruthy();
@@ -89,7 +91,9 @@ describe('OnboardingContainer', () => {
       handleScroll: jest.fn(),
     });
     const onFinish = jest.fn();
-    const { getByText } = renderWithProviders(<OnboardingContainer onFinish={onFinish} />);
+    const { getByText } = renderWithProviders(
+      <OnboardingContainer onFinish={onFinish} />
+    );
 
     await waitFor(() => {
       expect(getByText('Create an account')).toBeTruthy();
