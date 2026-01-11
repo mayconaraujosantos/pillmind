@@ -243,7 +243,7 @@ export class MockMedicineRepository implements MedicineRepository {
     return { ...existing, ...medicine };
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(_id: string): Promise<void> {
     await this.simulateDelay();
   }
 

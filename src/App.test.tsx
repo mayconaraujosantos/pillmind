@@ -103,18 +103,11 @@ jest.mock('@shared/hooks', () => ({
   useFonts: jest.fn(),
 }));
 
-jest.mock(
-  '@features/onboarding/presentation/contexts/AuthContext',
-  () => ({
-    AuthProvider: ({ children }: { children: React.ReactNode }) =>
-      require('react').createElement(
-        require('react').Fragment,
-        null,
-        children
-      ),
-    useAuthContext: jest.fn(),
-  })
-);
+jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) =>
+    require('react').createElement(require('react').Fragment, null, children),
+  useAuthContext: jest.fn(),
+}));
 
 const mockUseFonts = jest.requireMock('@shared/hooks').useFonts as jest.Mock;
 const mockUseOnboardingStorage = jest.requireMock(

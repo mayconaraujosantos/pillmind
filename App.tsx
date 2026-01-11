@@ -163,11 +163,16 @@ const AppContentWithOnboarding: React.FC<{
   }
 
   // Usuário já viu onboarding mas não está autenticado - mostrar tela de login
-  logger.info('App', '📋 User has seen onboarding, showing login');
+  // Permite que o usuário complete o fluxo de autenticação
+  // Quando autenticado, o componente será re-renderizado e mostrará o AppNavigator
+  logger.info('App', '📋 User has seen onboarding, showing login/signup');
   const content = (
     <>
       <ThemedStatusBar />
-      <OnboardingScreen onFinish={() => {}} onSkip={() => {}} />
+      <OnboardingScreen
+        onFinish={onOnboardingFinish}
+        onSkip={onOnboardingSkip}
+      />
     </>
   );
 
