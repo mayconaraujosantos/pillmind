@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, waitFor, fireEvent, act } from '@testing-library/react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AccountScreen } from '../AccountScreen';
 import { ThemeProvider } from '@shared/theme';
@@ -40,9 +40,7 @@ jest.mock('@shared/i18n', () => ({
 const renderWithProviders = (component: React.ReactElement) => {
   return render(
     <ThemeProvider>
-      <AuthProvider>
-        {component}
-      </AuthProvider>
+      <AuthProvider>{component}</AuthProvider>
     </ThemeProvider>
   );
 };
@@ -65,7 +63,9 @@ describe('AccountScreen', () => {
   });
 
   it('should render theme selector section', async () => {
-    const { getByText, getAllByText, findByText } = renderWithProviders(<AccountScreen />);
+    const { getByText, getAllByText, findByText } = renderWithProviders(
+      <AccountScreen />
+    );
 
     // Aguardar renderização
     await findByText('Profile', {}, { timeout: 3000 });
@@ -97,7 +97,7 @@ describe('AccountScreen', () => {
 
     // Aguardar renderização
     await findByText('Profile', {}, { timeout: 3000 });
-    
+
     const logoutButton = await findByText('Logout', {}, { timeout: 3000 });
     expect(logoutButton).toBeTruthy();
   });
@@ -114,8 +114,12 @@ describe('AccountScreen', () => {
 
     // Aguardar renderização
     await findByText('Profile', {}, { timeout: 3000 });
-    
-    const debugButton = await findByText('🐛 Debug: View theme detection', {}, { timeout: 3000 });
+
+    const debugButton = await findByText(
+      '🐛 Debug: View theme detection',
+      {},
+      { timeout: 3000 }
+    );
 
     await act(async () => {
       fireEvent.press(debugButton);
