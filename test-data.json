@@ -1,0 +1,167 @@
+{
+  "testData": {
+    "signUp": [
+      {
+        "id": 1,
+        "name": "João Silva",
+        "email": "joao.silva@email.com",
+        "password": "senha123",
+        "description": "Usuário válido básico"
+      },
+      {
+        "id": 2,
+        "name": "Maria Santos",
+        "email": "maria.santos@gmail.com",
+        "password": "password456",
+        "description": "Outro usuário"
+      },
+      {
+        "id": 3,
+        "name": "Pedro Oliveira",
+        "email": "pedro.oliveira@hotmail.com",
+        "password": "MySecurePass789",
+        "description": "Usuário com senha forte"
+      },
+      {
+        "id": 4,
+        "name": "Ana Pereira de Souza",
+        "email": "ana.pereira.souza@yahoo.com.br",
+        "password": "P@ssw0rd2024",
+        "description": "Nome longo e email com extensão brasileira"
+      },
+      {
+        "id": 5,
+        "name": "Carlos",
+        "email": "carlos@test.com",
+        "password": "123456789",
+        "description": "Dados simples"
+      },
+      {
+        "id": 6,
+        "name": "Test User",
+        "email": "emulator@test.com",
+        "password": "emutest123",
+        "description": "Específico para Android Emulator"
+      }
+    ],
+    "signIn": [
+      {
+        "id": 1,
+        "email": "joao.silva@email.com",
+        "password": "senha123",
+        "description": "Usar após sign up do usuário 1"
+      },
+      {
+        "id": 2,
+        "email": "maria.santos@gmail.com",
+        "password": "password456",
+        "description": "Usar após sign up do usuário 2"
+      },
+      {
+        "id": 3,
+        "email": "pedro.oliveira@hotmail.com",
+        "password": "MySecurePass789",
+        "description": "Usar após sign up do usuário 3"
+      },
+      {
+        "id": 4,
+        "email": "teste@example.com",
+        "password": "111111",
+        "description": "Teste simples com senha numérica"
+      },
+      {
+        "id": 5,
+        "email": "user@test.com",
+        "password": "qualquersenscha123",
+        "description": "Email genérico com senha qualquer"
+      }
+    ],
+    "errorCases": {
+      "signUp": [
+        {
+          "id": 1,
+          "name": "Teste",
+          "email": "emailsemarroba.com",
+          "password": "123456",
+          "expectedError": "Invalid email format",
+          "description": "Email sem @"
+        },
+        {
+          "id": 2,
+          "name": "",
+          "email": "teste@example.com",
+          "password": "123456",
+          "expectedError": "All fields are required",
+          "description": "Nome faltando"
+        },
+        {
+          "id": 3,
+          "name": "Teste",
+          "email": "teste@example",
+          "password": "123456",
+          "expectedError": "Invalid email format",
+          "description": "Email sem extensão (.com, .br, etc)"
+        }
+      ],
+      "signIn": [
+        {
+          "id": 1,
+          "email": "teste@example.com",
+          "password": "12345",
+          "expectedError": "Invalid credentials",
+          "description": "Senha muito curta (menos de 6 caracteres)"
+        },
+        {
+          "id": 2,
+          "email": "emailinvalido",
+          "password": "123456",
+          "expectedError": "Invalid email format (possível)",
+          "description": "Email sem formato válido"
+        }
+      ]
+    },
+    "quickTest": {
+      "description": "Roteiro rápido de testes",
+      "steps": [
+        {
+          "step": 1,
+          "action": "Sign Up",
+          "name": "João Silva",
+          "email": "joao.silva@email.com",
+          "password": "senha123",
+          "expectedResult": "Alert de sucesso"
+        },
+        {
+          "step": 2,
+          "action": "Sign In",
+          "email": "joao.silva@email.com",
+          "password": "senha123",
+          "expectedResult": "Alert de sucesso"
+        },
+        {
+          "step": 3,
+          "action": "Sign Up",
+          "name": "Maria Santos",
+          "email": "maria.santos@gmail.com",
+          "password": "password456",
+          "expectedResult": "Alert de sucesso"
+        },
+        {
+          "step": 4,
+          "action": "Teste de Erro - Sign In",
+          "email": "teste@example.com",
+          "password": "12345",
+          "expectedResult": "Error alert: Invalid credentials"
+        },
+        {
+          "step": 5,
+          "action": "Teste de Erro - Sign Up",
+          "name": "Teste",
+          "email": "emailsemarroba.com",
+          "password": "123456",
+          "expectedResult": "Error alert: Invalid email format"
+        }
+      ]
+    }
+  }
+}
