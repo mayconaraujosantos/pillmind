@@ -79,7 +79,8 @@
       "and": "e",
       "privacyPolicy": "Política de Privacidade",
       "alreadyHaveAccount": "Já tem uma conta?",
-      "signIn": "Entrar"
+      "signIn": "Entrar",
+      "signUpButton": "Cadastrar"
     },
     "signIn": {
       "title": "Entrar",

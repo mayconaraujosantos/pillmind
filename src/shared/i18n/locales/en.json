@@ -79,7 +79,8 @@
       "and": "and",
       "privacyPolicy": "Privacy Policy",
       "alreadyHaveAccount": "Already have an account?",
-      "signIn": "Sign In"
+      "signIn": "Sign In",
+      "signUpButton": "Sign Up"
     },
     "signIn": {
       "title": "Sign In",
