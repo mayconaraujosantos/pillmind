@@ -4,7 +4,14 @@
     "next": "Next",
     "back": "Back",
     "getStarted": "Get Started",
-    "logout": "Logout"
+    "logout": "Logout",
+    "cancel": "Cancel",
+    "error": "Error",
+    "ok": "OK",
+    "success": "Success",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "continueAnyway": "Continue Anyway"
   },
   "tabs": {
     "home": "Home",
@@ -18,7 +25,12 @@
     "welcome": "Welcome to your medication assistant!",
     "debugControls": "🛠️ Debug Controls",
     "resetOnboarding": "↻ Reset Onboarding",
-    "resetInfo": "Press to test onboarding again"
+    "resetInfo": "Press to test onboarding again",
+    "loadingMedications": "Loading your medications...",
+    "refreshingMedications": "Refreshing...",
+    "yourMedications": "Your Medications",
+    "noMedicationsFound": "No medications found",
+    "addFirstMedication": "Add your first medication to get started"
   },
   "appointments": {
     "title": "Appointments",
@@ -41,13 +53,19 @@
     "notifications": "Notifications",
     "privacy": "Privacy",
     "about": "About",
-    "debugTheme": "🐛 Debug: View theme detection"
+    "debugTheme": "🐛 Debug: View theme detection",
+    "logoutConfirm": "Are you sure you want to logout?",
+    "logoutFailed": "Failed to logout",
+    "logoutError": "An error occurred during logout"
   },
   "theme": {
     "automatic": "Automatic",
     "light": "Light",
     "dark": "Dark",
-    "title": "Theme"
+    "title": "Appearance",
+    "systemDescription": "Follows system setting",
+    "lightDescription": "Always uses light theme",
+    "darkDescription": "Always uses dark theme"
   },
   "onboarding": {
     "step1": {
@@ -105,5 +123,17 @@
       "createAccount": "Create an account",
       "login": "Login"
     }
+  },
+  "errors": {
+    "pleaseFieldAllFields": "Please fill in all fields",
+    "failedToSignIn": "Failed to sign in",
+    "authenticationError": "Authentication error",
+    "failedToCreateAccount": "Failed to create account",
+    "accountCreatedSuccess": "Account created! Please sign in.",
+    "networkError": "Network error",
+    "invalidUrl": "Please enter a valid URL",
+    "configuredSuccess": "Node-RED configured successfully!",
+    "connectionFailed": "Could not connect to Node-RED at this address",
+    "clearStorageFailed": "Failed to clear storage"
   }
 }

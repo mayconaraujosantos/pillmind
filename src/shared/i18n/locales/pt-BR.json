@@ -4,7 +4,14 @@
     "next": "Próximo",
     "back": "Voltar",
     "getStarted": "Começar",
-    "logout": "Sair"
+    "logout": "Sair",
+    "cancel": "Cancelar",
+    "error": "Erro",
+    "ok": "OK",
+    "success": "Sucesso",
+    "loading": "Carregando...",
+    "retry": "Tentar Novamente",
+    "continueAnyway": "Continuar Assim Mesmo"
   },
   "tabs": {
     "home": "Início",
@@ -18,7 +25,12 @@
     "welcome": "Bem-vindo ao seu assistente de medicamentos!",
     "debugControls": "🛠️ Controles de Debug",
     "resetOnboarding": "↻ Resetar Onboarding",
-    "resetInfo": "Pressione para testar o onboarding novamente"
+    "resetInfo": "Pressione para testar o onboarding novamente",
+    "loadingMedications": "Carregando seus medicamentos...",
+    "refreshingMedications": "Atualizando...",
+    "yourMedications": "Seus Medicamentos",
+    "noMedicationsFound": "Nenhum medicamento encontrado",
+    "addFirstMedication": "Adicione seu primeiro medicamento para começar"
   },
   "appointments": {
     "title": "Consultas",
@@ -41,13 +53,19 @@
     "notifications": "Notificações",
     "privacy": "Privacidade",
     "about": "Sobre",
-    "debugTheme": "🐛 Debug: Ver detecção do tema"
+    "debugTheme": "🐛 Debug: Ver detecção do tema",
+    "logoutConfirm": "Tem certeza de que deseja sair?",
+    "logoutFailed": "Falha ao sair",
+    "logoutError": "Ocorreu um erro durante o logout"
   },
   "theme": {
     "automatic": "Automático",
     "light": "Claro",
     "dark": "Escuro",
-    "title": "Tema"
+    "title": "Aparência",
+    "systemDescription": "Segue a configuração do sistema",
+    "lightDescription": "Sempre usa o tema claro",
+    "darkDescription": "Sempre usa o tema escuro"
   },
   "onboarding": {
     "step1": {
@@ -105,5 +123,17 @@
       "createAccount": "Criar uma conta",
       "login": "Entrar"
     }
+  },
+  "errors": {
+    "pleaseFieldAllFields": "Por favor, preencha todos os campos",
+    "failedToSignIn": "Falha ao fazer login",
+    "authenticationError": "Erro de autenticação",
+    "failedToCreateAccount": "Falha ao criar conta",
+    "accountCreatedSuccess": "Conta criada com sucesso! Faça login.",
+    "networkError": "Erro de rede",
+    "invalidUrl": "Por favor, insira uma URL válida",
+    "configuredSuccess": "Node-RED configurado com sucesso!",
+    "connectionFailed": "Não foi possível conectar ao Node-RED neste endereço",
+    "clearStorageFailed": "Falha ao limpar armazenamento"
   }
 }
