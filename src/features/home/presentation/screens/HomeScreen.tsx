@@ -14,6 +14,7 @@ import { useOnboardingStorage } from '@features/onboarding';
 import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
 import { SHOW_DEBUG_CONTROLS } from '@features/onboarding/presentation/constants/onboarding.constants';
 import { useTheme } from '@shared/theme';
+import { useTranslation } from '@shared/i18n';
 import { Ionicons } from '@expo/vector-icons';
 import { useHomeData } from '../hooks/useHomeData';
 import { GetMedicinesUseCase } from '../../domain/useCases/GetMedicinesUseCase';
@@ -27,19 +28,20 @@ export const HomeScreen: React.FC = () => {
   const { resetOnboarding } = useOnboardingStorage();
   const authContext = useAuthContext();
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const { medicines, loading, refreshing, error, refresh } =
     useHomeData(getMedicinesUseCase);
 
   // Show error alert if there's an error
   React.useEffect(() => {
     if (error) {
-      Alert.alert('Error', error, [
+      Alert.alert(t('common.error'), error, [
         {
-          text: 'Retry',
+          text: t('common.retry'),
           onPress: refresh,
         },
         {
-          text: 'OK',
+          text: t('common.ok'),
           style: 'cancel',
         },
       ]);
@@ -52,7 +54,7 @@ export const HomeScreen: React.FC = () => {
       <ScreenWrapper>
         <Loader
           variant="fullscreen"
-          message="Loading your medications..."
+          message={t('home.loadingMedications')}
           testID="home-initial-loader"
         />
       </ScreenWrapper>
@@ -77,12 +79,12 @@ export const HomeScreen: React.FC = () => {
         {/* Welcome Card */}
         <Card>
           <Text style={[styles.title, { color: theme.colors.text }]}>
-            PillMind Home
+            {t('home.title')}
           </Text>
           <Text
             style={[styles.subtitle, { color: theme.colors.textSecondary }]}
           >
-            Welcome to your medication assistant!
+            {t('home.welcome')}
           </Text>
         </Card>
 
@@ -115,7 +117,7 @@ export const HomeScreen: React.FC = () => {
         {/* Medicines Section */}
         <View style={styles.medicinesSection}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Your Medications
+            {t('home.yourMedications')}
           </Text>
 
           {/* Loading skeleton while refreshing */}
@@ -124,7 +126,7 @@ export const HomeScreen: React.FC = () => {
               <Loader
                 variant="inline"
                 size="small"
-                message="Refreshing..."
+                message={t('home.refreshingMedications')}
                 testID="home-refresh-loader"
               />
             </View>
@@ -156,7 +158,7 @@ export const HomeScreen: React.FC = () => {
                   { color: theme.colors.textSecondary },
                 ]}
               >
-                No medications found
+                {t('home.noMedicationsFound')}
               </Text>
               <Text
                 style={[
@@ -164,7 +166,7 @@ export const HomeScreen: React.FC = () => {
                   { color: theme.colors.textSecondary },
                 ]}
               >
-                Add your first medication to get started
+                {t('home.addFirstMedication')}
               </Text>
             </Card>
           ) : (
@@ -227,12 +229,12 @@ export const HomeScreen: React.FC = () => {
                 try {
                   await AsyncStorage.clear();
                   Alert.alert(
-                    'Success',
+                    t('common.success'),
                     'All storage cleared! Please close and reopen the app.',
-                    [{ text: 'OK' }]
+                    [{ text: t('common.ok') }]
                   );
                 } catch {
-                  Alert.alert('Error', 'Failed to clear storage');
+                  Alert.alert(t('common.error'), t('errors.clearStorageFailed'));
                 }
               }}
             >
