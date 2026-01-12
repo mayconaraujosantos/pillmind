@@ -7,31 +7,33 @@ import {
   ScrollView,
 } from 'react-native';
 import { useTheme, ThemeMode } from '@shared/theme';
-
-const THEME_OPTIONS: Array<{
-  value: ThemeMode;
-  label: string;
-  description: string;
-}> = [
-  {
-    value: 'automatic',
-    label: 'Automático',
-    description: 'Segue a configuração do sistema',
-  },
-  {
-    value: 'light',
-    label: 'Claro',
-    description: 'Sempre usa o tema claro',
-  },
-  {
-    value: 'dark',
-    label: 'Escuro',
-    description: 'Sempre usa o tema escuro',
-  },
-];
+import { useTranslation } from '@shared/i18n';
 
 export const ThemeSelector: React.FC = () => {
   const { theme, themeMode, setThemeMode } = useTheme();
+  const { t } = useTranslation();
+
+  const THEME_OPTIONS: Array<{
+    value: ThemeMode;
+    label: string;
+    description: string;
+  }> = [
+    {
+      value: 'automatic',
+      label: t('theme.automatic'),
+      description: t('theme.systemDescription'),
+    },
+    {
+      value: 'light',
+      label: t('theme.light'),
+      description: t('theme.lightDescription'),
+    },
+    {
+      value: 'dark',
+      label: t('theme.dark'),
+      description: t('theme.darkDescription'),
+    },
+  ];
 
   return (
     <View style={styles.container}>
@@ -39,7 +41,7 @@ export const ThemeSelector: React.FC = () => {
         style={[styles.title, { color: theme.colors.text }]}
         testID="theme-selector-title"
       >
-        Aparência
+        {t('account.appearance')}
       </Text>
 
       <ScrollView style={styles.optionsContainer}>

@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '@shared/i18n';
+import { useTheme } from '@shared/theme';
 import { COMMON_STYLES } from '@shared/constants/styles';
 
 interface HeaderProps {
@@ -12,27 +14,53 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  userName = 'Usuário',
+  userName,
   userAvatar: _userAvatar,
   onNotificationPress,
   onProfilePress,
 }) => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { theme, isDark } = useTheme();
+  
+  const displayName = userName || t('account.user');
+
+  const dynamicStyles = {
+    avatar: {
+      ...styles.avatar,
+      backgroundColor: theme.colors.surface,
+    },
+    avatarText: {
+      ...styles.avatarText,
+      color: theme.colors.primary,
+    },
+    userName: {
+      ...styles.userName,
+      color: theme.colors.text,
+    },
+  };
 
   return (
-    <View style={[styles.container, { paddingTop: Math.max(insets.top, 0) }]}>
+    <View style={[
+      styles.container, 
+      { 
+        paddingTop: Math.max(insets.top, 0),
+        backgroundColor: theme.colors.background,
+        borderBottomColor: theme.colors.border,
+      }
+    ]}>
       <TouchableOpacity
         style={styles.userSection}
         onPress={onProfilePress}
         activeOpacity={0.7}
       >
-        <View style={styles.avatar}>
+        <View style={dynamicStyles.avatar}>
           {/* TODO: Adicionar Image quando userAvatar for fornecido */}
-          <Text style={styles.avatarText}>
-            {userName.charAt(0).toUpperCase()}
+          <Text style={dynamicStyles.avatarText}>
+            {displayName.charAt(0).toUpperCase()}
           </Text>
         </View>
-        <Text style={styles.userName}>{userName}</Text>
+        <Text style={dynamicStyles.userName}>{displayName}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -40,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
         onPress={onNotificationPress}
         activeOpacity={0.7}
       >
-        <Ionicons name="notifications-outline" size={24} color="#000" />
+        <Ionicons name="notifications-outline" size={24} color={theme.colors.text} />
         {/* Badge de notificação pode ser adicionado aqui */}
       </TouchableOpacity>
     </View>
@@ -54,9 +82,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: COMMON_STYLES.padding.horizontal.medium,
     paddingVertical: COMMON_STYLES.padding.vertical.medium,
-    backgroundColor: COMMON_STYLES.colors.background.white,
     borderBottomWidth: 1,
-    borderBottomColor: COMMON_STYLES.colors.border.light,
   },
   userSection: {
     flexDirection: 'row',
@@ -67,7 +93,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: COMMON_STYLES.colors.background.light,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: COMMON_STYLES.padding.horizontal.small,
@@ -75,12 +100,10 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: COMMON_STYLES.fontSize.large,
     fontWeight: COMMON_STYLES.fontWeight.bold,
-    color: COMMON_STYLES.colors.primary,
   },
   userName: {
     fontSize: COMMON_STYLES.fontSize.large,
     fontWeight: COMMON_STYLES.fontWeight.semibold,
-    color: COMMON_STYLES.colors.text.primary,
   },
   notificationButton: {
     padding: COMMON_STYLES.padding.vertical.small,
