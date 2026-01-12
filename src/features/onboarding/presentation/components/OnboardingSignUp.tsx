@@ -40,9 +40,8 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
       if (Platform.OS === 'android') {
         host = '10.0.2.2'; // Android emulator special alias
       } else {
-        // iOS: User must set EXPO_PUBLIC_NODERED_HOST to machine IP
-        // Fallback to localhost (may not work without proper config)
-        host = '192.168.1.100'; // Change this to your machine IP
+        // iOS: Use environment variable or fallback
+        host = process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13';
       }
     }
 
@@ -87,7 +86,7 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
         email: email ? 'filled' : 'empty',
         password: password ? 'filled' : 'empty',
       });
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('common.error'), t('errors.pleaseFieldAllFields'));
       return;
     }
 
@@ -99,16 +98,16 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
         email,
         userId: result.data?.user.id,
       });
-      Alert.alert('Success', 'Account created! Please sign in.');
+      Alert.alert(t('common.success'), t('errors.accountCreatedSuccess'));
       onGoToSignIn?.();
     } else {
-      const errorMsg = authError || 'Failed to create account';
+      const errorMsg = authError || t('errors.failedToCreateAccount');
       logger.error('OnboardingSignUp', '❌ Sign up failed', {
         email,
         error: errorMsg,
         code: result.error?.code,
       });
-      Alert.alert('Error', errorMsg);
+      Alert.alert(t('common.error'), errorMsg);
     }
   };
 
@@ -194,7 +193,7 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
 
         // Hide modal and show error
         setSocialAuthModal({ visible: false, provider, loading: false });
-        Alert.alert('Error', errorMsg);
+        Alert.alert(t('common.error'), errorMsg);
       }
     } catch (err) {
       // Hide modal on error
@@ -204,10 +203,10 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
         logger.error('OnboardingSignUp', `⏱️ ${provider} request timeout`, {
           error: 'Request took more than 30 seconds',
           suggestion:
-            'Ensure Node-RED is running on http://localhost:1880 and reachable from your device',
+            `Ensure Node-RED is running on http://${process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13'}:${process.env.EXPO_PUBLIC_NODERED_PORT || '1880'} and reachable from your device`,
         });
         Alert.alert(
-          'Error',
+          t('common.error'),
           `${provider} request timed out. Make sure Node-RED is running.`
         );
       } else {
@@ -220,7 +219,7 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
           endpoint: getSocialAuthUrl(provider),
         });
         const errorMsg = err instanceof Error ? err.message : String(err);
-        Alert.alert('Error', `Network error: ${errorMsg}`);
+        Alert.alert(t('common.error'), `${t('errors.networkError')}: ${errorMsg}`);
       }
     }
   };

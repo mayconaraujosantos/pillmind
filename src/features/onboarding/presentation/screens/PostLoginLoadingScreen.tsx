@@ -4,6 +4,7 @@ import { ScreenWrapper, Loader } from '@shared/components';
 import { usePostLoginPreparation } from '../hooks/usePostLoginPreparation';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useTheme } from '@shared/theme';
+import { useTranslation } from '@shared/i18n';
 import { logger } from '@shared/utils/logger';
 
 interface PostLoginLoadingScreenProps {
@@ -26,6 +27,7 @@ export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
   onComplete,
 }) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const authContext = useAuthContext();
   const { isPreparing, error, progress, retry } = usePostLoginPreparation();
   const hasCompletedRef = useRef(false);
@@ -71,11 +73,11 @@ export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
       errorShownRef.current = error;
 
       Alert.alert(
-        'Loading Error',
+        t('common.error'),
         error,
         [
           {
-            text: 'Retry',
+            text: t('common.retry'),
             onPress: () => {
               logger.info('PostLoginLoadingScreen', '🔄 Retrying preparation');
               errorShownRef.current = null; // Reset to allow showing again on new error
@@ -84,7 +86,7 @@ export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
             },
           },
           {
-            text: 'Continue Anyway',
+            text: t('common.continueAnyway'),
             style: 'cancel',
             onPress: () => {
               logger.warn(
