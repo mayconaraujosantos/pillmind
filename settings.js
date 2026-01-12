@@ -9,14 +9,12 @@ module.exports = {
   // Listen on all interfaces (0.0.0.0) to allow connections from Android emulator (10.0.2.2)
   // This applies to both the editor UI and the API endpoints
   uiHost: '0.0.0.0',
-
-  // Also bind HTTP API to all interfaces
-  httpServerOptions: {
-    host: '0.0.0.0',
-  },
-
-  // Node-RED server port
   uiPort: 1880,
+
+  // Also bind HTTP server to all interfaces
+  httpAdminRoot: '/',
+  httpNodeRoot: '/',
+  httpRoot: '/',
 
   // Allow connections from all origins (important for mobile devices)
   // This is only for development - use proper CORS in production
@@ -25,7 +23,7 @@ module.exports = {
   },
 
   // Database filename
-  flows: '.node-red/flows.json',
+  flows: 'node-red-flow.json',
 
   // Node modules directory
   nodesDir: '.node-red/nodes',
