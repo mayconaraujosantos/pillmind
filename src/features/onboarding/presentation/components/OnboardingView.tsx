@@ -138,8 +138,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   indicatorContainer: {
-    paddingVertical: adaptiveSpacing.md,
+    paddingTop: adaptiveSpacing.xs,
+    paddingBottom: 0,
     alignItems: 'center',
-    minHeight: deviceSize(60, 70, 80),
+    minHeight: deviceSize(30, 35, 40),
   },
 });
