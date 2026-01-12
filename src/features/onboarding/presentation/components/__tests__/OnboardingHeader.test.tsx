@@ -8,7 +8,7 @@ describe('OnboardingHeader', () => {
     const onSkip = jest.fn();
     const { getByText } = render(
       <WithThemeProvider>
-        <OnboardingHeader onSkip={onSkip} />
+        <OnboardingHeader onSkip={onSkip} currentStep={0} />
       </WithThemeProvider>
     );
 
@@ -21,7 +21,7 @@ describe('OnboardingHeader', () => {
     const onSkip = jest.fn();
     const { getByText } = render(
       <WithThemeProvider>
-        <OnboardingHeader onSkip={onSkip} />
+        <OnboardingHeader onSkip={onSkip} currentStep={0} />
       </WithThemeProvider>
     );
 
@@ -36,7 +36,7 @@ describe('OnboardingHeader', () => {
     const onSkip = jest.fn();
     const { getByLabelText } = render(
       <WithThemeProvider>
-        <OnboardingHeader onSkip={onSkip} />
+        <OnboardingHeader onSkip={onSkip} currentStep={0} />
       </WithThemeProvider>
     );
 
@@ -54,7 +54,7 @@ describe('OnboardingHeader', () => {
     const onSkip = jest.fn();
     const { getByLabelText } = render(
       <WithThemeProvider>
-        <OnboardingHeader onSkip={onSkip} />
+        <OnboardingHeader onSkip={onSkip} currentStep={0} />
       </WithThemeProvider>
     );
 
@@ -73,7 +73,7 @@ describe('OnboardingHeader', () => {
     const onSkip = jest.fn();
     const { getByLabelText } = render(
       <WithThemeProvider>
-        <OnboardingHeader onSkip={onSkip} />
+        <OnboardingHeader onSkip={onSkip} currentStep={0} />
       </WithThemeProvider>
     );
 
@@ -100,12 +100,24 @@ describe('OnboardingHeader', () => {
     const onSkip = jest.fn();
     const { toJSON } = render(
       <WithThemeProvider>
-        <OnboardingHeader onSkip={onSkip} />
+        <OnboardingHeader onSkip={onSkip} currentStep={0} />
       </WithThemeProvider>
     );
 
     await waitFor(() => {
       expect(toJSON()).toMatchSnapshot();
     });
+  });
+
+  it('deve ocultar header quando currentStep >= 2', async () => {
+    const onSkip = jest.fn();
+    const { container } = render(
+      <WithThemeProvider>
+        <OnboardingHeader onSkip={onSkip} currentStep={2} />
+      </WithThemeProvider>
+    );
+
+    // Component deve retornar null quando hidden
+    expect(container.children).toHaveLength(0);
   });
 });
