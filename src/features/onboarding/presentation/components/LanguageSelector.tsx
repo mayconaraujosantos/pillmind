@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '@shared/theme';
 import { useTranslation } from '@shared/i18n';
 import { saveLanguagePreference } from '@shared/i18n/i18n.config';
 import { getOnboardingColors } from '../constants/onboarding.constants';
+import { ResponsiveContainer, ResponsiveText, useResponsive, useResponsiveSpacing } from '@shared/responsive';
 
 interface LanguageSelectorProps {
   onLanguageChange?: (language: string) => void;
@@ -15,6 +16,8 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const { isDark } = useTheme();
   const { i18n } = useTranslation();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
+  const { wp, hp, rf, isSmallDevice, isTablet } = useResponsive();
+  const spacing = useResponsiveSpacing();
 
   const currentLanguage = i18n.language;
 
@@ -27,12 +30,21 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <View style={styles.container}>
+    <ResponsiveContainer 
+      variant="padded" 
+      paddingVertical="md"
+      style={styles.container}
+    >
       <TouchableOpacity
         onPress={() => handleLanguageChange('pt-BR')}
         style={[
-          styles.flagButton,
           {
+            width: isTablet ? 60 : isSmallDevice ? 40 : 48,
+            height: isTablet ? 60 : isSmallDevice ? 40 : 48,
+            borderRadius: isTablet ? 30 : isSmallDevice ? 20 : 24,
+            borderWidth: isTablet ? 3 : 2,
+            alignItems: 'center',
+            justifyContent: 'center',
             backgroundColor:
               currentLanguage === 'pt-BR'
                 ? colors.PRIMARY + '20'
@@ -41,20 +53,26 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               currentLanguage === 'pt-BR'
                 ? colors.PRIMARY
                 : colors.SKIP_BUTTON_BORDER,
+            marginRight: spacing.pad('sm'),
           },
         ]}
         activeOpacity={0.7}
         accessibilityLabel="Selecionar Português"
         accessibilityRole="button"
       >
-        <Text style={styles.flag}>🇧🇷</Text>
+        <ResponsiveText style={{ fontSize: rf(24) }}>🇧🇷</ResponsiveText>
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => handleLanguageChange('en')}
         style={[
-          styles.flagButton,
           {
+            width: isTablet ? 60 : isSmallDevice ? 40 : 48,
+            height: isTablet ? 60 : isSmallDevice ? 40 : 48,
+            borderRadius: isTablet ? 30 : isSmallDevice ? 20 : 24,
+            borderWidth: isTablet ? 3 : 2,
+            alignItems: 'center',
+            justifyContent: 'center',
             backgroundColor:
               currentLanguage === 'en'
                 ? colors.PRIMARY + '20'
@@ -69,9 +87,9 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         accessibilityLabel="Select English"
         accessibilityRole="button"
       >
-        <Text style={styles.flag}>🇺🇸</Text>
+        <ResponsiveText style={{ fontSize: rf(24) }}>🇺🇸</ResponsiveText>
       </TouchableOpacity>
-    </View>
+    </ResponsiveContainer>
   );
 };
 
@@ -79,17 +97,5 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  flagButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  flag: {
-    fontSize: 24,
   },
 });

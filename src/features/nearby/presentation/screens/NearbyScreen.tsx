@@ -2,16 +2,20 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { ScreenWrapper } from '@shared/components';
 import { useTheme } from '@shared/theme';
+import { useTranslation } from '@shared/i18n';
 
 export const NearbyScreen: React.FC = () => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>Nearby</Text>
+        <Text style={[styles.title, { color: theme.colors.text }]}>  
+          {t('nearby.title')}
+        </Text>
         <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-          Find nearby pharmacies and hospitals
+          {t('nearby.subtitle')}
         </Text>
       </View>
     </ScreenWrapper>
