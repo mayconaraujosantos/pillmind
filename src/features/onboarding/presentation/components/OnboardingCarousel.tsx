@@ -19,8 +19,8 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const aspectRatio = SCREEN_HEIGHT / SCREEN_WIDTH;
 const CAROUSEL_HEIGHT =
   aspectRatio > 2
-    ? hp(deviceSize(58, 62, 65)) // Telas longas (aspect ratio > 2)
-    : hp(deviceSize(55, 58, 62)); // Telas normais
+    ? hp(deviceSize(62, 66, 70)) // Telas longas (aspect ratio > 2)
+    : hp(deviceSize(58, 62, 66)); // Telas normais
 
 interface OnboardingCarouselProps {
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;

@@ -46,10 +46,13 @@ interface OnboardingAuthProps {
   isLoading?: boolean;
   appleLabel: string;
   onApplePress?: () => void;
+  appleDisabled?: boolean;
   googleLabel: string;
   onGooglePress?: () => void;
+  googleDisabled?: boolean;
   termsText?: string;
   linkCta?: LinkCta;
+  footerInfo?: string;
 }
 
 export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
@@ -62,10 +65,13 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
   isLoading = false,
   appleLabel: _appleLabel,
   onApplePress,
+  appleDisabled = false,
   googleLabel: _googleLabel,
   onGooglePress,
+  googleDisabled = false,
   termsText,
   linkCta,
+  footerInfo,
 }) => {
   const { isDark } = useTheme();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
@@ -179,11 +185,12 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
             {
               backgroundColor: isDark ? '#2C2C2C' : '#FFFFFF',
               borderColor: isDark ? '#444' : '#E8E8E8',
+              opacity: (!onGooglePress || googleDisabled) ? 0.5 : 1,
             },
           ]}
           onPress={onGooglePress}
           activeOpacity={0.7}
-          disabled={!onGooglePress}
+          disabled={!onGooglePress || googleDisabled}
         >
           <FontAwesome5 name="google" size={22} color="#EA4335" />
         </TouchableOpacity>
@@ -194,11 +201,12 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
             {
               backgroundColor: isDark ? '#2C2C2C' : '#FFFFFF',
               borderColor: isDark ? '#444' : '#E8E8E8',
+              opacity: (!onApplePress || appleDisabled) ? 0.5 : 1,
             },
           ]}
           onPress={onApplePress}
           activeOpacity={0.7}
-          disabled={!onApplePress}
+          disabled={!onApplePress || appleDisabled}
         >
           <FontAwesome5 name="apple" size={22} color={colors.TEXT_PRIMARY} />
         </TouchableOpacity>
@@ -214,6 +222,14 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
             >
               {linkCta.linkLabel}
             </Text>
+          </Text>
+        </View>
+      ) : null}
+      
+      {footerInfo ? (
+        <View style={styles.footerContainer}>
+          <Text style={[styles.footerText, { color: colors.TEXT_SECONDARY }]}>
+            {footerInfo}
           </Text>
         </View>
       ) : null}
@@ -317,5 +333,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     fontWeight: '500',
+  },
+  footerContainer: {
+    marginTop: adaptiveSpacing.md,
+    alignItems: 'center',
+    paddingHorizontal: adaptiveSpacing.sm,
+  },
+  footerText: {
+    fontSize: 12,
+    textAlign: 'center',
+    fontWeight: '400',
+    lineHeight: 18,
   },
 });

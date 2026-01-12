@@ -91,12 +91,13 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
 const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: adaptiveSpacing.lg,
-    paddingBottom: deviceSize(24, 32, 40),
-    paddingTop: 0,
-    marginTop: -20,
+    paddingBottom: deviceSize(70, 90, 110),
+    paddingTop: adaptiveSpacing.sm,
+    marginTop: -adaptiveSpacing.xs,
     alignContent: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
+    minHeight: 120,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -108,13 +109,16 @@ const styles = StyleSheet.create({
   buttonColumn: {
     width: '100%',
     gap: 16,
+    maxWidth: 400,
   },
   singleButtonContainer: {
-    flexDirection: 'row',
+    width: '100%',
     gap: adaptiveSpacing.sm,
     alignItems: 'center',
+    maxWidth: 400,
   },
   button: {
-    flex: 1,
+    width: '100%',
+    minHeight: 48,
   },
 });

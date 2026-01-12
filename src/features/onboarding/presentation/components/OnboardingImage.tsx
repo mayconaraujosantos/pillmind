@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: deviceSize(8, 12, 16),
-    paddingBottom: deviceSize(4, 6, 8),
+    paddingTop: deviceSize(4, 6, 8),
+    paddingBottom: deviceSize(2, 3, 4),
   },
   image: {
     resizeMode: 'contain',

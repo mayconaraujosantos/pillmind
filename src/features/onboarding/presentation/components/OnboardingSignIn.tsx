@@ -28,49 +28,17 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
     loading: false,
   });
 
+  // Estados para Node-RED discovery (usando variáveis de ambiente)
+  const [isDiscovering] = useState(false);
+  const [discoveryError] = useState<string | null>(null);
+  const nodeRedURL = process.env.EXPO_PUBLIC_NODERED_AUTH_URL || 'http://192.168.1.13:1880/api/auth';
+
   const getSocialAuthUrl = (provider: 'apple' | 'google'): string => {
-    const noredHost = process.env.EXPO_PUBLIC_NODERED_HOST;
-    const noredPort = process.env.EXPO_PUBLIC_NODERED_PORT || '1880';
-
-    let host = noredHost;
-
-    if (!host || host === 'localhost' || host === '127.0.0.1') {
-      // Auto-detect based on platform
-      if (Platform.OS === 'android') {
-        host = '10.0.2.2'; // Android emulator special alias
-      } else {
-        // iOS: User must set EXPO_PUBLIC_NODERED_HOST to machine IP
-        // Fallback to localhost (may not work without proper config)
-        host = '192.168.1.100'; // Change this to your machine IP
-      }
-    }
-
-    return `http://${host}:${noredPort}/api/auth/${provider}`;
-  };
-
-  const fetchWithTimeout = async (
-    url: string,
-    timeout = 30000
-  ): Promise<Response> => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-    const body = JSON.stringify({});
-
-    try {
-      return await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          'Content-Length': body.length.toString(),
-        },
-        body,
-        signal: controller.signal,
-      });
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    // Usar configurações do .env
+    const nodeRedHost = process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13';
+    const nodeRedPort = process.env.EXPO_PUBLIC_NODERED_PORT || '1880';
+    
+    return `http://${nodeRedHost}:${nodeRedPort}/api/auth/${provider}`;
   };
 
   const handleSignIn = async () => {
@@ -84,7 +52,7 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
         email: email ? 'filled' : 'empty',
         password: password ? 'filled' : 'empty',
       });
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('common.error'), t('errors.pleaseFieldAllFields'));
       return;
     }
 
@@ -100,18 +68,18 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
       // Removed success alert - PostLoginLoadingScreen provides better UX feedback
       onSignInComplete?.();
     } else {
-      const errorMsg = error || 'Failed to sign in';
+      const errorMsg = error || t('errors.failedToSignIn');
       logger.error('OnboardingSignIn', '❌ Sign in failed', {
         email,
         error: errorMsg,
         code: result.error?.code,
       });
-      Alert.alert('Error', errorMsg);
+      Alert.alert(t('common.error'), errorMsg);
     }
   };
 
   const handleSocialSignInClick = (provider: 'apple' | 'google') => {
-    // Show modal first without loading
+    // Show modal directly - sem complexidade de descoberta
     setSocialAuthModal({
       visible: true,
       provider,
@@ -119,8 +87,77 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
     });
   };
 
+  // Extrair funções auxiliares para reduzir complexidade
+  const validateNodeRedConnection = () => {
+    if (!nodeRedURL) {
+      const nodeRedHost = process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13';
+      const nodeRedPort = process.env.EXPO_PUBLIC_NODERED_PORT || '1880';
+      const errorMessage = discoveryError || `Node-RED não foi encontrado. Verifique se está rodando em ${nodeRedHost}:${nodeRedPort}.`;
+      logger.error('OnboardingSignIn', `❌ Node-RED not found for ${socialAuthModal.provider} auth`, {
+        discoveryError,
+        nodeRedURL,
+        isDiscovering
+      });
+      
+      Alert.alert(
+        t('errors.networkError'),
+        errorMessage,
+        [{ text: t('common.ok'), style: 'default' }]
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const performSocialSignIn = async (provider: 'google' | 'apple', endpoint: string) => {
+    logger.info('OnboardingSignIn', `🔐 ${provider} sign in started`);
+    logger.debug('OnboardingSignIn', `📡 Calling ${provider} endpoint`, {
+      endpoint,
+      platform: Platform.OS,
+    });
+
+    const startTime = new Date().toISOString();
+    logger.debug('OnboardingSignIn', '⏱️ Request started at', { time: startTime });
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform: Platform.OS }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `${provider} authentication failed`);
+      }
+
+      logger.info('OnboardingSignIn', `✅ ${provider} sign in successful`, { data });
+      await authContext.login(data);
+      onSignInComplete?.();
+      
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && error.message?.includes('fetch') ? 
+        'Request took more than 30 seconds' : 
+        error instanceof Error ? error.message : 'Unknown error';
+
+      logger.error('OnboardingSignIn', `⏱️ ${provider} request timeout`, {
+        error: errorMessage,
+        suggestion: `Ensure Node-RED is running on ${process.env.EXPO_PUBLIC_NODERED_AUTH_URL || 'http://192.168.1.13:1880'} and reachable from your device`
+      });
+
+      throw error;
+    }
+  };
+
   const handleSocialSignInConfirm = async () => {
     const { provider } = socialAuthModal;
+
+    // Validar conexão Node-RED
+    if (!validateNodeRedConnection()) {
+      setSocialAuthModal({ visible: false, provider, loading: false });
+      return;
+    }
 
     // Start loading
     setSocialAuthModal((prev) => ({
@@ -129,97 +166,28 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
     }));
 
     try {
-      logger.info('OnboardingSignIn', `🔐 ${provider} sign in started`);
-
       const endpoint = getSocialAuthUrl(provider);
-      logger.debug('OnboardingSignIn', `📡 Calling ${provider} endpoint`, {
-        endpoint,
-        platform: Platform.OS,
-      });
-
-      const startTime = Date.now();
-      logger.debug('OnboardingSignIn', `⏱️ Request started at`, {
-        time: new Date().toISOString(),
-      });
-
-      const response = await fetchWithTimeout(endpoint);
-
-      const duration = Date.now() - startTime;
-      logger.debug(
-        'OnboardingSignIn',
-        `⏱️ Request completed in ${duration}ms`,
-        {
-          duration,
-          status: response.status,
-        }
-      );
-
-      logger.debug('OnboardingSignIn', `📥 ${provider} response received`, {
-        status: response.status,
-        ok: response.ok,
-        statusText: response.statusText,
-      });
-
-      const data = await response.json();
-      logger.debug('OnboardingSignIn', `📦 ${provider} response data`, {
-        hasUser: !!data.user,
-        hasToken: !!data.token,
-        dataKeys: Object.keys(data),
-        message: data.message,
-        error: data.error,
-      });
-
-      if (response.ok && data.user && data.token) {
-        logger.info('OnboardingSignIn', `✅ ${provider} sign in successful`, {
-          userId: data.user.id,
-          email: data.user.email,
-        });
-
-        // Hide modal
-        setSocialAuthModal({ visible: false, provider, loading: false });
-
-        await authContext.login(data);
-        // Removed success alert - PostLoginLoadingScreen provides better UX feedback
-        onSignInComplete?.();
-      } else {
-        const errorMsg =
-          data.message || data.error || `Failed to sign in with ${provider}`;
-        logger.warn('OnboardingSignIn', `⚠️ ${provider} sign in failed`, {
-          status: response.status,
-          message: errorMsg,
-          data,
-        });
-
-        // Hide modal and show error
-        setSocialAuthModal({ visible: false, provider, loading: false });
-        Alert.alert('Error', errorMsg);
-      }
+      await performSocialSignIn(provider, endpoint);
+      
+      // Hide modal
+      setSocialAuthModal({ visible: false, provider, loading: false });
+      onSignInComplete?.();
     } catch (err) {
       // Hide modal on error
       setSocialAuthModal({ visible: false, provider, loading: false });
 
-      if (err instanceof Error && err.name === 'AbortError') {
-        logger.error('OnboardingSignIn', `⏱️ ${provider} request timeout`, {
-          error: 'Request took more than 30 seconds',
-          suggestion:
-            'Ensure Node-RED is running on http://localhost:1880 and reachable from your device',
-        });
-        Alert.alert(
-          'Error',
-          `${provider} request timed out. Make sure Node-RED is running.`
-        );
-      } else {
-        const errorObj = err as Error & { code?: string };
-        logger.error('OnboardingSignIn', `❌ ${provider} error`, {
-          error: err instanceof Error ? err.message : String(err),
-          name: err instanceof Error ? err.name : 'Unknown',
-          code: errorObj?.code,
-          platform: Platform.OS,
-          endpoint: getSocialAuthUrl(provider),
-        });
-        const errorMsg = err instanceof Error ? err.message : String(err);
-        Alert.alert('Error', `Network error: ${errorMsg}`);
-      }
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const displayMessage = nodeRedURL 
+        ? `${provider} authentication failed: ${errorMessage}` 
+        : `${provider} authentication failed. Node-RED not found.`;
+      
+      logger.error('OnboardingSignIn', `❌ ${provider} error`, {
+        error: errorMessage,
+        nodeRedURL,
+        discoveryError
+      });
+        
+      Alert.alert(t('errors.authenticationError'), displayMessage);
     }
   };
 
@@ -259,15 +227,31 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
         primaryLabel={t('onboarding.signIn.signInButton')}
         onPrimaryPress={handleSignIn}
         isLoading={loading}
-        appleLabel={t('onboarding.signIn.continueWithApple')}
+        appleLabel={
+          isDiscovering 
+            ? 'Descobrindo Node-RED...' 
+            : t('onboarding.signIn.continueWithApple')
+        }
         onApplePress={() => handleSocialSignInClick('apple')}
-        googleLabel={t('onboarding.signIn.continueWithGoogle')}
+        appleDisabled={isDiscovering}
+        googleLabel={
+          isDiscovering 
+            ? 'Descobrindo Node-RED...' 
+            : t('onboarding.signIn.continueWithGoogle')
+        }
         onGooglePress={() => handleSocialSignInClick('google')}
+        googleDisabled={isDiscovering}
         linkCta={{
           text: t('onboarding.signIn.dontHaveAccount'),
           linkLabel: t('onboarding.signIn.signUp'),
           onPress: onGoToSignUp,
         }}
+        // Indicação do status do Node-RED
+        footerInfo={(() => {
+          if (isDiscovering) return '🔍 Descobrindo Node-RED... Aguarde.';
+          if (nodeRedURL) return `🟢 Conectado: ${nodeRedURL.replace('http://', '')}`;
+          return '🔴 Node-RED não encontrado. Toque nos botões para configurar.';
+        })()}
       />
       <SocialAuthModal
         visible={socialAuthModal.visible}
