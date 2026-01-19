@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Platform, View } from 'react-native';
 import { AppNavigator } from '@core/navigation/AppNavigator';
@@ -10,6 +10,7 @@ import {
 } from '@features/onboarding/presentation/contexts/AuthContext';
 import { useOnboardingStorage } from '@features/onboarding/presentation/hooks/useOnboardingStorage';
 import { FORCE_SHOW_ONBOARDING } from '@features/onboarding/presentation/constants/onboarding.constants';
+import { configureGoogleSignIn } from '@features/onboarding/domain/services/oauth.service';
 import { ThemeProvider } from '@shared/theme';
 import { ThemedStatusBar, DebugConsole } from '@shared/components';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
@@ -17,6 +18,11 @@ import { useFonts } from '@shared/hooks';
 import { logger } from '@shared/utils/logger';
 import { logDeviceInfo } from '@shared/utils/dimensions';
 import '@shared/i18n';
+
+// TODO: Mover para variável de ambiente (.env)
+const GOOGLE_WEB_CLIENT_ID =
+  process.env.GOOGLE_WEB_CLIENT_ID ||
+  'YOUR_GOOGLE_WEB_CLIENT_ID_HERE.apps.googleusercontent.com';
 
 export default function App() {
   const [isAppReady, setIsAppReady] = useState(false);
@@ -26,6 +32,15 @@ export default function App() {
     isLoading: isLoadingOnboarding,
     markOnboardingAsSeen,
   } = useOnboardingStorage();
+
+  // Configurar Google Sign-In ao iniciar o app
+  useEffect(() => {
+    try {
+      configureGoogleSignIn(GOOGLE_WEB_CLIENT_ID);
+    } catch (error) {
+      logger.error('App', '❌ Failed to configure Google Sign-In', { error });
+    }
+  }, []);
 
   const handleSplashFinish = () => {
     setIsAppReady(true);

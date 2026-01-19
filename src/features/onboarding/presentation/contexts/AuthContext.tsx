@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthResponse } from '../../domain/models/auth.model';
+import { oauthService } from '../../domain/services/oauth.service';
 import { logger } from '@shared/utils/logger';
 
 export interface AuthContextType {
@@ -11,6 +12,7 @@ export interface AuthContextType {
   login: (authData: AuthResponse) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
+  signInWithGoogle: () => Promise<{ success: boolean; error?: string }>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(
@@ -120,6 +122,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const logout = async () => {
     logger.info('AuthContext', '🚪 Logout called');
     try {
+      // Faz logout do Google se estiver logado
+      const isGoogleSignedIn = await oauthService.isSignedIn();
+      if (isGoogleSignedIn) {
+        await oauthService.signOutGoogle();
+      }
+
       setUser(null);
       setToken(null);
       await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
@@ -135,6 +143,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  const signInWithGoogle = async (): Promise<{
+    success: boolean;
+    error?: string;
+  }> => {
+    logger.info('AuthContext', '🔐 Google Sign-In initiated');
+    try {
+      const response = await oauthService.signInWithGoogle();
+
+      if (response.success && response.data) {
+        // Salva os dados de autenticação
+        await login(response.data);
+        logger.info('AuthContext', '✅ Google Sign-In successful');
+        return { success: true };
+      } else {
+        const errorMessage =
+          response.error?.message || 'Erro ao fazer login com Google';
+        logger.warn('AuthContext', '⚠️ Google Sign-In failed', {
+          error: errorMessage,
+        });
+        return { success: false, error: errorMessage };
+      }
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Erro desconhecido';
+      logger.error('AuthContext', '❌ Google Sign-In error', { error });
+      return { success: false, error: errorMessage };
+    }
+  };
+
   const value: AuthContextType = {
     user,
     token,
@@ -143,6 +180,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     login,
     logout,
     restoreSession,
+    signInWithGoogle,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
