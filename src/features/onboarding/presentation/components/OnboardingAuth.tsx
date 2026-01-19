@@ -3,13 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   TextInputProps,
 } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { useTheme } from '@shared/theme';
+import { ModernInput, ValidationAlert } from '@shared/components';
 import {
   adaptiveSpacing,
   scaleHeight,
@@ -18,6 +18,7 @@ import {
 import { getOnboardingColors } from '../constants/onboarding.constants';
 import { OnboardingTitleBlock } from './OnboardingTitleBlock';
 import { OnboardingPrimaryButton } from './OnboardingPrimaryButton';
+import { OnboardingSecondaryButton } from './OnboardingSecondaryButton';
 
 type AuthField = {
   key: string;
@@ -43,6 +44,8 @@ interface OnboardingAuthProps {
   fields: AuthField[];
   primaryLabel: string;
   onPrimaryPress?: () => void;
+  secondaryLabel?: string;
+  onSecondaryPress?: () => void;
   isLoading?: boolean;
   appleLabel: string;
   onApplePress?: () => void;
@@ -62,6 +65,8 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
   fields,
   primaryLabel,
   onPrimaryPress,
+  secondaryLabel,
+  onSecondaryPress,
   isLoading = false,
   appleLabel: _appleLabel,
   onApplePress,
@@ -76,6 +81,32 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
   const { isDark } = useTheme();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
   const [showPassword, setShowPassword] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
+
+  const validateFields = (): boolean => {
+    const requiredFields = fields.filter(
+      (field) =>
+        field.key === 'email' ||
+        field.key === 'password' ||
+        field.key === 'name'
+    );
+
+    return requiredFields.every(
+      (field) => field.value && field.value.trim() !== ''
+    );
+  };
+
+  const handlePrimaryPress = () => {
+    if (!validateFields()) {
+      setShowValidation(true);
+      // Remove validation state after 3 seconds
+      setTimeout(() => setShowValidation(false), 3000);
+      return;
+    }
+
+    setShowValidation(false);
+    onPrimaryPress?.();
+  };
 
   return (
     <ScrollView
@@ -83,6 +114,12 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
+      <ValidationAlert
+        visible={showValidation}
+        message="Por favor, preencha todos os campos obrigatórios (*)"
+        onDismiss={() => setShowValidation(false)}
+      />
+
       <OnboardingTitleBlock
         title={title}
         subtitle={subtitle}
@@ -92,40 +129,43 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
 
       <View style={styles.form}>
         {fields.map((field) => {
-          const isPasswordField = field.key === 'password';
+          const isPasswordField =
+            field.key === 'password' || field.key === 'confirmPassword';
+          const isRequired = field.key === 'email' || field.key === 'password';
 
           return (
-            <View key={field.key} style={styles.inputGroup}>
-              <Text style={[styles.label, { color: colors.TEXT_PRIMARY }]}>
-                {field.label}
-              </Text>
-              <View
-                style={[
-                  styles.inputContainer,
-                  {
-                    borderBottomColor: isDark ? '#444' : '#E8E8E8',
-                  },
-                ]}
-              >
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      color: colors.TEXT_PRIMARY,
-                    },
-                  ]}
-                  placeholder={field.placeholder}
-                  placeholderTextColor={colors.TEXT_SECONDARY}
-                  value={field.value}
-                  onChangeText={field.onChangeText}
-                  keyboardType={field.keyboardType}
-                  autoCapitalize={field.autoCapitalize}
-                  secureTextEntry={isPasswordField && !showPassword}
-                />
-                {isPasswordField && (
+            <ModernInput
+              key={field.key}
+              label={field.label}
+              placeholder={field.placeholder}
+              value={field.value}
+              onChangeText={field.onChangeText}
+              keyboardType={field.keyboardType}
+              autoCapitalize={field.autoCapitalize}
+              secureTextEntry={isPasswordField && !showPassword}
+              variant="modern"
+              size="md"
+              required={isRequired}
+              showValidation={showValidation}
+              leftIcon={
+                field.key === 'email' ? (
+                  <Ionicons
+                    name="mail-outline"
+                    size={20}
+                    color={colors.TEXT_SECONDARY}
+                  />
+                ) : isPasswordField ? (
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={20}
+                    color={colors.TEXT_SECONDARY}
+                  />
+                ) : null
+              }
+              rightIcon={
+                isPasswordField ? (
                   <TouchableOpacity
                     onPress={() => setShowPassword(!showPassword)}
-                    style={styles.eyeIcon}
                     activeOpacity={0.6}
                   >
                     <Ionicons
@@ -134,22 +174,30 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
                       color={colors.TEXT_SECONDARY}
                     />
                   </TouchableOpacity>
-                )}
-              </View>
-            </View>
+                ) : null
+              }
+            />
           );
         })}
       </View>
 
-      <View style={styles.primaryButtonContainer}>
+      <View style={styles.buttonsContainer}>
         <OnboardingPrimaryButton
           label={primaryLabel}
           isLoading={isLoading}
-          onPress={onPrimaryPress}
+          onPress={handlePrimaryPress}
           backgroundColor={colors.PRIMARY}
           shadowColor={colors.PRIMARY}
           textColor={colors.BUTTON_TEXT}
         />
+        {secondaryLabel && (
+          <OnboardingSecondaryButton
+            label={secondaryLabel}
+            onPress={onSecondaryPress}
+            borderColor={colors.PRIMARY}
+            textColor={colors.PRIMARY}
+          />
+        )}
       </View>
 
       {termsText ? (
@@ -183,9 +231,9 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
           style={[
             styles.socialButton,
             {
-              backgroundColor: isDark ? '#2C2C2C' : '#FFFFFF',
-              borderColor: isDark ? '#444' : '#E8E8E8',
-              opacity: (!onGooglePress || googleDisabled) ? 0.5 : 1,
+              backgroundColor: colors.BACKGROUND,
+              borderColor: colors.INDICATOR_INACTIVE,
+              opacity: !onGooglePress || googleDisabled ? 0.5 : 1,
             },
           ]}
           onPress={onGooglePress}
@@ -199,9 +247,9 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
           style={[
             styles.socialButton,
             {
-              backgroundColor: isDark ? '#2C2C2C' : '#FFFFFF',
-              borderColor: isDark ? '#444' : '#E8E8E8',
-              opacity: (!onApplePress || appleDisabled) ? 0.5 : 1,
+              backgroundColor: colors.BACKGROUND,
+              borderColor: colors.INDICATOR_INACTIVE,
+              opacity: !onApplePress || appleDisabled ? 0.5 : 1,
             },
           ]}
           onPress={onApplePress}
@@ -225,7 +273,7 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
           </Text>
         </View>
       ) : null}
-      
+
       {footerInfo ? (
         <View style={styles.footerContainer}>
           <Text style={[styles.footerText, { color: colors.TEXT_SECONDARY }]}>
@@ -243,12 +291,12 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: adaptiveSpacing.lg,
-    paddingTop: scaleHeight(40),
-    paddingBottom: adaptiveSpacing.xxl,
+    paddingTop: scaleHeight(32), // Reduzido de 40 para 32
+    paddingBottom: adaptiveSpacing.xl, // Reduzido de xxl para xl
   },
   form: {
-    marginBottom: adaptiveSpacing.xl,
-    gap: adaptiveSpacing.lg,
+    marginBottom: adaptiveSpacing.lg,
+    gap: adaptiveSpacing.sm, // Reduzido de lg para sm
   },
   inputGroup: {
     gap: adaptiveSpacing.sm,
@@ -280,8 +328,9 @@ const styles = StyleSheet.create({
     padding: adaptiveSpacing.sm,
     marginRight: -adaptiveSpacing.sm,
   },
-  primaryButtonContainer: {
-    marginVertical: adaptiveSpacing.lg,
+  buttonsContainer: {
+    marginVertical: adaptiveSpacing.md, // Reduzido de lg para md
+    gap: adaptiveSpacing.sm,
   },
   termsContainer: {
     marginVertical: adaptiveSpacing.md,
@@ -295,7 +344,7 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: adaptiveSpacing.xl,
+    marginVertical: adaptiveSpacing.lg, // Reduzido de xl para lg
     gap: adaptiveSpacing.md,
   },
   dividerLine: {
@@ -310,7 +359,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: adaptiveSpacing.lg,
     justifyContent: 'center',
-    marginBottom: adaptiveSpacing.xl,
+    marginBottom: adaptiveSpacing.lg, // Reduzido de xl para lg
   },
   socialButton: {
     width: 56,
@@ -326,7 +375,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   linkContainer: {
-    marginTop: adaptiveSpacing.lg,
+    marginTop: adaptiveSpacing.md, // Reduzido de lg para md
     alignItems: 'center',
   },
   linkText: {
