@@ -1,8 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ScrollView } from 'react-native';
 import { OnboardingView } from '../components/OnboardingView';
-import { OnboardingSignUp } from '../components/OnboardingSignUp';
-import { OnboardingSignIn } from '../components/OnboardingSignIn';
+import { OnboardingUnifiedAuth } from '../components/OnboardingUnifiedAuth';
 import { OnboardingSuccess } from '../components/OnboardingSuccess';
 import { PostLoginLoadingScreen } from './PostLoginLoadingScreen';
 import { useOnboardingScroll } from '../hooks/useOnboardingScroll';
@@ -12,8 +11,7 @@ const TOTAL_ONBOARDING_STEPS = 3; // Apenas 3 telas informativas
 
 type ScreenType =
   | 'carousel'
-  | 'signup'
-  | 'signin'
+  | 'auth'
   | 'success'
   | 'postLoginLoading';
 
@@ -48,45 +46,17 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
     onSkip?.();
   };
 
-  const handleCreateAccount = () => {
-    logger.debug('OnboardingContainer', 'Sign up button pressed');
-    setCurrentScreen('signup');
+  const handleAuth = () => {
+    logger.debug('OnboardingContainer', 'Auth button pressed');
+    setCurrentScreen('auth');
   };
 
-  const handleLogin = () => {
-    logger.debug('OnboardingContainer', 'Sign in button pressed');
-    setCurrentScreen('signin');
-  };
-
-  const handleSignUpComplete = () => {
+  const handleAuthComplete = () => {
     logger.debug(
       'OnboardingContainer',
-      'Sign up completed - checking if user is authenticated'
+      'Authentication completed, showing post-login loading screen'
     );
-    // If user is authenticated (social signup), show loading screen
-    // Otherwise, show success screen to prompt sign in
-    // Note: This will be handled by checking auth state in the component
     setCurrentScreen('postLoginLoading');
-  };
-
-  const handleSignInComplete = () => {
-    logger.debug(
-      'OnboardingContainer',
-      'Sign in completed, showing post-login loading screen'
-    );
-    // Show post-login loading screen instead of success screen
-    // This prepares user data before navigating to home
-    setCurrentScreen('postLoginLoading');
-  };
-
-  const handleGoToSignIn = () => {
-    logger.debug('OnboardingContainer', 'Going to sign in screen');
-    setCurrentScreen('signin');
-  };
-
-  const handleGoToSignUp = () => {
-    logger.debug('OnboardingContainer', 'Going to sign up screen');
-    setCurrentScreen('signup');
   };
 
   const handleFinish = () => {
@@ -98,22 +68,11 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
   };
 
   // Renderiza a tela apropriada baseado no estado
-  if (currentScreen === 'signup') {
-    logger.debug('OnboardingContainer', 'Rendering signup screen');
+  if (currentScreen === 'auth') {
+    logger.debug('OnboardingContainer', 'Rendering unified auth screen');
     return (
-      <OnboardingSignUp
-        onSignUpComplete={handleSignUpComplete}
-        onGoToSignIn={handleGoToSignIn}
-      />
-    );
-  }
-
-  if (currentScreen === 'signin') {
-    logger.debug('OnboardingContainer', 'Rendering signin screen');
-    return (
-      <OnboardingSignIn
-        onSignInComplete={handleSignInComplete}
-        onGoToSignUp={handleGoToSignUp}
+      <OnboardingUnifiedAuth
+        onAuthComplete={handleAuthComplete}
       />
     );
   }
@@ -137,10 +96,8 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
       totalSteps={TOTAL_ONBOARDING_STEPS}
       onScroll={handleScroll}
       onSkip={handleSkip}
-      onCreateAccount={handleCreateAccount}
-      onLogin={handleLogin}
-      onSignUpComplete={handleSignUpComplete}
-      onSignInComplete={handleSignInComplete}
+      onCreateAccount={handleAuth}
+      onLogin={handleAuth}
       onFinish={onFinish}
     />
   );
