@@ -1,5 +1,5 @@
 export interface SignUpRequest {
-  name: string;
+  name?: string;
   email: string;
   password: string;
 }

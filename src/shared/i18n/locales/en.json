@@ -11,7 +11,8 @@
     "success": "Success",
     "loading": "Loading...",
     "retry": "Retry",
-    "continueAnyway": "Continue Anyway"
+    "continueAnyway": "Continue Anyway",
+    "selectLanguage": "Select Language"
   },
   "tabs": {
     "home": "Home",
@@ -99,6 +100,20 @@
       "alreadyHaveAccount": "Already have an account?",
       "signIn": "Sign In",
       "signUpButton": "Sign Up"
+    },
+    "auth": {
+      "title": "Welcome",
+      "subtitle": "Sign in or create your account to get started",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email address",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "or": "Or",
+      "continueWithApple": "Continue with Apple",
+      "continueWithGoogle": "Continue with Google",
+      "signInButton": "Sign In",
+      "signUpButton": "Create Account",
+      "terms": "By continuing, you agree to the Terms of Service and Privacy Policy"
     },
     "signIn": {
       "title": "Sign In",

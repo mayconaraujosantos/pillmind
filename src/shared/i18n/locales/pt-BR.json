@@ -11,7 +11,8 @@
     "success": "Sucesso",
     "loading": "Carregando...",
     "retry": "Tentar Novamente",
-    "continueAnyway": "Continuar Assim Mesmo"
+    "continueAnyway": "Continuar Assim Mesmo",
+    "selectLanguage": "Selecionar Idioma"
   },
   "tabs": {
     "home": "Início",
@@ -99,6 +100,20 @@
       "alreadyHaveAccount": "Já tem uma conta?",
       "signIn": "Entrar",
       "signUpButton": "Cadastrar"
+    },
+    "auth": {
+      "title": "Bem-vindo",
+      "subtitle": "Entre ou crie sua conta para começar",
+      "email": "E-mail",
+      "emailPlaceholder": "Digite seu endereço de e-mail",
+      "password": "Senha",
+      "passwordPlaceholder": "Digite sua senha",
+      "or": "Ou",
+      "continueWithApple": "Continuar com Apple",
+      "continueWithGoogle": "Continuar com Google",
+      "signInButton": "Entrar",
+      "signUpButton": "Criar Conta",
+      "terms": "Ao continuar, você concorda com os Termos de Serviço e Política de Privacidade"
     },
     "signIn": {
       "title": "Entrar",
