@@ -26,7 +26,7 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
   onGoToSignUp,
 }) => {
   const { t } = useTranslation();
-  const { signIn, loading, error } = useAuth();
+  const { signIn, loading, error: _error } = useAuth();
   const authContext = useAuthContext();
 
   const [email, setEmail] = useState('');

@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
 import { COMMON_STYLES } from '@shared/constants/styles';
+import { adaptiveSpacing } from '@shared/utils/dimensions';
 
 interface HeaderProps {
   userName?: string;
@@ -21,7 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { theme, isDark } = useTheme();
+  const { theme, _isDark } = useTheme();
   
   const displayName = userName || t('account.user');
 
@@ -49,40 +50,47 @@ export const Header: React.FC<HeaderProps> = ({
         borderBottomColor: theme.colors.border,
       }
     ]}>
-      <TouchableOpacity
-        style={styles.userSection}
-        onPress={onProfilePress}
-        activeOpacity={0.7}
-      >
-        <View style={dynamicStyles.avatar}>
-          {/* TODO: Adicionar Image quando userAvatar for fornecido */}
-          <Text style={dynamicStyles.avatarText}>
-            {displayName.charAt(0).toUpperCase()}
-          </Text>
-        </View>
-        <Text style={dynamicStyles.userName}>{displayName}</Text>
-      </TouchableOpacity>
+      <View style={styles.content}>
+        <TouchableOpacity
+          style={styles.userSection}
+          onPress={onProfilePress}
+          activeOpacity={0.7}
+        >
+          <View style={dynamicStyles.avatar}>
+            {/* TODO: Adicionar Image quando userAvatar for fornecido */}
+            <Text style={dynamicStyles.avatarText}>
+              {displayName.charAt(0).toUpperCase()}
+            </Text>
+          </View>
+          <Text style={dynamicStyles.userName}>{displayName}</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.notificationButton}
-        onPress={onNotificationPress}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="notifications-outline" size={24} color={theme.colors.text} />
-        {/* Badge de notificação pode ser adicionado aqui */}
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.notificationButton}
+          onPress={onNotificationPress}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="notifications-outline" size={24} color={theme.colors.text} />
+          {/* Badge de notificação pode ser adicionado aqui */}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    paddingHorizontal: adaptiveSpacing.lg,
+    paddingVertical: COMMON_STYLES.padding.vertical.medium,
+    borderBottomWidth: 1,
+    alignItems: 'center',
+  },
+  content: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: COMMON_STYLES.padding.horizontal.medium,
-    paddingVertical: COMMON_STYLES.padding.vertical.medium,
-    borderBottomWidth: 1,
+    width: '100%',
+    maxWidth: 400,
   },
   userSection: {
     flexDirection: 'row',

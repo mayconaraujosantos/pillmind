@@ -38,7 +38,7 @@ const renderTabBarIcon =
 
 export const AppNavigator: React.FC = () => {
   const { t } = useTranslation();
-  const { theme, isDark } = useTheme();
+  const { theme, isDark: _isDark } = useTheme();
   
   return (
     <NavigationContainer>
