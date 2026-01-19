@@ -21,7 +21,7 @@ export const OnboardingTitleBlock: React.FC<OnboardingTitleBlockProps> = ({
   subtitle,
   titleColor,
   subtitleColor,
-  containerMarginBottom = spacing.lg,
+  containerMarginBottom = spacing.md, // Reduzido de lg para md
   subtitleMarginBottom = spacing.none,
 }) => {
   return (
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: adaptiveFontSizes.xxl,
     fontWeight: '700',
-    marginBottom: adaptiveSpacing.sm,
+    marginBottom: adaptiveSpacing.xs, // Reduzido de sm para xs
     textAlign: 'center',
     lineHeight: deviceSize(32, 36, 40),
   },

@@ -71,12 +71,12 @@ export const OnboardingPrimaryButton: React.FC<
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: adaptiveSpacing.md,
-    paddingHorizontal: adaptiveSpacing.lg,
-    borderRadius: borderRadius.lg,
+    paddingVertical: adaptiveSpacing.sm,
+    paddingHorizontal: adaptiveSpacing.md,
+    borderRadius: borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: deviceSize(52, 56, 60),
+    minHeight: deviceSize(46, 50, 54),
     shadowOffset: {
       width: 0,
       height: 2,
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   label: {
-    fontSize: adaptiveFontSizes.lg,
+    fontSize: adaptiveFontSizes.md,
     fontWeight: '600',
     textAlign: 'center',
     letterSpacing: 0.4,

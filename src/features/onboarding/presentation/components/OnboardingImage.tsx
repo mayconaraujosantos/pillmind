@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Image, StyleSheet } from 'react-native';
 import { deviceSize, hp, wp } from '@shared/utils/dimensions';
 
-const IMAGE_RATIO = 511 / 1022; // original image proportion
+const IMAGE_RATIO = 600 / 1022; // original image proportion
 
 // Dimensão responsiva da imagem adaptada a qualquer tamanho de tela
 const getImageDimensions = () => {
