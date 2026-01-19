@@ -79,7 +79,11 @@ class OAuthService {
     } catch (error: unknown) {
       // Tratamento específico de erros do Google Sign-In
       if (error && typeof error === 'object' && 'code' in error) {
-        const googleError = error as { code: string; message?: string };
+        const googleError = error as {
+          code: string;
+          message?: string;
+          userInfo?: unknown;
+        };
 
         // Usuário cancelou o login
         if (googleError.code === 'SIGN_IN_CANCELLED') {
@@ -104,6 +108,36 @@ class OAuthService {
             },
           };
         }
+
+        // Error Code 10: DEVELOPER_ERROR - SHA-1 mismatch with Google Cloud Console
+        if (googleError.code === '10') {
+          const debugMessage =
+            'Error Code 10 (DEVELOPER_ERROR): This usually means the app signing certificate SHA-1 does not match Google Cloud Console configuration. ' +
+            'See GOOGLE_OAUTH_DEBUG.md for solution.';
+          logger.error('OAuthService', debugMessage, {
+            code: googleError.code,
+            troubleshootingUrl:
+              'https://react-native-google-signin.github.io/docs/troubleshooting',
+          });
+          return {
+            success: false,
+            error: {
+              message: debugMessage,
+              code: 'DEVELOPER_ERROR',
+            },
+          };
+        }
+
+        // Log all error details for debugging
+        logger.error(
+          'OAuthService',
+          '❌ Google Sign-In failed with error code: ' + googleError.code,
+          {
+            code: googleError.code,
+            message: googleError.message,
+            fullError: googleError,
+          }
+        );
       }
 
       // Erro genérico
