@@ -19,9 +19,9 @@ import { logger } from '@shared/utils/logger';
 import { logDeviceInfo } from '@shared/utils/dimensions';
 import '@shared/i18n';
 
-// TODO: Mover para variável de ambiente (.env)
+// Google Web Client ID para OAuth2
 const GOOGLE_WEB_CLIENT_ID =
-  process.env.GOOGLE_WEB_CLIENT_ID ||
+  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
   'YOUR_GOOGLE_WEB_CLIENT_ID_HERE.apps.googleusercontent.com';
 
 export default function App() {
