@@ -51,6 +51,7 @@ class OAuthService {
 
       // 3. Pega o ID Token do Google
       const idToken = userInfo.data?.idToken;
+      console.log('Google ID Token:', idToken);
 
       if (!idToken) {
         throw new Error('ID Token not received from Google');
@@ -59,23 +60,56 @@ class OAuthService {
       logger.info('OAuthService', '📤 Sending ID Token to backend');
 
       // 4. Envia ID Token para o backend validar
-      const response = await apiService.post<AuthResponse>('/auth/google', {
+      type BackendResponse =
+        | AuthResponse
+        | {
+            accessToken: string;
+            accountId: string;
+            name: string;
+            email: string;
+          };
+
+      const response = await apiService.post<BackendResponse>('/auth/google', {
         idToken,
       });
 
-      if (response.success) {
+      if (response.success && response.data) {
+        // Mapeia a resposta do backend Java para o formato esperado pelo frontend
+        const backendData = response.data;
+
+        // Verifica se o backend retornou no formato antigo (user/token) ou novo (accountId/accessToken)
+        const mappedResponse: AuthResponse =
+          'user' in backendData
+            ? backendData // Formato já correto
+            : {
+                // Mapeia formato do backend Java
+                user: {
+                  id: backendData.accountId,
+                  name: backendData.name,
+                  email: backendData.email,
+                },
+                token: backendData.accessToken,
+              };
+
         logger.info('OAuthService', '✅ Backend authentication successful', {
-          userId: response.data?.user.id,
-          email: response.data?.user.email,
+          userId: mappedResponse.user.id,
+          email: mappedResponse.user.email,
         });
+
+        return {
+          success: true,
+          data: mappedResponse,
+        };
       } else {
         logger.error('OAuthService', '❌ Backend authentication failed', {
           error: response.error?.message,
           code: response.error?.code,
         });
+        return {
+          success: false,
+          error: response.error,
+        };
       }
-
-      return response;
     } catch (error: unknown) {
       // Tratamento específico de erros do Google Sign-In
       if (error && typeof error === 'object' && 'code' in error) {
