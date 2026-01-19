@@ -20,7 +20,6 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
   const { signUp, loading, error: authError } = useAuth();
   const authContext = useAuthContext();
 
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [socialAuthModal, setSocialAuthModal] = useState({
@@ -76,13 +75,11 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
   const handleSignUp = async () => {
     logger.info('OnboardingSignUp', '🔄 Sign up button pressed', {
       email,
-      nameLength: name.length,
       passwordLength: password.length,
     });
 
-    if (!name || !email || !password) {
+    if (!email || !password) {
       logger.warn('OnboardingSignUp', '⚠️ Missing required fields', {
-        name: name ? 'filled' : 'empty',
         email: email ? 'filled' : 'empty',
         password: password ? 'filled' : 'empty',
       });
@@ -91,7 +88,7 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
     }
 
     logger.debug('OnboardingSignUp', '📤 Calling signUp with data', { email });
-    const result = await signUp({ name, email, password });
+    const result = await signUp({ email, password });
 
     if (result.success && result.data) {
       logger.info('OnboardingSignUp', '✅ Sign up successful', {
@@ -239,13 +236,6 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
         subtitle={t('onboarding.signUp.subtitle')}
         dividerLabel={t('onboarding.signUp.or')}
         fields={[
-          {
-            key: 'name',
-            label: t('onboarding.signUp.name'),
-            placeholder: t('onboarding.signUp.namePlaceholder'),
-            value: name,
-            onChangeText: setName,
-          },
           {
             key: 'email',
             label: t('onboarding.signUp.email'),
