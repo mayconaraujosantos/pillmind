@@ -49,13 +49,15 @@ import { SuccessTooltip } from '@shared/components';
 ## Características dos novos componentes:
 
 ### ValidationAlert
+
 - ✅ Usa Safe Area para não ser cortado
 - 🎨 Design flat moderno com cores sólidas
 - 🔄 Auto-hide após 4 segundos
 - 📍 Posicionamento relativo ao safe area top
 - 🎯 Suporte para error, success, warning
 
-### SuccessTooltip  
+### SuccessTooltip
+
 - ✅ Similar ao exemplo da imagem mostrada
 - 🎨 Design com borda verde e background sólido
 - ⭐ Ícone de check bem visível

@@ -7,7 +7,9 @@ export const config = {
   nodeRed: {
     host: process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13',
     port: process.env.EXPO_PUBLIC_NODERED_PORT || '1880',
-    authUrl: process.env.EXPO_PUBLIC_NODERED_AUTH_URL || 'http://192.168.1.13:1880/api/auth',
+    authUrl:
+      process.env.EXPO_PUBLIC_NODERED_AUTH_URL ||
+      'http://192.168.1.13:1880/api/auth',
   },
   app: {
     name: process.env.EXPO_PUBLIC_APP_NAME || 'PillMind',

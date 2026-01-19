@@ -10,9 +10,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme';
-import { adaptiveSpacing, adaptiveFontSizes, deviceSize } from '@shared/utils/dimensions';
+import {
+  adaptiveSpacing,
+  adaptiveFontSizes,
+  deviceSize,
+} from '@shared/utils/dimensions';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: _SCREEN_WIDTH } = Dimensions.get('window');
 
 interface ValidationAlertProps {
   visible: boolean;
@@ -32,14 +36,14 @@ export const ValidationAlert: React.FC<ValidationAlertProps> = ({
   const slideAnimation = useRef(new Animated.Value(-100)).current;
   const fadeAnimation = useRef(new Animated.Value(0)).current;
   const [isAnimating, setIsAnimating] = useState(false);
-  
+
   // Auto dismiss after 4 seconds
   useEffect(() => {
     if (visible) {
       const timer = setTimeout(() => {
         onDismiss?.();
       }, 4000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [visible, onDismiss]);
@@ -124,18 +128,20 @@ export const ValidationAlert: React.FC<ValidationAlertProps> = ({
       pointerEvents={visible ? 'auto' : 'none'}
     >
       <View style={styles.content}>
-        <Ionicons 
-          name={typeConfig.icon as any} 
-          size={20} 
-          color={typeConfig.iconColor} 
+        <Ionicons
+          name={
+            typeConfig.icon as 'checkmark-circle' | 'alert-circle' | 'warning'
+          }
+          size={20}
+          color={typeConfig.iconColor}
         />
-        
+
         <Text style={styles.message} numberOfLines={2}>
           {message}
         </Text>
-        
-        <TouchableOpacity 
-          onPress={onDismiss} 
+
+        <TouchableOpacity
+          onPress={onDismiss}
           style={styles.dismissButton}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >

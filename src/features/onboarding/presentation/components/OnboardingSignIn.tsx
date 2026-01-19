@@ -31,13 +31,15 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
   // Estados para Node-RED discovery (usando variáveis de ambiente)
   const [isDiscovering] = useState(false);
   const [discoveryError] = useState<string | null>(null);
-  const nodeRedURL = process.env.EXPO_PUBLIC_NODERED_AUTH_URL || 'http://192.168.1.13:1880/api/auth';
+  const nodeRedURL =
+    process.env.EXPO_PUBLIC_NODERED_AUTH_URL ||
+    'http://192.168.1.13:1880/api/auth';
 
   const getSocialAuthUrl = (provider: 'apple' | 'google'): string => {
     // Usar configurações do .env
     const nodeRedHost = process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13';
     const nodeRedPort = process.env.EXPO_PUBLIC_NODERED_PORT || '1880';
-    
+
     return `http://${nodeRedHost}:${nodeRedPort}/api/auth/${provider}`;
   };
 
@@ -90,26 +92,34 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
   // Extrair funções auxiliares para reduzir complexidade
   const validateNodeRedConnection = () => {
     if (!nodeRedURL) {
-      const nodeRedHost = process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13';
+      const nodeRedHost =
+        process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13';
       const nodeRedPort = process.env.EXPO_PUBLIC_NODERED_PORT || '1880';
-      const errorMessage = discoveryError || `Node-RED não foi encontrado. Verifique se está rodando em ${nodeRedHost}:${nodeRedPort}.`;
-      logger.error('OnboardingSignIn', `❌ Node-RED not found for ${socialAuthModal.provider} auth`, {
-        discoveryError,
-        nodeRedURL,
-        isDiscovering
-      });
-      
-      Alert.alert(
-        t('errors.networkError'),
-        errorMessage,
-        [{ text: t('common.ok'), style: 'default' }]
+      const errorMessage =
+        discoveryError ||
+        `Node-RED não foi encontrado. Verifique se está rodando em ${nodeRedHost}:${nodeRedPort}.`;
+      logger.error(
+        'OnboardingSignIn',
+        `❌ Node-RED not found for ${socialAuthModal.provider} auth`,
+        {
+          discoveryError,
+          nodeRedURL,
+          isDiscovering,
+        }
       );
+
+      Alert.alert(t('errors.networkError'), errorMessage, [
+        { text: t('common.ok'), style: 'default' },
+      ]);
       return false;
     }
     return true;
   };
 
-  const performSocialSignIn = async (provider: 'google' | 'apple', endpoint: string) => {
+  const performSocialSignIn = async (
+    provider: 'google' | 'apple',
+    endpoint: string
+  ) => {
     logger.info('OnboardingSignIn', `🔐 ${provider} sign in started`);
     logger.debug('OnboardingSignIn', `📡 Calling ${provider} endpoint`, {
       endpoint,
@@ -117,7 +127,9 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
     });
 
     const startTime = new Date().toISOString();
-    logger.debug('OnboardingSignIn', '⏱️ Request started at', { time: startTime });
+    logger.debug('OnboardingSignIn', '⏱️ Request started at', {
+      time: startTime,
+    });
 
     try {
       const response = await fetch(endpoint, {
@@ -132,18 +144,24 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
         throw new Error(data.message || `${provider} authentication failed`);
       }
 
-      logger.info('OnboardingSignIn', `✅ ${provider} sign in successful`, { data });
+      logger.info('OnboardingSignIn', `✅ ${provider} sign in successful`, {
+        data,
+      });
       await authContext.login(data);
       onSignInComplete?.();
-      
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error && error.message?.includes('fetch') ? 
-        'Request took more than 30 seconds' : 
-        error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error && error.message?.includes('fetch')
+          ? 'Request took more than 30 seconds'
+          : error instanceof Error
+          ? error.message
+          : 'Unknown error';
 
       logger.error('OnboardingSignIn', `⏱️ ${provider} request timeout`, {
         error: errorMessage,
-        suggestion: `Ensure Node-RED is running on ${process.env.EXPO_PUBLIC_NODERED_AUTH_URL || 'http://192.168.1.13:1880'} and reachable from your device`
+        suggestion: `Ensure Node-RED is running on ${
+          process.env.EXPO_PUBLIC_NODERED_AUTH_URL || 'http://192.168.1.13:1880'
+        } and reachable from your device`,
       });
 
       throw error;
@@ -168,7 +186,7 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
     try {
       const endpoint = getSocialAuthUrl(provider);
       await performSocialSignIn(provider, endpoint);
-      
+
       // Hide modal
       setSocialAuthModal({ visible: false, provider, loading: false });
       onSignInComplete?.();
@@ -177,16 +195,16 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
       setSocialAuthModal({ visible: false, provider, loading: false });
 
       const errorMessage = err instanceof Error ? err.message : String(err);
-      const displayMessage = nodeRedURL 
-        ? `${provider} authentication failed: ${errorMessage}` 
+      const displayMessage = nodeRedURL
+        ? `${provider} authentication failed: ${errorMessage}`
         : `${provider} authentication failed. Node-RED not found.`;
-      
+
       logger.error('OnboardingSignIn', `❌ ${provider} error`, {
         error: errorMessage,
         nodeRedURL,
-        discoveryError
+        discoveryError,
       });
-        
+
       Alert.alert(t('errors.authenticationError'), displayMessage);
     }
   };
@@ -228,15 +246,15 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
         onPrimaryPress={handleSignIn}
         isLoading={loading}
         appleLabel={
-          isDiscovering 
-            ? 'Descobrindo Node-RED...' 
+          isDiscovering
+            ? 'Descobrindo Node-RED...'
             : t('onboarding.signIn.continueWithApple')
         }
         onApplePress={() => handleSocialSignInClick('apple')}
         appleDisabled={isDiscovering}
         googleLabel={
-          isDiscovering 
-            ? 'Descobrindo Node-RED...' 
+          isDiscovering
+            ? 'Descobrindo Node-RED...'
             : t('onboarding.signIn.continueWithGoogle')
         }
         onGooglePress={() => handleSocialSignInClick('google')}
@@ -249,7 +267,8 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
         // Indicação do status do Node-RED
         footerInfo={(() => {
           if (isDiscovering) return '🔍 Descobrindo Node-RED... Aguarde.';
-          if (nodeRedURL) return `🟢 Conectado: ${nodeRedURL.replace('http://', '')}`;
+          if (nodeRedURL)
+            return `🟢 Conectado: ${nodeRedURL.replace('http://', '')}`;
           return '🔴 Node-RED não encontrado. Toque nos botões para configurar.';
         })()}
       />

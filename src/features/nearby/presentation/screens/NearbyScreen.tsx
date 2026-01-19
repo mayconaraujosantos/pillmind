@@ -11,7 +11,7 @@ export const NearbyScreen: React.FC = () => {
   return (
     <ScreenWrapper>
       <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>  
+        <Text style={[styles.title, { color: theme.colors.text }]}>
           {t('nearby.title')}
         </Text>
         <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>

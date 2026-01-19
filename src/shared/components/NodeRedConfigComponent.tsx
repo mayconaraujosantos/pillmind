@@ -11,13 +11,16 @@ import {
 import { useTheme } from '@shared/theme';
 import { useTranslation } from '@shared/i18n';
 import { adaptiveSpacing, adaptiveFontSizes } from '@shared/utils/dimensions';
-import { useNodeRedDiscovery, useNodeRedConnection } from '@shared/hooks/useNodeRedDiscovery';
+import {
+  useNodeRedDiscovery,
+  useNodeRedConnection,
+} from '@shared/hooks/useNodeRedDiscovery';
 
 export const NodeRedConfigComponent: React.FC = () => {
   const { isDark } = useTheme();
   const { t } = useTranslation();
   const [manualURL, setManualURL] = useState('');
-  
+
   const {
     nodeRedURL,
     isDiscovering,
@@ -71,7 +74,9 @@ export const NodeRedConfigComponent: React.FC = () => {
 
       {/* Status da Conexão */}
       <View style={styles.statusContainer}>
-        <View style={[styles.statusDot, { backgroundColor: getStatusColor() }]} />
+        <View
+          style={[styles.statusDot, { backgroundColor: getStatusColor() }]}
+        />
         <Text style={[styles.statusText, { color: isDark ? '#CCC' : '#666' }]}>
           {getStatusText()}
         </Text>
@@ -79,17 +84,17 @@ export const NodeRedConfigComponent: React.FC = () => {
 
       {/* Erro */}
       {error && (
-        <Text style={[styles.errorText, { color: '#F44336' }]}>
-          {error}
-        </Text>
+        <Text style={[styles.errorText, { color: '#F44336' }]}>{error}</Text>
       )}
 
       {/* Configuração Manual */}
       <View style={styles.manualConfig}>
-        <Text style={[styles.sectionTitle, { color: isDark ? '#FFF' : '#000' }]}>
+        <Text
+          style={[styles.sectionTitle, { color: isDark ? '#FFF' : '#000' }]}
+        >
           Configuração Manual
         </Text>
-        
+
         <TextInput
           style={[
             styles.input,
@@ -108,10 +113,7 @@ export const NodeRedConfigComponent: React.FC = () => {
         />
 
         <TouchableOpacity
-          style={[
-            styles.button,
-            { opacity: isDiscovering ? 0.6 : 1 },
-          ]}
+          style={[styles.button, { opacity: isDiscovering ? 0.6 : 1 }]}
           onPress={handleManualConfig}
           disabled={isDiscovering}
         >

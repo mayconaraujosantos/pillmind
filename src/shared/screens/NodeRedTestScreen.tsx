@@ -26,19 +26,20 @@ export const NodeRedTestScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>🔧 Node-RED Discovery Test</Text>
-      
+
       <View style={styles.statusContainer}>
         <Text style={styles.statusText}>
-          Status: {isDiscovering ? '🔍 Discovering...' : nodeRedURL ? '🟢 Found' : '🔴 Not found'}
+          Status:{' '}
+          {isDiscovering
+            ? '🔍 Discovering...'
+            : nodeRedURL
+            ? '🟢 Found'
+            : '🔴 Not found'}
         </Text>
-        
-        {nodeRedURL && (
-          <Text style={styles.urlText}>URL: {nodeRedURL}</Text>
-        )}
-        
-        {error && (
-          <Text style={styles.errorText}>Error: {error}</Text>
-        )}
+
+        {nodeRedURL && <Text style={styles.urlText}>URL: {nodeRedURL}</Text>}
+
+        {error && <Text style={styles.errorText}>Error: {error}</Text>}
       </View>
 
       <Button

@@ -125,16 +125,7 @@ export const ModernInput: React.FC<ModernInputProps> = ({
     : theme.colors.border;
 
   // Better background color handling for different themes
-  const backgroundColor =
-    variant === 'modern'
-      ? isFocused
-        ? isDark
-          ? 'rgba(255, 255, 255, 0.08)' // Dark theme: light overlay
-          : theme.colors.surface + '40' // Light theme: surface with opacity
-        : isDark
-        ? 'rgba(255, 255, 255, 0.05)' // Dark theme: subtle light overlay
-        : theme.colors.surface // Light theme: normal surface
-      : 'transparent';
+  const backgroundColor = 'transparent';
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -182,7 +173,7 @@ export const ModernInput: React.FC<ModernInputProps> = ({
             style={[
               styles.input,
               sizeStyles.input,
-              { color: theme.colors.text },
+              { color: theme.colors.text, backgroundColor: 'transparent' },
               inputStyle,
             ]}
             placeholderTextColor={theme.colors.placeholder}
@@ -190,6 +181,7 @@ export const ModernInput: React.FC<ModernInputProps> = ({
             onFocus={handleFocus}
             onBlur={handleBlur}
             value={value}
+            underlineColorAndroid="transparent"
             {...props}
           />
 
@@ -278,7 +270,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 0,
   },
   input: {
     flex: 1,
@@ -286,6 +278,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
     includeFontPadding: false,
     textAlignVertical: 'center',
+    backgroundColor: 'transparent',
   },
   label: {
     fontWeight: '600',

@@ -22,8 +22,8 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { theme, _isDark } = useTheme();
-  
+  const { theme, isDark: _isDark } = useTheme();
+
   const displayName = userName || t('account.user');
 
   const dynamicStyles = {
@@ -42,14 +42,16 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <View style={[
-      styles.container, 
-      { 
-        paddingTop: Math.max(insets.top, 0),
-        backgroundColor: theme.colors.background,
-        borderBottomColor: theme.colors.border,
-      }
-    ]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: Math.max(insets.top, 0),
+          backgroundColor: theme.colors.background,
+          borderBottomColor: theme.colors.border,
+        },
+      ]}
+    >
       <View style={styles.content}>
         <TouchableOpacity
           style={styles.userSection}
@@ -70,7 +72,11 @@ export const Header: React.FC<HeaderProps> = ({
           onPress={onNotificationPress}
           activeOpacity={0.7}
         >
-          <Ionicons name="notifications-outline" size={24} color={theme.colors.text} />
+          <Ionicons
+            name="notifications-outline"
+            size={24}
+            color={theme.colors.text}
+          />
           {/* Badge de notificação pode ser adicionado aqui */}
         </TouchableOpacity>
       </View>

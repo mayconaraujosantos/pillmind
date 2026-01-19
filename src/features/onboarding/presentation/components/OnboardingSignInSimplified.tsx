@@ -43,7 +43,7 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
 
   const handleSignIn = async () => {
     try {
-      await signIn(email, password);
+      await signIn({ email, password });
       onSignInComplete?.();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
@@ -62,14 +62,14 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
   const handleSocialSignInConfirm = async () => {
     const { provider } = socialAuthModal;
 
-    setSocialAuthModal(prev => ({
+    setSocialAuthModal((prev) => ({
       ...prev,
       loading: true,
     }));
 
     try {
       const endpoint = getSocialAuthUrl(provider);
-      
+
       logger.info('OnboardingSignIn', `🔐 ${provider} sign in started`);
       logger.debug('OnboardingSignIn', `📡 Calling ${provider} endpoint`, {
         endpoint,
@@ -88,23 +88,27 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
         throw new Error(data.message || `${provider} authentication failed`);
       }
 
-      logger.info('OnboardingSignIn', `✅ ${provider} sign in successful`, { data });
+      logger.info('OnboardingSignIn', `✅ ${provider} sign in successful`, {
+        data,
+      });
       await authContext.login(data);
-      
+
       setSocialAuthModal({ visible: false, provider, loading: false });
       onSignInComplete?.();
-      
     } catch (err) {
       setSocialAuthModal({ visible: false, provider, loading: false });
-      
+
       const errorMessage = err instanceof Error ? err.message : String(err);
-      
+
       logger.error('OnboardingSignIn', `❌ ${provider} error`, {
         error: errorMessage,
-        endpoint: getSocialAuthUrl(provider)
+        endpoint: getSocialAuthUrl(provider),
       });
-        
-      Alert.alert('Authentication Error', `${provider} authentication failed: ${errorMessage}`);
+
+      Alert.alert(
+        'Authentication Error',
+        `${provider} authentication failed: ${errorMessage}`
+      );
     }
   };
 

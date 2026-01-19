@@ -32,8 +32,8 @@ export const ExampleUsage: React.FC = () => {
   return (
     <View>
       <Text>Node-RED: {nodeRedURL || 'Não configurado'}</Text>
-      {error && <Text style={{color: 'red'}}>{error}</Text>}
-      
+      {error && <Text style={{ color: 'red' }}>{error}</Text>}
+
       <Button
         title="Fazer Requisição"
         onPress={makeNodeRedRequest}

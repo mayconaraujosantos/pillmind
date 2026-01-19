@@ -234,7 +234,10 @@ export const HomeScreen: React.FC = () => {
                     [{ text: t('common.ok') }]
                   );
                 } catch {
-                  Alert.alert(t('common.error'), t('errors.clearStorageFailed'));
+                  Alert.alert(
+                    t('common.error'),
+                    t('errors.clearStorageFailed')
+                  );
                 }
               }}
             >

@@ -19,7 +19,7 @@ export const useNodeRedDiscovery = (): UseNodeRedDiscoveryResult => {
   const discoverNodeRed = useCallback(async () => {
     setIsDiscovering(true);
     setError(null);
-    
+
     try {
       const url = await nodeRedDiscovery.getNodeRedURL();
       if (url) {
@@ -39,7 +39,7 @@ export const useNodeRedDiscovery = (): UseNodeRedDiscoveryResult => {
   const manualSetURL = useCallback(async (url: string): Promise<boolean> => {
     setIsDiscovering(true);
     setError(null);
-    
+
     try {
       const success = await nodeRedDiscovery.setManualNodeRedURL(url);
       if (success) {
@@ -99,7 +99,7 @@ export const useNodeRedConnection = (url: string | null) => {
       try {
         const response = await fetch(`${url}/settings`, {
           method: 'GET',
-          headers: { 'Accept': 'application/json' },
+          headers: { Accept: 'application/json' },
         });
         setIsConnected(response.ok);
       } catch {
@@ -110,7 +110,7 @@ export const useNodeRedConnection = (url: string | null) => {
     };
 
     testConnection();
-    
+
     // Testar conexão periodicamente (30s)
     const interval = setInterval(testConnection, 30000);
     return () => clearInterval(interval);

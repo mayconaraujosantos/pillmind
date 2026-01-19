@@ -9,11 +9,7 @@ import { logger } from '@shared/utils/logger';
 
 const TOTAL_ONBOARDING_STEPS = 3; // Apenas 3 telas informativas
 
-type ScreenType =
-  | 'carousel'
-  | 'auth'
-  | 'success'
-  | 'postLoginLoading';
+type ScreenType = 'carousel' | 'auth' | 'success' | 'postLoginLoading';
 
 interface OnboardingContainerProps {
   onFinish?: () => void;
@@ -70,11 +66,7 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
   // Renderiza a tela apropriada baseado no estado
   if (currentScreen === 'auth') {
     logger.debug('OnboardingContainer', 'Rendering unified auth screen');
-    return (
-      <OnboardingUnifiedAuth
-        onAuthComplete={handleAuthComplete}
-      />
-    );
+    return <OnboardingUnifiedAuth onAuthComplete={handleAuthComplete} />;
   }
 
   if (currentScreen === 'postLoginLoading') {

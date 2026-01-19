@@ -9,7 +9,11 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme';
-import { adaptiveSpacing, adaptiveFontSizes, deviceSize } from '@shared/utils/dimensions';
+import {
+  adaptiveSpacing,
+  adaptiveFontSizes,
+  deviceSize,
+} from '@shared/utils/dimensions';
 
 interface SuccessTooltipProps {
   visible: boolean;
@@ -28,7 +32,7 @@ export const SuccessTooltip: React.FC<SuccessTooltipProps> = ({
   autoHide = true,
   duration = 4000,
 }) => {
-  const { theme } = useTheme();
+  const { theme: _theme } = useTheme();
   const insets = useSafeAreaInsets();
   const slideAnimation = useRef(new Animated.Value(-100)).current;
   const fadeAnimation = useRef(new Animated.Value(0)).current;
@@ -40,7 +44,7 @@ export const SuccessTooltip: React.FC<SuccessTooltipProps> = ({
       const timer = setTimeout(() => {
         onDismiss?.();
       }, duration);
-      
+
       return () => clearTimeout(timer);
     }
   }, [visible, autoHide, duration, onDismiss]);
@@ -102,16 +106,14 @@ export const SuccessTooltip: React.FC<SuccessTooltipProps> = ({
         <View style={styles.iconContainer}>
           <Ionicons name="checkmark-circle" size={24} color="#FFFFFF" />
         </View>
-        
+
         <View style={styles.textContainer}>
           <Text style={styles.title}>{title}</Text>
-          {message && (
-            <Text style={styles.message}>{message}</Text>
-          )}
+          {message && <Text style={styles.message}>{message}</Text>}
         </View>
-        
-        <TouchableOpacity 
-          onPress={onDismiss} 
+
+        <TouchableOpacity
+          onPress={onDismiss}
           style={styles.dismissButton}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >

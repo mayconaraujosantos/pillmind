@@ -111,13 +111,13 @@ describe('OnboardingHeader', () => {
 
   it('deve ocultar header quando currentStep >= 2', async () => {
     const onSkip = jest.fn();
-    const { container } = render(
+    const { queryByTestId } = render(
       <WithThemeProvider>
         <OnboardingHeader onSkip={onSkip} currentStep={2} />
       </WithThemeProvider>
     );
 
     // Component deve retornar null quando hidden
-    expect(container.children).toHaveLength(0);
+    expect(queryByTestId('onboarding-header')).toBeNull();
   });
 });

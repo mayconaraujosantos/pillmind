@@ -1,27 +1,32 @@
 # ModernInput - Design System 2025
 
 ## Overview
+
 O `ModernInput` é um componente de input moderno e clean, seguindo as melhores práticas de design de 2025. Ele oferece animações suaves, microinterações intuitivas e múltiplas variações para diferentes casos de uso.
 
 ## Features
 
 ### 🎨 **Design Moderno**
+
 - Interface clean e minimalista
 - Animações suaves com springs naturais
 - Microinterações que guiam o usuário
 - Suporte completo a temas (light/dark)
 
 ### 📱 **Responsivo**
+
 - Dimensionamento adaptativo baseado no tamanho da tela
 - Três tamanhos disponíveis: `sm`, `md`, `lg`
 - Escala automaticamente fontes e espaçamentos
 
 ### 🎭 **Três Variantes**
+
 1. **Floating**: Label que flutua acima do campo
 2. **Filled**: Background preenchido com visual moderno
 3. **Outlined**: Bordas definidas, estilo clássico
 
 ### 🚀 **Animações Avançadas**
+
 - Label animado com floating effect
 - Borda que se destaca no foco
 - Escala sutil no container
@@ -30,6 +35,7 @@ O `ModernInput` é um componente de input moderno e clean, seguindo as melhores 
 ## Usage Examples
 
 ### Basic Floating Input
+
 ```tsx
 <ModernInput
   label="Email Address"
@@ -42,6 +48,7 @@ O `ModernInput` é um componente de input moderno e clean, seguindo as melhores 
 ```
 
 ### With Icons
+
 ```tsx
 <ModernInput
   label="Password"
@@ -50,11 +57,16 @@ O `ModernInput` é um componente de input moderno e clean, seguindo as melhores 
   variant="floating"
   secureTextEntry
   leftIcon={<Ionicons name="lock-closed-outline" size={20} />}
-  rightIcon={<TouchableOpacity><Ionicons name="eye-outline" size={20} /></TouchableOpacity>}
+  rightIcon={
+    <TouchableOpacity>
+      <Ionicons name="eye-outline" size={20} />
+    </TouchableOpacity>
+  }
 />
 ```
 
 ### Filled Variant
+
 ```tsx
 <ModernInput
   label="Full Name"
@@ -68,6 +80,7 @@ O `ModernInput` é um componente de input moderno e clean, seguindo as melhores 
 ```
 
 ### Outlined with Validation
+
 ```tsx
 <ModernInput
   label="Email"
@@ -80,6 +93,7 @@ O `ModernInput` é um componente de input moderno e clean, seguindo as melhores 
 ```
 
 ### Search Input
+
 ```tsx
 <ModernInput
   placeholder="Search medications..."
@@ -94,33 +108,37 @@ O `ModernInput` é um componente de input moderno e clean, seguindo as melhores 
 ## Props API
 
 ### ModernInputProps
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `label` | `string` | - | Label do campo (opcional) |
-| `error` | `string` | - | Mensagem de erro |
-| `hint` | `string` | - | Texto de ajuda |
-| `leftIcon` | `ReactNode` | - | Ícone à esquerda |
-| `rightIcon` | `ReactNode` | - | Ícone à direita |
-| `variant` | `'floating' \\| 'filled' \\| 'outlined'` | `'floating'` | Variante visual |
-| `size` | `'sm' \\| 'md' \\| 'lg'` | `'md'` | Tamanho do componente |
-| `containerStyle` | `ViewStyle` | - | Estilo do container |
-| `inputStyle` | `TextStyle` | - | Estilo do input |
+
+| Prop             | Type           | Default     | Description               |
+| ---------------- | -------------- | ----------- | ------------------------- | ------------ | --------------------- |
+| `label`          | `string`       | -           | Label do campo (opcional) |
+| `error`          | `string`       | -           | Mensagem de erro          |
+| `hint`           | `string`       | -           | Texto de ajuda            |
+| `leftIcon`       | `ReactNode`    | -           | Ícone à esquerda          |
+| `rightIcon`      | `ReactNode`    | -           | Ícone à direita           |
+| `variant`        | `'floating' \\ | 'filled' \\ | 'outlined'`               | `'floating'` | Variante visual       |
+| `size`           | `'sm' \\       | 'md' \\     | 'lg'`                     | `'md'`       | Tamanho do componente |
+| `containerStyle` | `ViewStyle`    | -           | Estilo do container       |
+| `inputStyle`     | `TextStyle`    | -           | Estilo do input           |
 
 Além de todas as props do `TextInput` do React Native.
 
 ## Design Tokens
 
 ### Sizes
+
 - **Small**: 44-52px de altura
-- **Medium**: 52-60px de altura  
+- **Medium**: 52-60px de altura
 - **Large**: 60-68px de altura
 
 ### Animations
+
 - **Duration**: 200ms para mudanças de estado
 - **Easing**: Spring natural com tension: 150, friction: 8
 - **Scale**: 1.02x no foco para feedback visual
 
 ### Colors
+
 - Utiliza automaticamente o theme system
 - Suporte completo para modo escuro
 - Estados de erro com cores consistentes
@@ -128,13 +146,15 @@ Além de todas as props do `TextInput` do React Native.
 ## Best Practices
 
 ### ✅ Do's
+
 - Use `floating` para formulários principais
 - Use `filled` para inputs de busca e filtros
 - Use `outlined` quando precisar de mais destaque
 - Sempre forneça labels descritivos
 - Use ícones para melhorar a UX
 
-### ❌ Don'ts  
+### ❌ Don'ts
+
 - Não misture variantes no mesmo formulário
 - Não use tamanhos diferentes sem justificativa
 - Não esqueça de tratar estados de erro
@@ -143,6 +163,7 @@ Além de todas as props do `TextInput` do React Native.
 ## Migration Guide
 
 ### From Old Input
+
 ```tsx
 // Before
 <Input
@@ -156,7 +177,7 @@ Além de todas as props do `TextInput` do React Native.
 // After
 <ModernInput
   label="Email"
-  placeholder="Enter email" 
+  placeholder="Enter email"
   value={email}
   onChangeText={setEmail}
   variant="floating" // Try the new floating variant!
@@ -168,6 +189,7 @@ Além de todas as props do `TextInput` do React Native.
 ## Technical Implementation
 
 ### Key Features
+
 - **Adaptive Sizing**: Uses `deviceSize()` for cross-device consistency
 - **Theme Integration**: Full theme support with automatic color switching
 - **Animation System**: Custom Animated.Value management for smooth interactions
@@ -175,6 +197,7 @@ Além de todas as props do `TextInput` do React Native.
 - **Performance**: Optimized rendering with minimal re-renders
 
 ### Dependencies
+
 - React Native Reanimated 2
 - @expo/vector-icons (para ícones)
 - Shared theme system
@@ -182,4 +205,4 @@ Além de todas as props do `TextInput` do React Native.
 
 ---
 
-*Designed for 2025 with modern UX patterns and clean aesthetics* ✨
+_Designed for 2025 with modern UX patterns and clean aesthetics_ ✨

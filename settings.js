@@ -38,12 +38,6 @@ module.exports = {
     },
   },
 
-  // Enable editor UI
-  httpAdminRoot: '/',
-
-  // API settings - expose all HTTP nodes at root
-  httpNodeRoot: '/',
-
   // Context storage
   contextStorage: {
     default: {

@@ -133,6 +133,28 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
             field.key === 'password' || field.key === 'confirmPassword';
           const isRequired = field.key === 'email' || field.key === 'password';
 
+          const getLeftIcon = () => {
+            if (field.key === 'email') {
+              return (
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color={colors.TEXT_SECONDARY}
+                />
+              );
+            }
+            if (isPasswordField) {
+              return (
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={colors.TEXT_SECONDARY}
+                />
+              );
+            }
+            return null;
+          };
+
           return (
             <ModernInput
               key={field.key}
@@ -147,21 +169,7 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
               size="md"
               required={isRequired}
               showValidation={showValidation}
-              leftIcon={
-                field.key === 'email' ? (
-                  <Ionicons
-                    name="mail-outline"
-                    size={20}
-                    color={colors.TEXT_SECONDARY}
-                  />
-                ) : isPasswordField ? (
-                  <Ionicons
-                    name="lock-closed-outline"
-                    size={20}
-                    color={colors.TEXT_SECONDARY}
-                  />
-                ) : null
-              }
+              leftIcon={getLeftIcon()}
               rightIcon={
                 isPasswordField ? (
                   <TouchableOpacity
@@ -291,7 +299,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: adaptiveSpacing.lg,
-    paddingTop: scaleHeight(32), // Reduzido de 40 para 32
+    paddingTop: scaleHeight(50), // Reduzido de 40 para 32
     paddingBottom: adaptiveSpacing.xl, // Reduzido de xxl para xl
   },
   form: {
@@ -379,9 +387,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    fontSize: 13,
+    fontSize: 20,
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   footerContainer: {
     marginTop: adaptiveSpacing.md,

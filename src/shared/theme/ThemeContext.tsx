@@ -1,20 +1,20 @@
 /*
  * ThemeProvider com suporte para Expo Go e Development Build
- * 
+ *
  * LIMITAÇÕES CONHECIDAS:
- * 
+ *
  * 🟢 DEVELOPMENT BUILD:
  * - Appearance.getColorScheme() funciona perfeitamente
  * - addChangeListener funciona para mudanças em tempo real
  * - Detecção automática de tema funciona 100%
- * 
+ *
  * 🟡 EXPO GO:
  * - Appearance.getColorScheme() pode não funcionar
  * - addChangeListener pode falhar
  * - useColorScheme hook ainda funciona
  * - Mudanças de tema podem não ser detectadas em tempo real
  * - Funcionalidade básica de tema funciona, mas com limitações
- * 
+ *
  * ESTRATÉGIA DE FALLBACK:
  * 1. Prioriza useColorScheme (funciona em ambos)
  * 2. Tenta Appearance.getColorScheme() como backup
@@ -59,19 +59,19 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const detectSystemTheme = useCallback((): 'light' | 'dark' => {
     let detectedScheme: string | null | undefined;
     let detectionMethod = 'unknown';
-    
+
     // Estratégia específica para iOS (simulator e device)
     if (Platform.OS === 'ios') {
       try {
         // Para iOS, primeiro tenta Appearance.getColorScheme()
         const appearanceScheme = Appearance.getColorScheme();
         const hookScheme = systemColorScheme;
-        
+
         // Se ambos concordam, usa o resultado
         if (appearanceScheme && hookScheme && appearanceScheme === hookScheme) {
           detectedScheme = appearanceScheme;
           detectionMethod = 'iOS-concordância';
-        } 
+        }
         // Se apenas um funciona, usa ele
         else if (appearanceScheme) {
           detectedScheme = appearanceScheme;
@@ -90,7 +90,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         detectedScheme = systemColorScheme || 'light';
         detectionMethod = 'iOS-erro';
       }
-    } 
+    }
     // Estratégia para Android e outras plataformas
     else {
       if (systemColorScheme) {
@@ -101,29 +101,34 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
           detectedScheme = Appearance.getColorScheme();
           detectionMethod = 'Appearance';
         } catch (error) {
-          console.warn(`[ThemeProvider] Appearance.getColorScheme() falhou:`, error);
+          console.warn(
+            `[ThemeProvider] Appearance.getColorScheme() falhou:`,
+            error
+          );
           detectedScheme = 'light';
           detectionMethod = 'fallback';
         }
       }
     }
-    
+
     const finalTheme = detectedScheme === 'dark' ? 'dark' : 'light';
-    
+
     // Log detalhado para debug
     console.log(`[ThemeProvider] Detecção de tema:`);
     console.log(`  - Plataforma: ${Platform.OS}`);
     console.log(`  - Método usado: ${detectionMethod}`);
     console.log(`  - useColorScheme: ${systemColorScheme}`);
-    console.log(`  - Appearance API: ${(() => {
-      try {
-        return Appearance.getColorScheme();
-      } catch {
-        return 'não disponível';
-      }
-    })()}`);
+    console.log(
+      `  - Appearance API: ${(() => {
+        try {
+          return Appearance.getColorScheme();
+        } catch {
+          return 'não disponível';
+        }
+      })()}`
+    );
     console.log(`  - Tema final: ${finalTheme}`);
-    
+
     return finalTheme;
   }, [systemColorScheme]);
 
@@ -138,18 +143,26 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     // Tenta adicionar listener para mudanças no tema do sistema
     // Pode falhar no Expo Go, então usamos try/catch
-    let subscription: any = null;
-    
+    let subscription: ReturnType<typeof Appearance.addChangeListener> | null =
+      null;
+
     try {
       subscription = Appearance.addChangeListener(({ colorScheme }) => {
         const newTheme = colorScheme === 'dark' ? 'dark' : 'light';
         setDetectedTheme(newTheme);
         console.log(`[ThemeProvider] Sistema mudou para: ${newTheme}`);
       });
-      console.log(`[ThemeProvider] Listener de mudança de tema ativo (Development Build)`);
+      console.log(
+        `[ThemeProvider] Listener de mudança de tema ativo (Development Build)`
+      );
     } catch (error) {
-      console.warn(`[ThemeProvider] addChangeListener falhou (provavelmente Expo Go):`, error);
-      console.log(`[ThemeProvider] Usando apenas useColorScheme para detectar mudanças`);
+      console.warn(
+        `[ThemeProvider] addChangeListener falhou (provavelmente Expo Go):`,
+        error
+      );
+      console.log(
+        `[ThemeProvider] Usando apenas useColorScheme para detectar mudanças`
+      );
     }
 
     // Re-detecção específica para iOS após um delay (problema de timing no simulator)
@@ -189,35 +202,53 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         return 'Expo Go';
       }
     })();
-    
+
     console.log(`[ThemeProvider] Ambiente detectado: ${environment}`);
-    console.log(`[ThemeProvider] Modo: ${themeMode}, Sistema: ${detectedTheme}, isDark: ${isDark}`);
-    
+    console.log(
+      `[ThemeProvider] Modo: ${themeMode}, Sistema: ${detectedTheme}, isDark: ${isDark}`
+    );
+
     // Debug específico para iOS
     if (Platform.OS === 'ios') {
       console.log(`[ThemeProvider] 🍎 iOS Debug:`);
       console.log(`  - Simulator/Device: ${__DEV__ ? 'Simulator' : 'Device'}`);
       console.log(`  - useColorScheme(): ${systemColorScheme}`);
-      console.log(`  - Appearance.getColorScheme(): ${(() => {
-        try {
-          return Appearance.getColorScheme();
-        } catch {
-          return 'erro';
-        }
-      })()}`);
+      console.log(
+        `  - Appearance.getColorScheme(): ${(() => {
+          try {
+            return Appearance.getColorScheme();
+          } catch {
+            return 'erro';
+          }
+        })()}`
+      );
       console.log(`  - Tema final aplicado: ${isDark ? 'dark' : 'light'}`);
-      
+
       // AVISO específico para iOS Simulator
-      if (__DEV__ && systemColorScheme === 'light' && detectedTheme === 'light') {
-        console.log(`[ThemeProvider] ⚠️  ATENÇÃO: iOS Simulator pode não sincronizar com macOS theme!`);
-        console.log(`[ThemeProvider] 💡 SOLUÇÃO: Configure Dark Mode diretamente no iOS Simulator:`);
-        console.log(`[ThemeProvider]    Settings > Display & Brightness > Dark`);
-        console.log(`[ThemeProvider] 🧪 TESTE: Mude para modo 'dark' manual no app para testar`);
+      if (
+        __DEV__ &&
+        systemColorScheme === 'light' &&
+        detectedTheme === 'light'
+      ) {
+        console.log(
+          `[ThemeProvider] ⚠️  ATENÇÃO: iOS Simulator pode não sincronizar com macOS theme!`
+        );
+        console.log(
+          `[ThemeProvider] 💡 SOLUÇÃO: Configure Dark Mode diretamente no iOS Simulator:`
+        );
+        console.log(
+          `[ThemeProvider]    Settings > Display & Brightness > Dark`
+        );
+        console.log(
+          `[ThemeProvider] 🧪 TESTE: Mude para modo 'dark' manual no app para testar`
+        );
       }
-      
+
       // Força uma re-verificação se houver inconsistência
       if (systemColorScheme && systemColorScheme !== detectedTheme) {
-        console.log(`[ThemeProvider] ⚠️  iOS inconsistência detectada! Hook: ${systemColorScheme}, Detectado: ${detectedTheme}`);
+        console.log(
+          `[ThemeProvider] ⚠️  iOS inconsistência detectada! Hook: ${systemColorScheme}, Detectado: ${detectedTheme}`
+        );
         // Re-força a detecção
         setTimeout(() => {
           setDetectedTheme(detectSystemTheme());

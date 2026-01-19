@@ -323,7 +323,7 @@ export interface ResponsiveTypographySystem {
 
 export const useResponsiveTypography = (): ResponsiveTypographySystem => {
   const { rf, isSmallDevice, isMediumDevice, isLargeDevice } = useResponsive();
-  
+
   // Fator de escala baseado no tamanho do dispositivo
   const getScaleFactor = () => {
     if (isSmallDevice) return 0.3; // Escala conservadora para telas pequenas
@@ -331,42 +331,64 @@ export const useResponsiveTypography = (): ResponsiveTypographySystem => {
     if (isLargeDevice) return 0.7; // Escala maior para tablets
     return 0.5;
   };
-  
+
   const scaleFactor = getScaleFactor();
-  
+
   // Função para aplicar responsividade a um estilo
   const makeResponsive = (style: TextStyle): TextStyle => ({
     ...style,
     fontSize: style.fontSize ? rf(style.fontSize, scaleFactor) : style.fontSize,
-    lineHeight: style.lineHeight ? rf(style.lineHeight, scaleFactor) : style.lineHeight,
+    lineHeight: style.lineHeight
+      ? rf(style.lineHeight, scaleFactor)
+      : style.lineHeight,
   });
-  
+
   // Aplicar responsividade a todas as categorias
   const responsiveDisplay = Object.keys(display).reduce((acc, key) => {
-    acc[key as keyof typeof display] = makeResponsive(display[key as keyof typeof display]);
+    acc[key as keyof typeof display] = makeResponsive(
+      display[key as keyof typeof display]
+    );
     return acc;
-  }, {} as { [K in keyof typeof display]: TextStyle });
-  
+  }, {} as Record<string, TextStyle>) as {
+    [K in keyof typeof display]: TextStyle;
+  };
+
   const responsiveHeading = Object.keys(heading).reduce((acc, key) => {
-    acc[key as keyof typeof heading] = makeResponsive(heading[key as keyof typeof heading]);
+    acc[key as keyof typeof heading] = makeResponsive(
+      heading[key as keyof typeof heading]
+    );
     return acc;
-  }, {} as { [K in keyof typeof heading]: TextStyle });
-  
+  }, {} as Record<string, TextStyle>) as {
+    [K in keyof typeof heading]: TextStyle;
+  };
+
   const responsiveBody = Object.keys(body).reduce((acc, key) => {
-    acc[key as keyof typeof body] = makeResponsive(body[key as keyof typeof body]);
+    acc[key as keyof typeof body] = makeResponsive(
+      body[key as keyof typeof body]
+    );
     return acc;
-  }, {} as { [K in keyof typeof body]: TextStyle });
-  
+  }, {} as Record<string, TextStyle>) as {
+    [K in keyof typeof body]: TextStyle;
+  };
+
   const responsiveButton = Object.keys(button).reduce((acc, key) => {
-    acc[key as keyof typeof button] = makeResponsive(button[key as keyof typeof button]);
+    acc[key as keyof typeof button] = makeResponsive(
+      button[key as keyof typeof button]
+    );
     return acc;
-  }, {} as { [K in keyof typeof button]: TextStyle });
-  
+  }, {} as Record<string, TextStyle>) as {
+    [K in keyof typeof button]: TextStyle;
+  };
+
   const responsiveCaption = Object.keys(caption).reduce((acc, key) => {
-    acc[key as keyof typeof caption] = makeResponsive(caption[key as keyof typeof caption]);
+    acc[key as keyof typeof caption] = makeResponsive(
+      caption[key as keyof typeof caption]
+    );
     return acc;
-  }, {} as { [K in keyof typeof caption]: TextStyle });
-  
+  }, {} as Record<string, TextStyle>) as {
+    [K in keyof typeof caption]: TextStyle;
+  };
+
   return {
     display,
     heading,

@@ -199,8 +199,11 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
       if (err instanceof Error && err.name === 'AbortError') {
         logger.error('OnboardingSignUp', `⏱️ ${provider} request timeout`, {
           error: 'Request took more than 30 seconds',
-          suggestion:
-            `Ensure Node-RED is running on http://${process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13'}:${process.env.EXPO_PUBLIC_NODERED_PORT || '1880'} and reachable from your device`,
+          suggestion: `Ensure Node-RED is running on http://${
+            process.env.EXPO_PUBLIC_NODERED_HOST || '192.168.1.13'
+          }:${
+            process.env.EXPO_PUBLIC_NODERED_PORT || '1880'
+          } and reachable from your device`,
         });
         Alert.alert(
           t('common.error'),
@@ -216,7 +219,10 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
           endpoint: getSocialAuthUrl(provider),
         });
         const errorMsg = err instanceof Error ? err.message : String(err);
-        Alert.alert(t('common.error'), `${t('errors.networkError')}: ${errorMsg}`);
+        Alert.alert(
+          t('common.error'),
+          `${t('errors.networkError')}: ${errorMsg}`
+        );
       }
     }
   };
