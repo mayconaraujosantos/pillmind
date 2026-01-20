@@ -1,5 +1,5 @@
-import { authService } from '../auth.service';
 import { apiService } from '@core/services/api.service';
+import { authService } from '../auth.service';
 
 jest.mock('@core/services/api.service');
 
@@ -34,10 +34,7 @@ describe('AuthService', () => {
 
       const result = await authService.signUp(signUpData);
 
-      expect(mockApiService.post).toHaveBeenCalledWith(
-        '/auth/signup',
-        signUpData
-      );
+      expect(mockApiService.post).toHaveBeenCalledWith('/signup', signUpData);
       expect(result).toEqual(mockResponse);
     });
 
@@ -88,10 +85,7 @@ describe('AuthService', () => {
 
       const result = await authService.signIn(signInData);
 
-      expect(mockApiService.post).toHaveBeenCalledWith(
-        '/auth/signin',
-        signInData
-      );
+      expect(mockApiService.post).toHaveBeenCalledWith('/signin', signInData);
       expect(result).toEqual(mockResponse);
     });
 

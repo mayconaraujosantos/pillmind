@@ -6,6 +6,7 @@ import { SocialAuthModal } from './SocialAuthModal';
 import { useAuth } from '../hooks/useAuth';
 import { useSocialAuth } from '../hooks/useSocialAuth';
 import { logger } from '@shared/utils/logger';
+import { useAuthContext } from '../contexts/AuthContext';
 
 interface OnboardingSignUpProps {
   onSignUpComplete?: () => void;
@@ -18,7 +19,9 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
 }) => {
   const { t } = useTranslation();
   const { signUp, loading, error: authError } = useAuth();
+  const authContext = useAuthContext();
 
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -29,11 +32,13 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
   const handleSignUp = async () => {
     logger.info('OnboardingSignUp', '🔄 Sign up button pressed', {
       email,
+      name,
       passwordLength: password.length,
     });
 
-    if (!email || !password) {
+    if (!name || !email || !password) {
       logger.warn('OnboardingSignUp', '⚠️ Missing required fields', {
+        name: name ? 'filled' : 'empty',
         email: email ? 'filled' : 'empty',
         password: password ? 'filled' : 'empty',
       });
@@ -41,16 +46,20 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
       return;
     }
 
-    logger.debug('OnboardingSignUp', '📤 Calling signUp with data', { email });
-    const result = await signUp({ email, password });
+    logger.debug('OnboardingSignUp', '📤 Calling signUp with data', {
+      email,
+      name,
+    });
+    const result = await signUp({ name, email, password });
 
     if (result.success && result.data) {
       logger.info('OnboardingSignUp', '✅ Sign up successful', {
         email,
         userId: result.data?.user.id,
       });
-      Alert.alert(t('common.success'), t('errors.accountCreatedSuccess'));
-      onGoToSignIn?.();
+      // Auto-login after signup
+      await authContext.login(result.data);
+      onSignUpComplete?.();
     } else {
       const errorMsg = authError || t('errors.failedToCreateAccount');
       logger.error('OnboardingSignUp', '❌ Sign up failed', {
@@ -74,6 +83,14 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
         subtitle={t('onboarding.signUp.subtitle')}
         dividerLabel={t('onboarding.signUp.or')}
         fields={[
+          {
+            key: 'name',
+            label: t('onboarding.signUp.name'),
+            placeholder: t('onboarding.signUp.namePlaceholder'),
+            value: name,
+            onChangeText: setName,
+            autoCapitalize: 'words',
+          },
           {
             key: 'email',
             label: t('onboarding.signUp.email'),
