@@ -140,6 +140,7 @@ export const ModernInput: React.FC<ModernInputProps> = ({
                 : theme.colors.textSecondary,
             },
           ]}
+          testID="modern-input-label"
         >
           {label}
           {required && <Text style={{ color: theme.colors.error }}> *</Text>}
@@ -166,10 +167,15 @@ export const ModernInput: React.FC<ModernInputProps> = ({
             },
           ]}
         >
-          {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
+          {leftIcon && (
+            <View style={styles.leftIcon} testID="left-icon">
+              {leftIcon}
+            </View>
+          )}
 
           <TextInput
             ref={inputRef}
+            testID="modern-input"
             style={[
               styles.input,
               sizeStyles.input,
@@ -185,7 +191,11 @@ export const ModernInput: React.FC<ModernInputProps> = ({
             {...props}
           />
 
-          {rightIcon && <View style={styles.rightIcon}>{rightIcon}</View>}
+          {rightIcon && (
+            <View style={styles.rightIcon} testID="right-icon">
+              {rightIcon}
+            </View>
+          )}
         </Animated.View>
       </TouchableWithoutFeedback>
 
@@ -196,14 +206,19 @@ export const ModernInput: React.FC<ModernInputProps> = ({
             styles.messageContainer,
             hasValidationError && { opacity: pulseAnimation },
           ]}
+          testID="message-container"
         >
           {displayError ? (
-            <Text style={[styles.errorText, { color: theme.colors.error }]}>
+            <Text
+              style={[styles.errorText, { color: theme.colors.error }]}
+              testID="error-text"
+            >
               {displayError}
             </Text>
           ) : (
             <Text
               style={[styles.hintText, { color: theme.colors.textSecondary }]}
+              testID="hint-text"
             >
               {hint}
             </Text>

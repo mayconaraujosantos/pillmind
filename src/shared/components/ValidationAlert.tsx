@@ -136,7 +136,11 @@ export const ValidationAlert: React.FC<ValidationAlertProps> = ({
           color={typeConfig.iconColor}
         />
 
-        <Text style={styles.message} numberOfLines={2}>
+        <Text
+          style={styles.message}
+          numberOfLines={2}
+          testID="validation-message"
+        >
           {message}
         </Text>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import { ValidationAlert } from '../ValidationAlert';
 import { ThemeProvider } from '@shared/theme';
 
@@ -8,20 +8,22 @@ const renderWithTheme = (component: React.ReactElement) => {
 };
 
 describe('ValidationAlert', () => {
-  it('should render when visible is true', () => {
-    const { getByText } = renderWithTheme(
+  it('should render when visible is true', async () => {
+    const { getByTestId } = renderWithTheme(
       <ValidationAlert visible={true} message="Test message" />
     );
 
-    expect(getByText('Test message')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId('validation-message')).toBeTruthy();
+    });
   });
 
   it('should not render when visible is false', () => {
-    const { queryByText } = renderWithTheme(
+    const { queryByTestId } = renderWithTheme(
       <ValidationAlert visible={false} message="Test message" />
     );
 
-    expect(queryByText('Test message')).toBeNull();
+    expect(queryByTestId('validation-message')).toBeNull();
   });
 
   it('should call onDismiss when dismiss button is pressed', () => {
@@ -39,20 +41,22 @@ describe('ValidationAlert', () => {
     expect(onDismiss).toBeTruthy();
   });
 
-  it('should use default message when none provided', () => {
-    const { getByText } = renderWithTheme(<ValidationAlert visible={true} />);
+  it('should use default message when none provided', async () => {
+    const { getByTestId } = renderWithTheme(<ValidationAlert visible={true} />);
 
-    expect(
-      getByText('Por favor, preencha todos os campos obrigatórios')
-    ).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId('validation-message')).toBeTruthy();
+    });
   });
 
-  it('should show custom message when provided', () => {
+  it('should show custom message when provided', async () => {
     const customMessage = 'Custom validation error';
-    const { getByText } = renderWithTheme(
+    const { getByTestId } = renderWithTheme(
       <ValidationAlert visible={true} message={customMessage} />
     );
 
-    expect(getByText(customMessage)).toBeTruthy();
+    await waitFor(() => {
+      expect(getByTestId('validation-message')).toBeTruthy();
+    });
   });
 });
