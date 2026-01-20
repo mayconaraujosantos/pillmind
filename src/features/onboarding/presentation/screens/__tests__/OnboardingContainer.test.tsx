@@ -14,7 +14,7 @@ jest.mock('../../hooks/useOnboardingScroll', () => ({
 const mockUseOnboardingScroll = () =>
   require('../../hooks/useOnboardingScroll').useOnboardingScroll as jest.Mock;
 
-const renderWithProviders = (component: React.ReactElement) => {
+const renderWithLocalProviders = (component: React.ReactElement) => {
   return render(
     <WithThemeProvider>
       <AuthProvider>{component}</AuthProvider>
@@ -28,7 +28,7 @@ describe('OnboardingContainer', () => {
       currentStep: 0,
       handleScroll: jest.fn(),
     });
-    const { getByText } = renderWithProviders(<OnboardingContainer />);
+    const { getByText } = renderWithLocalProviders(<OnboardingContainer />);
 
     await waitFor(() => {
       expect(getByText('Skip')).toBeTruthy();
@@ -42,7 +42,7 @@ describe('OnboardingContainer', () => {
       handleScroll: jest.fn(),
     });
     const onSkip = jest.fn();
-    const { getByText } = renderWithProviders(
+    const { getByText } = renderWithLocalProviders(
       <OnboardingContainer onSkip={onSkip} />
     );
 
@@ -58,7 +58,7 @@ describe('OnboardingContainer', () => {
       currentStep: 2,
       handleScroll: jest.fn(),
     });
-    const { getByText } = renderWithProviders(<OnboardingContainer />);
+    const { getByText } = renderWithLocalProviders(<OnboardingContainer />);
 
     await waitFor(() => {
       expect(getByText('Create an account')).toBeTruthy();
@@ -72,7 +72,7 @@ describe('OnboardingContainer', () => {
       handleScroll: jest.fn(),
     });
     const onFinish = jest.fn();
-    const { getByText } = renderWithProviders(
+    const { getByText } = renderWithLocalProviders(
       <OnboardingContainer onFinish={onFinish} />
     );
 
@@ -91,7 +91,7 @@ describe('OnboardingContainer', () => {
       handleScroll: jest.fn(),
     });
     const onFinish = jest.fn();
-    const { getByText } = renderWithProviders(
+    const { getByText } = renderWithLocalProviders(
       <OnboardingContainer onFinish={onFinish} />
     );
 
@@ -109,7 +109,7 @@ describe('OnboardingContainer', () => {
       currentStep: 0,
       handleScroll: jest.fn(),
     });
-    renderWithProviders(<OnboardingContainer />);
+    renderWithLocalProviders(<OnboardingContainer />);
     // Se não houver erros ao renderizar, o estado inicial está correto
     await waitFor(() => {
       expect(true).toBe(true);
@@ -121,7 +121,7 @@ describe('OnboardingContainer', () => {
       currentStep: 2,
       handleScroll: jest.fn(),
     });
-    const { getByText } = renderWithProviders(<OnboardingContainer />);
+    const { getByText } = renderWithLocalProviders(<OnboardingContainer />);
 
     // At step 2, the authentication screen is rendered with "Create an account" and "Login" buttons
     await waitFor(() => {
@@ -142,7 +142,7 @@ describe('OnboardingContainer', () => {
       currentStep: 0,
       handleScroll: jest.fn(),
     });
-    const { toJSON } = renderWithProviders(<OnboardingContainer />);
+    const { toJSON } = renderWithLocalProviders(<OnboardingContainer />);
 
     await waitFor(() => {
       expect(toJSON()).toMatchSnapshot();

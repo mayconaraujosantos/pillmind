@@ -15,29 +15,30 @@ jest.mock('@features/onboarding/presentation/hooks/useAuth', () => ({
   })),
 }));
 
-jest.mock('@shared/i18n', () => ({
-  useTranslation: jest.fn(() => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'account.title': 'Profile',
-        'account.user': 'User',
-        'account.email': 'usuario@pillmind.com',
-        'account.appearance': 'Appearance',
-        'account.settings': 'Settings',
-        'account.notifications': 'Notifications',
-        'account.privacy': 'Privacy',
-        'account.about': 'About',
-        'account.debugTheme': '🐛 Debug: View theme detection',
-        'common.logout': 'Logout',
-        'common.cancel': 'Cancel',
-        'common.error': 'Error',
-      };
-      return translations[key] || key;
-    },
-  })),
-}));
+jest.mock('@shared/i18n', () => {
+  const translations = {
+    'account.title': 'Profile',
+    'account.user': 'User',
+    'account.email': 'usuario@pillmind.com',
+    'account.appearance': 'Appearance',
+    'account.settings': 'Settings',
+    'account.notifications': 'Notifications',
+    'account.privacy': 'Privacy',
+    'account.about': 'About',
+    'account.debugTheme': '🐛 Debug: View theme detection',
+    'common.logout': 'Logout',
+    'common.cancel': 'Cancel',
+    'common.error': 'Error',
+  };
+  return {
+    useTranslation: () => ({
+      t: (key: keyof typeof translations) => translations[key] || key,
+      i18n: { language: 'en' },
+    }),
+  };
+});
 
-const renderWithProviders = (component: React.ReactElement) => {
+const renderWithLocalProviders = (component: React.ReactElement) => {
   return render(
     <ThemeProvider>
       <AuthProvider>{component}</AuthProvider>
@@ -52,7 +53,9 @@ describe('AccountScreen', () => {
   });
 
   it('should render user profile section', async () => {
-    const { findByText, getByText } = renderWithProviders(<AccountScreen />);
+    const { findByText, getByText } = renderWithLocalProviders(
+      <AccountScreen />
+    );
 
     // Aguardar o AuthContext carregar e o componente renderizar
     const profileTitle = await findByText('Profile', {}, { timeout: 3000 });
@@ -63,7 +66,7 @@ describe('AccountScreen', () => {
   });
 
   it('should render theme selector section', async () => {
-    const { getByText, getAllByText, findByText } = renderWithProviders(
+    const { getAllByText, findByText, getByTestId } = renderWithLocalProviders(
       <AccountScreen />
     );
 
@@ -74,14 +77,16 @@ describe('AccountScreen', () => {
     // O ThemeSelector usa "Aparência" hardcoded, mas o AccountScreen usa t('account.appearance') que é "Appearance"
     expect(getAllByText('Appearance').length).toBeGreaterThan(0);
 
-    // O ThemeSelector usa textos hardcoded em português
-    expect(getByText('Automático')).toBeTruthy();
-    expect(getByText('Claro')).toBeTruthy();
-    expect(getByText('Escuro')).toBeTruthy();
+    // O ThemeSelector agora usa i18n, então vamos verificar se os testIDs estão presentes
+    expect(getByTestId('theme-option-automatic')).toBeTruthy();
+    expect(getByTestId('theme-option-light')).toBeTruthy();
+    expect(getByTestId('theme-option-dark')).toBeTruthy();
   });
 
   it('should render settings options', async () => {
-    const { getByText, findByText } = renderWithProviders(<AccountScreen />);
+    const { getByText, findByText } = renderWithLocalProviders(
+      <AccountScreen />
+    );
 
     // Aguardar renderização
     await findByText('Profile', {}, { timeout: 3000 });
@@ -93,7 +98,7 @@ describe('AccountScreen', () => {
   });
 
   it('should render logout button', async () => {
-    const { findByText } = renderWithProviders(<AccountScreen />);
+    const { findByText } = renderWithLocalProviders(<AccountScreen />);
 
     // Aguardar renderização
     await findByText('Profile', {}, { timeout: 3000 });
@@ -103,14 +108,11 @@ describe('AccountScreen', () => {
   });
 
   it('should trigger debug alert with theme info', async () => {
-    const globalWithAlert = globalThis as typeof globalThis & {
-      alert?: (...args: unknown[]) => unknown;
-    };
-    const originalAlert = globalWithAlert.alert;
+    const originalAlert: typeof globalThis.alert = globalThis.alert;
     const alertMock = jest.fn();
-    globalWithAlert.alert = alertMock;
+    globalThis.alert = alertMock;
 
-    const { findByText } = renderWithProviders(<AccountScreen />);
+    const { findByText } = renderWithLocalProviders(<AccountScreen />);
 
     // Aguardar renderização
     await findByText('Profile', {}, { timeout: 3000 });
@@ -127,10 +129,6 @@ describe('AccountScreen', () => {
 
     expect(alertMock).toHaveBeenCalled();
 
-    if (originalAlert) {
-      globalWithAlert.alert = originalAlert;
-    } else {
-      globalWithAlert.alert = () => undefined;
-    }
+    globalThis.alert = originalAlert ?? (() => undefined);
   });
 });

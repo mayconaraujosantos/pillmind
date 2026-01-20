@@ -1,15 +1,49 @@
 import { ApiResponse, apiService } from '@core/services/api.service';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { logger } from '@shared/utils/logger';
 import { AuthResponse } from '../models/auth.model';
+
+type GoogleSigninType =
+  typeof import('@react-native-google-signin/google-signin').GoogleSignin;
+
+// Lazy import Google Sign-In to avoid crash in Expo Go
+let GoogleSignin: GoogleSigninType | null = null;
+try {
+  GoogleSignin =
+    require('@react-native-google-signin/google-signin').GoogleSignin;
+} catch {
+  logger.warn(
+    'OAuthService',
+    '⚠️ Google Sign-In module not available (requires Custom Development Build)'
+  );
+}
+
+/**
+ * Verifica se o módulo Google Sign-In está disponível
+ */
+const isGoogleSignInAvailable = (): boolean => {
+  return GoogleSignin !== null;
+};
 
 /**
  * Configuração do Google Sign-In
  * Deve ser chamada no início do app (App.tsx)
  */
 export const configureGoogleSignIn = (webClientId: string) => {
+  if (!isGoogleSignInAvailable()) {
+    logger.warn(
+      'OAuthService',
+      '⚠️ Skipping Google Sign-In configuration (module not available)'
+    );
+    return;
+  }
+
+  const googleSignin = GoogleSignin;
+  if (!googleSignin) {
+    return;
+  }
+
   try {
-    GoogleSignin.configure({
+    googleSignin.configure({
       webClientId, // Web Client ID do Google Cloud Console
       offlineAccess: true, // Para obter refresh token
       forceCodeForRefreshToken: true,
@@ -33,16 +67,45 @@ class OAuthService {
    * O backend decide automaticamente se cria ou autentica
    */
   async signInWithGoogle(): Promise<ApiResponse<AuthResponse>> {
+    if (!isGoogleSignInAvailable()) {
+      logger.error(
+        'OAuthService',
+        '❌ Google Sign-In not available (requires Custom Development Build)',
+        {
+          reason: 'MODULE_NOT_AVAILABLE',
+        }
+      );
+      return {
+        success: false,
+        error: {
+          message:
+            'Google Sign-In requires Custom Development Build. Use email/password for now.',
+          code: 'MODULE_NOT_AVAILABLE',
+        },
+      };
+    }
+
+    const googleSignin = GoogleSignin;
+    if (!googleSignin) {
+      return {
+        success: false,
+        error: {
+          message: 'Google Sign-In module not loaded',
+          code: 'MODULE_NOT_AVAILABLE',
+        },
+      };
+    }
+
     try {
       logger.info('OAuthService', '🔐 Google Sign-In started');
 
       // 1. Verifica se Google Play Services está disponível
-      await GoogleSignin.hasPlayServices({
+      await googleSignin.hasPlayServices({
         showPlayServicesUpdateDialog: true,
       });
 
       // 2. Abre popup do Google para autenticação
-      const userInfo = await GoogleSignin.signIn();
+      const userInfo = await googleSignin.signIn();
 
       logger.info('OAuthService', '✅ Google authentication successful', {
         email: userInfo.data?.user.email,
@@ -73,6 +136,14 @@ class OAuthService {
         idToken,
       });
 
+      // Log completo da resposta do backend para debug
+      logger.debug('OAuthService', '📦 Backend response received', {
+        success: response.success,
+        hasData: !!response.data,
+        dataKeys: response.data ? Object.keys(response.data) : [],
+        fullData: response.data,
+      });
+
       if (response.success && response.data) {
         // Mapeia a resposta do backend Java para o formato esperado pelo frontend
         const backendData = response.data;
@@ -91,10 +162,16 @@ class OAuthService {
                 token: backendData.accessToken,
               };
 
-        logger.info('OAuthService', '✅ Backend authentication successful', {
-          userId: mappedResponse.user.id,
-          email: mappedResponse.user.email,
-        });
+        logger.info(
+          'OAuthService',
+          '✅ Backend authentication successful - User created/authenticated',
+          {
+            userId: mappedResponse.user.id,
+            userName: mappedResponse.user.name,
+            email: mappedResponse.user.email,
+            hasToken: !!mappedResponse.token,
+          }
+        );
 
         return {
           success: true,
@@ -193,9 +270,18 @@ class OAuthService {
    * Faz logout do Google (limpa sessão local)
    */
   async signOutGoogle(): Promise<void> {
+    const googleSignin = GoogleSignin;
+    if (!googleSignin) {
+      logger.warn(
+        'OAuthService',
+        '⚠️ Google Sign-In not available, skipping sign out'
+      );
+      return;
+    }
+
     try {
       logger.info('OAuthService', '🚪 Google Sign-Out started');
-      await GoogleSignin.signOut();
+      await googleSignin.signOut();
       logger.info('OAuthService', '✅ Google Sign-Out successful');
     } catch (error) {
       logger.error('OAuthService', '❌ Google Sign-Out failed', { error });
@@ -207,9 +293,18 @@ class OAuthService {
    * Revoga acesso do Google (remove permissões completamente)
    */
   async revokeGoogleAccess(): Promise<void> {
+    const googleSignin = GoogleSignin;
+    if (!googleSignin) {
+      logger.warn(
+        'OAuthService',
+        '⚠️ Google Sign-In not available, skipping revoke access'
+      );
+      return;
+    }
+
     try {
       logger.info('OAuthService', '🔐 Revoking Google access');
-      await GoogleSignin.revokeAccess();
+      await googleSignin.revokeAccess();
       logger.info('OAuthService', '✅ Google access revoked');
     } catch (error) {
       logger.error('OAuthService', '❌ Failed to revoke Google access', {
@@ -223,8 +318,13 @@ class OAuthService {
    * Verifica se usuário está logado no Google
    */
   async isSignedIn(): Promise<boolean> {
+    const googleSignin = GoogleSignin;
+    if (!googleSignin) {
+      return false;
+    }
+
     try {
-      const isSignedIn = await GoogleSignin.hasPreviousSignIn();
+      const isSignedIn = await googleSignin.hasPreviousSignIn();
       return isSignedIn;
     } catch (error) {
       logger.error('OAuthService', '❌ Failed to check Google sign-in status', {
@@ -238,8 +338,13 @@ class OAuthService {
    * Pega informações do usuário logado no Google (se houver)
    */
   async getCurrentUser() {
+    const googleSignin = GoogleSignin;
+    if (!googleSignin) {
+      return null;
+    }
+
     try {
-      const userInfo = await GoogleSignin.getCurrentUser();
+      const userInfo = await googleSignin.getCurrentUser();
       return userInfo;
     } catch (error) {
       logger.error('OAuthService', '❌ Failed to get current Google user', {
