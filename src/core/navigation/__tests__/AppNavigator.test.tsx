@@ -1,6 +1,39 @@
 import { render } from '@testing-library/react-native';
 import React from 'react';
 import { AppNavigator } from '../AppNavigator';
+import { ThemeProvider } from '@shared/theme';
+
+// Lightweight theme mock to avoid async ThemeProvider side effects in tests
+jest.mock('@shared/theme', () => {
+  const React = require('react');
+  const mockTheme = {
+    colors: {
+      primary: '#000',
+      text: '#000',
+      textSecondary: '#666',
+      background: '#fff',
+      border: '#ccc',
+      surface: '#f5f5f5',
+      placeholder: '#999',
+      error: '#f00',
+    },
+  };
+
+  return {
+    ThemeProvider: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    useTheme: () => ({
+      theme: mockTheme,
+      isDark: false,
+      setThemeMode: jest.fn(),
+      toggleTheme: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('@shared/i18n', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
 
 // Mock dependencies
 jest.mock('@react-navigation/native', () => ({
@@ -125,17 +158,21 @@ describe('AppNavigator', () => {
     jest.clearAllMocks();
   });
 
+  const renderWithProviders = (component: React.ReactElement) => {
+    return render(<ThemeProvider>{component}</ThemeProvider>);
+  };
+
   it('renders without crashing', () => {
-    expect(() => render(<AppNavigator />)).not.toThrow();
+    expect(() => renderWithProviders(<AppNavigator />)).not.toThrow();
   });
 
   it('should have correct structure', () => {
-    const { toJSON } = render(<AppNavigator />);
+    const { toJSON } = renderWithProviders(<AppNavigator />);
     expect(toJSON()).toBeTruthy();
   });
 
   it('should render all screens', () => {
-    const { getByTestId } = render(<AppNavigator />);
+    const { getByTestId } = renderWithProviders(<AppNavigator />);
     expect(getByTestId('home-screen')).toBeTruthy();
     expect(getByTestId('appointments-screen')).toBeTruthy();
     expect(getByTestId('account-screen')).toBeTruthy();
@@ -144,7 +181,7 @@ describe('AppNavigator', () => {
   });
 
   it('should render all screen texts', () => {
-    const { getByText } = render(<AppNavigator />);
+    const { getByText } = renderWithProviders(<AppNavigator />);
     expect(getByText('Home Screen')).toBeTruthy();
     expect(getByText('Appointments Screen')).toBeTruthy();
     expect(getByText('Account Screen')).toBeTruthy();

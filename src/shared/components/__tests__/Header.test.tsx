@@ -1,6 +1,42 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { Header } from '../Header';
+import { ThemeProvider } from '@shared/theme';
+
+// Lightweight theme mock to avoid async ThemeProvider side effects in tests
+jest.mock('@shared/theme', () => {
+  const React = require('react');
+  const mockTheme = {
+    colors: {
+      primary: '#000',
+      text: '#000',
+      textSecondary: '#666',
+      background: '#fff',
+      border: '#ccc',
+      surface: '#f5f5f5',
+      placeholder: '#999',
+      error: '#f00',
+    },
+  };
+
+  return {
+    ThemeProvider: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    useTheme: () => ({
+      theme: mockTheme,
+      isDark: false,
+      setThemeMode: jest.fn(),
+      toggleTheme: jest.fn(),
+    }),
+  };
+});
+
+jest.mock('@shared/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) => (key === 'account.user' ? 'Usuário' : key),
+    i18n: { language: 'pt-BR' },
+  }),
+}));
 
 // Mock safe area context
 jest.mock('react-native-safe-area-context', () => ({
@@ -21,26 +57,30 @@ jest.mock('@expo/vector-icons', () => ({
 }));
 
 describe('Header', () => {
+  const renderWithProviders = (component: React.ReactElement) => {
+    return render(<ThemeProvider>{component}</ThemeProvider>);
+  };
+
   it('should render with default userName', () => {
-    const { getByText } = render(<Header />);
+    const { getByText } = renderWithProviders(<Header />);
 
     expect(getByText('Usuário')).toBeTruthy();
   });
 
   it('should render with custom userName', () => {
-    const { getByText } = render(<Header userName="John Doe" />);
+    const { getByText } = renderWithProviders(<Header userName="John Doe" />);
 
     expect(getByText('John Doe')).toBeTruthy();
   });
 
   it('should render avatar with first letter of userName', () => {
-    const { getByText } = render(<Header userName="John" />);
+    const { getByText } = renderWithProviders(<Header userName="John" />);
 
     expect(getByText('J')).toBeTruthy();
   });
 
   it('should render avatar when userAvatar is provided', () => {
-    const { getByText } = render(
+    const { getByText } = renderWithProviders(
       <Header userName="John" userAvatar="avatar-url" />
     );
 
@@ -50,7 +90,7 @@ describe('Header', () => {
 
   it('should call onProfilePress when user section is pressed', () => {
     const onProfilePress = jest.fn();
-    const { getByText } = render(
+    const { getByText } = renderWithProviders(
       <Header userName="John" onProfilePress={onProfilePress} />
     );
 
@@ -60,7 +100,7 @@ describe('Header', () => {
 
   it('should call onNotificationPress when notification button is pressed', () => {
     const onNotificationPress = jest.fn();
-    const { getByTestId } = render(
+    const { getByTestId } = renderWithProviders(
       <Header onNotificationPress={onNotificationPress} />
     );
 
@@ -69,7 +109,7 @@ describe('Header', () => {
   });
 
   it('should render notification icon', () => {
-    const { getByTestId } = render(<Header />);
+    const { getByTestId } = renderWithProviders(<Header />);
 
     expect(getByTestId('icon-notifications-outline')).toBeTruthy();
   });
