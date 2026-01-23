@@ -4,6 +4,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { HomeScreen } from '../HomeScreen';
 import { ThemeProvider } from '@shared/theme';
 
+// Mock i18n
+jest.mock('@shared/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'home.noMedicationsScheduled': 'No medications scheduled',
+        'home.addFirstMedication': 'Add your first medication to get started',
+        'home.addMedication': 'Add Medication',
+        'home.viewAll': 'View All',
+        'home.viewLess': 'View Less',
+        'home.todayLabel': 'Today',
+        'home.dateLabel': 'Date',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 jest.mock('@features/onboarding', () => ({
   useOnboardingStorage: () => ({
     resetOnboarding: jest.fn(),
@@ -43,11 +61,13 @@ describe('HomeScreen', () => {
   });
 
   it('should render home screen with welcome message', async () => {
-    const { getByText } = renderWithTheme(<HomeScreen />);
+    const { getByText, getByTestId } = renderWithTheme(<HomeScreen />);
 
     await waitFor(() => {
-      expect(getByText('PillMind Home')).toBeTruthy();
-      expect(getByText('Welcome to your medication assistant!')).toBeTruthy();
+      // Verifica se o ScrollView est\u00e1 presente
+      expect(getByTestId('home-scroll-view')).toBeTruthy();
+      // Como n\u00e3o h\u00e1 medicamentos, deve mostrar o empty state
+      expect(getByText('No medications scheduled')).toBeTruthy();
     });
   });
 
