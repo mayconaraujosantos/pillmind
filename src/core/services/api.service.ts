@@ -56,21 +56,23 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
+        const errorMessage = data?.message || data?.error || 'Request failed';
+
         logger.warn('ApiService', `⚠️ API returned error`, {
           requestId,
           endpoint,
           status: response.status,
           statusText: response.statusText,
-          errorMessage: data.message,
+          errorMessage,
           duration,
         });
 
         return {
           success: false,
           error: {
-            message: data.message || 'Request failed',
+            message: errorMessage,
             status: response.status,
-            code: data.code,
+            code: data?.code,
           },
         };
       }
@@ -144,29 +146,47 @@ class ApiService {
     }
   }
 
-  async get<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async get<T>(
+    endpoint: string,
+    options?: RequestInit
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'GET',
+      ...options,
     });
   }
 
-  async post<T>(endpoint: string, body?: unknown): Promise<ApiResponse<T>> {
+  async post<T>(
+    endpoint: string,
+    body?: unknown,
+    options?: RequestInit
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: JSON.stringify(body),
+      ...options,
     });
   }
 
-  async put<T>(endpoint: string, body?: unknown): Promise<ApiResponse<T>> {
+  async put<T>(
+    endpoint: string,
+    body?: unknown,
+    options?: RequestInit
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: JSON.stringify(body),
+      ...options,
     });
   }
 
-  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async delete<T>(
+    endpoint: string,
+    options?: RequestInit
+  ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'DELETE',
+      ...options,
     });
   }
 
