@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '@shared/i18n';
@@ -10,13 +10,17 @@ import { adaptiveSpacing } from '@shared/utils/dimensions';
 interface HeaderProps {
   userName?: string;
   userAvatar?: string;
+  greeting?: string;
+  subtitle?: string;
   onNotificationPress?: () => void;
   onProfilePress?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   userName,
-  userAvatar: _userAvatar,
+  userAvatar,
+  greeting,
+  subtitle,
   onNotificationPress,
   onProfilePress,
 }) => {
@@ -25,6 +29,8 @@ export const Header: React.FC<HeaderProps> = ({
   const { theme, isDark: _isDark } = useTheme();
 
   const displayName = userName || t('account.user');
+  const titleText = greeting || t('home.hello', { name: displayName });
+  const subtitleText = subtitle || t('home.welcomeShort');
 
   const dynamicStyles = {
     avatar: {
@@ -39,6 +45,10 @@ export const Header: React.FC<HeaderProps> = ({
       ...styles.userName,
       color: theme.colors.text,
     },
+    userSubtitle: {
+      ...styles.userSubtitle,
+      color: theme.colors.textSecondary,
+    },
   };
 
   return (
@@ -48,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
         {
           paddingTop: Math.max(insets.top, 0),
           backgroundColor: theme.colors.background,
-          borderBottomColor: theme.colors.border,
+          borderBottomColor: 'transparent',
         },
       ]}
     >
@@ -59,16 +69,25 @@ export const Header: React.FC<HeaderProps> = ({
           activeOpacity={0.7}
         >
           <View style={dynamicStyles.avatar}>
-            {/* TODO: Adicionar Image quando userAvatar for fornecido */}
-            <Text style={dynamicStyles.avatarText}>
-              {displayName.charAt(0).toUpperCase()}
-            </Text>
+            {userAvatar ? (
+              <Image source={{ uri: userAvatar }} style={styles.avatarImage} />
+            ) : (
+              <Text style={dynamicStyles.avatarText}>
+                {displayName.charAt(0).toUpperCase()}
+              </Text>
+            )}
           </View>
-          <Text style={dynamicStyles.userName}>{displayName}</Text>
+          <View>
+            <Text style={dynamicStyles.userName}>{titleText}</Text>
+            <Text style={dynamicStyles.userSubtitle}>{subtitleText}</Text>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.notificationButton}
+          style={[
+            styles.notificationButton,
+            { backgroundColor: theme.colors.surface },
+          ]}
           onPress={onNotificationPress}
           activeOpacity={0.7}
         >
@@ -87,8 +106,7 @@ export const Header: React.FC<HeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: adaptiveSpacing.lg,
-    paddingVertical: COMMON_STYLES.padding.vertical.medium,
-    borderBottomWidth: 1,
+    paddingBottom: adaptiveSpacing.md,
     alignItems: 'center',
   },
   content: {
@@ -104,22 +122,42 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: COMMON_STYLES.padding.horizontal.small,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   avatarText: {
-    fontSize: COMMON_STYLES.fontSize.large,
+    fontSize: 18,
     fontWeight: COMMON_STYLES.fontWeight.bold,
   },
   userName: {
-    fontSize: COMMON_STYLES.fontSize.large,
+    fontSize: 18,
     fontWeight: COMMON_STYLES.fontWeight.semibold,
   },
+  userSubtitle: {
+    fontSize: 13,
+    marginTop: 2,
+  },
   notificationButton: {
-    padding: COMMON_STYLES.padding.vertical.small,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
 });
