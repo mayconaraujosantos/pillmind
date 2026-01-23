@@ -12,6 +12,7 @@ type BackendAuthResponse = {
   id: string;
   name: string;
   email: string;
+  pictureUrl?: string | null;
 };
 
 class AuthService {
@@ -23,16 +24,17 @@ class AuthService {
   ): AuthResponse {
     // Check if already in correct format
     if ('user' in backendData && 'token' in backendData) {
-      return backendData as AuthResponse;
+      return backendData;
     }
 
     // Map backend format to frontend format
-    const backend = backendData as BackendAuthResponse;
+    const backend = backendData;
     return {
       user: {
         id: backend.id,
         name: backend.name,
         email: backend.email,
+        pictureUrl: backend.pictureUrl ?? null,
       },
       token: backend.accessToken,
     };
@@ -45,7 +47,7 @@ class AuthService {
     });
 
     const response = await apiService.post<BackendAuthResponse | AuthResponse>(
-      '/signup',
+      '/api/signup',
       data
     );
 
@@ -73,7 +75,7 @@ class AuthService {
     });
 
     const response = await apiService.post<BackendAuthResponse | AuthResponse>(
-      '/signin',
+      '/api/signin',
       data
     );
 
@@ -93,6 +95,45 @@ class AuthService {
     });
 
     return response as ApiResponse<AuthResponse>;
+  }
+
+  async getProfile(token: string): Promise<ApiResponse<AuthResponse['user']>> {
+    logger.info('AuthService', '👤 Loading profile', {
+      hasToken: !!token,
+    });
+
+    type BackendProfile = {
+      id: string;
+      name: string;
+      email: string;
+      pictureUrl?: string | null;
+    };
+
+    const response = await apiService.get<BackendProfile>('/api/profile', {
+      headers: {
+        'x-access-token': token,
+      },
+    });
+
+    if (response.success && response.data) {
+      return {
+        ...response,
+        data: {
+          id: response.data.id,
+          name: response.data.name,
+          email: response.data.email,
+          pictureUrl: response.data.pictureUrl ?? null,
+        },
+      };
+    }
+
+    logger.warn('AuthService', '⚠️ Load profile failed', {
+      error: response.error?.message,
+      code: response.error?.code,
+      status: response.error?.status,
+    });
+
+    return response as ApiResponse<AuthResponse['user']>;
   }
 
   logout(): void {

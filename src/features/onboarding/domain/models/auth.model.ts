@@ -14,6 +14,7 @@ export interface AuthResponse {
     id: string;
     name: string;
     email: string;
+    pictureUrl?: string | null;
   };
   token: string;
 }
@@ -22,4 +23,5 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  pictureUrl?: string | null;
 }
