@@ -34,7 +34,10 @@ describe('AuthService', () => {
 
       const result = await authService.signUp(signUpData);
 
-      expect(mockApiService.post).toHaveBeenCalledWith('/signup', signUpData);
+      expect(mockApiService.post).toHaveBeenCalledWith(
+        '/api/signup',
+        signUpData
+      );
       expect(result).toEqual(mockResponse);
     });
 
@@ -85,7 +88,10 @@ describe('AuthService', () => {
 
       const result = await authService.signIn(signInData);
 
-      expect(mockApiService.post).toHaveBeenCalledWith('/signin', signInData);
+      expect(mockApiService.post).toHaveBeenCalledWith(
+        '/api/signin',
+        signInData
+      );
       expect(result).toEqual(mockResponse);
     });
 
