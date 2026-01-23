@@ -37,9 +37,19 @@ npm run android
 npm run ios
 ```
 
-### ⚠️ Importante: Node-RED Backend
+### ⚠️ Importante: Backend de Autenticação
 
-Para que a autenticação funcione, você precisa iniciar o Node-RED em um terminal separado:
+Para que a autenticação funcione, você precisa apontar o app para o **pillmind-backend** (Java) e definir as variáveis de ambiente:
+
+```bash
+# URL base do backend (sem /api)
+EXPO_PUBLIC_API_URL=http://localhost:8080
+
+# Google OAuth Web Client ID
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your_google_web_client_id.apps.googleusercontent.com
+```
+
+Se estiver usando o backend antigo via Node-RED (desenvolvimento), inicie em um terminal separado:
 
 ```bash
 npm run nodered

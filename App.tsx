@@ -12,7 +12,7 @@ import { useOnboardingStorage } from '@features/onboarding/presentation/hooks/us
 import { FORCE_SHOW_ONBOARDING } from '@features/onboarding/presentation/constants/onboarding.constants';
 import { configureGoogleSignIn } from '@features/onboarding/domain/services/oauth.service';
 import { ThemeProvider } from '@shared/theme';
-import { ThemedStatusBar, DebugConsole } from '@shared/components';
+import { ThemedStatusBar } from '@shared/components';
 import { ErrorBoundary } from '@shared/components/ErrorBoundary';
 import { useFonts } from '@shared/hooks';
 import { logger } from '@shared/utils/logger';
@@ -151,7 +151,6 @@ const AppContentWithOnboarding: React.FC<{
       <>
         <ThemedStatusBar />
         <AppNavigator />
-        <DebugConsole />
       </>
     );
   }
