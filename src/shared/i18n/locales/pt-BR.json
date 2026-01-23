@@ -24,6 +24,10 @@
   "home": {
     "title": "PillMind Início",
     "welcome": "Bem-vindo ao seu assistente de medicamentos!",
+    "hello": "Olá, {{name}}",
+    "welcomeShort": "Bem-vindo!",
+    "todayLabel": "Hoje",
+    "dateLabel": "Data",
     "debugControls": "🛠️ Controles de Debug",
     "resetOnboarding": "↻ Resetar Onboarding",
     "resetInfo": "Pressione para testar o onboarding novamente",
@@ -31,7 +35,11 @@
     "refreshingMedications": "Atualizando...",
     "yourMedications": "Seus Medicamentos",
     "noMedicationsFound": "Nenhum medicamento encontrado",
-    "addFirstMedication": "Adicione seu primeiro medicamento para começar"
+    "noMedicationsScheduled": "Nenhum medicamento programado para este dia",
+    "addFirstMedication": "Se você ainda não adicionou um medicamento, faça isso agora.",
+    "addMedication": "Adicionar medicamento",
+    "viewAll": "Ver tudo",
+    "viewLess": "Ver menos"
   },
   "appointments": {
     "title": "Consultas",
