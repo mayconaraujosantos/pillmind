@@ -55,7 +55,10 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
       // Removed success alert - PostLoginLoadingScreen provides better UX feedback
       onSignInComplete?.();
     } else {
-      const errorMsg = error || t('errors.failedToSignIn');
+      const errorMsg =
+        result.error?.code === 'NETWORK_ERROR'
+          ? t('errors.networkError')
+          : result.error?.message || error || t('errors.failedToSignIn');
       logger.error('OnboardingSignIn', '❌ Sign in failed', {
         email,
         error: errorMsg,

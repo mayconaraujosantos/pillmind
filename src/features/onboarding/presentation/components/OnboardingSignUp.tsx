@@ -61,7 +61,12 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
       await authContext.login(result.data);
       onSignUpComplete?.();
     } else {
-      const errorMsg = authError || t('errors.failedToCreateAccount');
+      const errorMsg =
+        result.error?.code === 'NETWORK_ERROR'
+          ? t('errors.networkError')
+          : result.error?.message ||
+            authError ||
+            t('errors.failedToCreateAccount');
       logger.error('OnboardingSignUp', '❌ Sign up failed', {
         email,
         error: errorMsg,
