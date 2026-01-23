@@ -3,6 +3,19 @@ import React from 'react';
 import { AppNavigator } from '../AppNavigator';
 import { ThemeProvider } from '@shared/theme';
 
+// Mock AuthContext
+jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
+  useAuthContext: () => ({
+    user: { name: 'Test User', email: 'test@example.com' },
+    isAuthenticated: true,
+    isLoading: false,
+    signIn: jest.fn(),
+    signUp: jest.fn(),
+    signOut: jest.fn(),
+    signInWithGoogle: jest.fn(),
+  }),
+}));
+
 // Lightweight theme mock to avoid async ThemeProvider side effects in tests
 jest.mock('@shared/theme', () => {
   const React = require('react');
