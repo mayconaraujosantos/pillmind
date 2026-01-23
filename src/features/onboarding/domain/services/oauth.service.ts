@@ -132,9 +132,12 @@ class OAuthService {
             email: string;
           };
 
-      const response = await apiService.post<BackendResponse>('/auth/google', {
-        idToken,
-      });
+      const response = await apiService.post<BackendResponse>(
+        '/api/auth/google',
+        {
+          idToken,
+        }
+      );
 
       // Log completo da resposta do backend para debug
       logger.debug('OAuthService', '📦 Backend response received', {

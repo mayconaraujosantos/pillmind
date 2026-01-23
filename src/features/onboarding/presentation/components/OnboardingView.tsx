@@ -120,7 +120,6 @@ export const OnboardingView = forwardRef<ScrollView, OnboardingViewProps>(
             currentStep={currentStep}
           />
         </View>
-
         <OnboardingFooter
           currentStep={currentStep}
           onSignIn={onLogin}
