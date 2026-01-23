@@ -8,14 +8,12 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Card, ScreenWrapper, Loader, SkeletonCard } from '@shared/components';
 import { useOnboardingStorage } from '@features/onboarding';
-import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
-import { SHOW_DEBUG_CONTROLS } from '@features/onboarding/presentation/constants/onboarding.constants';
 import { useTheme } from '@shared/theme';
 import { useTranslation } from '@shared/i18n';
 import { Ionicons } from '@expo/vector-icons';
+import { MedicineReminderCalendar } from '../components';
 import { useHomeData } from '../hooks/useHomeData';
 import { GetMedicinesUseCase } from '../../domain/useCases/GetMedicinesUseCase';
 import { MockMedicineRepository } from '../hooks/__mocks__/mockMedicineRepository';
@@ -24,13 +22,119 @@ import { MockMedicineRepository } from '../hooks/__mocks__/mockMedicineRepositor
 const medicineRepository = new MockMedicineRepository();
 const getMedicinesUseCase = new GetMedicinesUseCase(medicineRepository);
 
+const MEDICINES_PREVIEW_LIMIT = 5;
+
 export const HomeScreen: React.FC = () => {
-  const { resetOnboarding } = useOnboardingStorage();
-  const authContext = useAuthContext();
+  useOnboardingStorage();
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { medicines, loading, refreshing, error, refresh } =
     useHomeData(getMedicinesUseCase);
+  const [showAllMedicines, setShowAllMedicines] = React.useState(false);
+  const [selectedDate, setSelectedDate] = React.useState(() => new Date());
+  const [viewMode, setViewMode] = React.useState<'today' | 'week' | 'month'>(
+    'today'
+  );
+
+  const visibleMedicines = showAllMedicines
+    ? medicines
+    : medicines.slice(0, MEDICINES_PREVIEW_LIMIT);
+  const viewAllLabel = showAllMedicines
+    ? t('home.viewLess')
+    : t('home.viewAll');
+
+  const renderMedicinesContent = () => {
+    if (loading && medicines.length === 0) {
+      return (
+        <View>
+          {[1, 2, 3].map((i) => (
+            <SkeletonCard
+              key={i}
+              lines={2}
+              showAvatar={false}
+              style={styles.medicineCard}
+            />
+          ))}
+        </View>
+      );
+    }
+
+    if (medicines.length === 0) {
+      return (
+        <View style={styles.emptyState}>
+          <Ionicons
+            name="medkit-outline"
+            size={64}
+            color={theme.colors.textSecondary}
+          />
+          <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>
+            {t('home.noMedicationsScheduled')}
+          </Text>
+          <Text
+            style={[
+              styles.emptySubtitle,
+              { color: theme.colors.textSecondary },
+            ]}
+          >
+            {t('home.addFirstMedication')}
+          </Text>
+          <TouchableOpacity style={styles.addMedicationButton}>
+            <Text style={styles.addMedicationText}>
+              + {t('home.addMedication')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <>
+        {visibleMedicines.map((medicine) => (
+          <Card key={medicine.id} style={styles.medicineCard}>
+            <View style={styles.medicineCardContent}>
+              <Ionicons name="medical" size={32} color={theme.colors.primary} />
+              <View style={styles.medicineInfo}>
+                <Text
+                  style={[styles.medicineName, { color: theme.colors.text }]}
+                >
+                  {medicine.name}
+                </Text>
+                <Text
+                  style={[
+                    styles.medicineDosage,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {medicine.dosage} • {medicine.frequency}
+                </Text>
+                {medicine.notes && (
+                  <Text
+                    style={[
+                      styles.medicineNotes,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
+                    {medicine.notes}
+                  </Text>
+                )}
+              </View>
+            </View>
+          </Card>
+        ))}
+
+        {medicines.length > MEDICINES_PREVIEW_LIMIT && (
+          <TouchableOpacity
+            style={styles.viewAllButton}
+            onPress={() => setShowAllMedicines((prev) => !prev)}
+          >
+            <Text style={[styles.viewAllText, { color: theme.colors.primary }]}>
+              {viewAllLabel}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </>
+    );
+  };
 
   // Show error alert if there's an error
   React.useEffect(() => {
@@ -38,7 +142,9 @@ export const HomeScreen: React.FC = () => {
       Alert.alert(t('common.error'), error, [
         {
           text: t('common.retry'),
-          onPress: refresh,
+          onPress: () => {
+            void refresh();
+          },
         },
         {
           text: t('common.ok'),
@@ -69,57 +175,25 @@ export const HomeScreen: React.FC = () => {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={refresh}
+            onRefresh={() => {
+              void refresh();
+            }}
             tintColor={theme.colors.primary}
             colors={[theme.colors.primary]}
           />
         }
         testID="home-scroll-view"
       >
-        {/* Welcome Card */}
-        <Card>
-          <Text style={[styles.title, { color: theme.colors.text }]}>
-            {t('home.title')}
-          </Text>
-          <Text
-            style={[styles.subtitle, { color: theme.colors.textSecondary }]}
-          >
-            {t('home.welcome')}
-          </Text>
-        </Card>
-
-        {/* User Info Card */}
-        {authContext.isAuthenticated && (
-          <Card style={styles.userCard}>
-            <View style={styles.userCardContent}>
-              <Ionicons
-                name="person-circle"
-                size={40}
-                color={theme.colors.primary}
-              />
-              <View style={styles.userInfo}>
-                <Text style={[styles.userName, { color: theme.colors.text }]}>
-                  {authContext.user?.name || 'User'}
-                </Text>
-                <Text
-                  style={[
-                    styles.userEmail,
-                    { color: theme.colors.textSecondary },
-                  ]}
-                >
-                  {authContext.user?.email}
-                </Text>
-              </View>
-            </View>
-          </Card>
-        )}
+        {/* Calendar Component */}
+        <MedicineReminderCalendar
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
         {/* Medicines Section */}
         <View style={styles.medicinesSection}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            {t('home.yourMedications')}
-          </Text>
-
           {/* Loading skeleton while refreshing */}
           {refreshing && medicines.length > 0 && (
             <View style={styles.refreshLoader}>
@@ -132,122 +206,10 @@ export const HomeScreen: React.FC = () => {
             </View>
           )}
 
-          {/* Show skeleton cards during initial load */}
-          {loading && medicines.length === 0 ? (
-            <View>
-              {[1, 2, 3].map((i) => (
-                <SkeletonCard
-                  key={i}
-                  lines={2}
-                  showAvatar={false}
-                  style={styles.medicineCard}
-                />
-              ))}
-            </View>
-          ) : medicines.length === 0 ? (
-            // Empty state
-            <Card style={styles.emptyCard}>
-              <Ionicons
-                name="medical-outline"
-                size={48}
-                color={theme.colors.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.emptyText,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                {t('home.noMedicationsFound')}
-              </Text>
-              <Text
-                style={[
-                  styles.emptySubtext,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                {t('home.addFirstMedication')}
-              </Text>
-            </Card>
-          ) : (
-            // Medicines list
-            medicines.map((medicine) => (
-              <Card key={medicine.id} style={styles.medicineCard}>
-                <View style={styles.medicineCardContent}>
-                  <Ionicons
-                    name="medical"
-                    size={32}
-                    color={theme.colors.primary}
-                  />
-                  <View style={styles.medicineInfo}>
-                    <Text
-                      style={[
-                        styles.medicineName,
-                        { color: theme.colors.text },
-                      ]}
-                    >
-                      {medicine.name}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.medicineDosage,
-                        { color: theme.colors.textSecondary },
-                      ]}
-                    >
-                      {medicine.dosage} • {medicine.frequency}
-                    </Text>
-                    {medicine.notes && (
-                      <Text
-                        style={[
-                          styles.medicineNotes,
-                          { color: theme.colors.textSecondary },
-                        ]}
-                      >
-                        {medicine.notes}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              </Card>
-            ))
-          )}
+          {renderMedicinesContent()}
         </View>
 
         {/* Controles de Debug - só aparecem em desenvolvimento */}
-        {SHOW_DEBUG_CONTROLS && (
-          <Card style={styles.debugCard}>
-            <Text style={styles.debugTitle}>🛠️ Debug Controls</Text>
-            <TouchableOpacity
-              style={styles.debugButton}
-              onPress={resetOnboarding}
-            >
-              <Text style={styles.debugButtonText}>↻ Reset Onboarding</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.debugButton, styles.clearStorageButton]}
-              onPress={async () => {
-                try {
-                  await AsyncStorage.clear();
-                  Alert.alert(
-                    t('common.success'),
-                    'All storage cleared! Please close and reopen the app.',
-                    [{ text: t('common.ok') }]
-                  );
-                } catch {
-                  Alert.alert(
-                    t('common.error'),
-                    t('errors.clearStorageFailed')
-                  );
-                }
-              }}
-            >
-              <Text style={styles.debugButtonText}>🗑️ Clear All Storage</Text>
-            </TouchableOpacity>
-            <Text style={styles.debugInfo}>
-              Reset onboarding or clear all storage (including auth)
-            </Text>
-          </Card>
-        )}
       </ScrollView>
     </ScreenWrapper>
   );
@@ -259,44 +221,10 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  userCard: {
-    marginTop: 20,
-    padding: 16,
-  },
-  userCardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  userInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 14,
+    paddingTop: 8,
   },
   medicinesSection: {
-    marginTop: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
+    marginTop: 32,
   },
   refreshLoader: {
     marginBottom: 12,
@@ -327,55 +255,43 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontStyle: 'italic',
   },
-  emptyCard: {
-    padding: 32,
+  viewAllButton: {
+    alignSelf: 'center',
+    paddingVertical: 8,
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+  },
+  emptyTitle: {
+    marginTop: 16,
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    marginTop: 8,
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  addMedicationButton: {
+    marginTop: 18,
+    backgroundColor: '#0A63FF',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  emptySubtext: {
-    fontSize: 14,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  debugCard: {
-    marginTop: 20,
-    backgroundColor: '#FFF3CD',
-    borderColor: '#FFEAA7',
-    borderWidth: 1,
-  },
-  debugTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#856404',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  debugButton: {
-    backgroundColor: '#FD79A8',
-    padding: 10,
-    borderRadius: 6,
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  clearStorageButton: {
-    backgroundColor: '#FF6B6B',
-    marginTop: 4,
-  },
-  debugButtonText: {
+  addMedicationText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  debugInfo: {
-    fontSize: 12,
-    color: '#856404',
-    textAlign: 'center',
-    fontStyle: 'italic',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
