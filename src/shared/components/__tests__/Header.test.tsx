@@ -33,7 +33,14 @@ jest.mock('@shared/theme', () => {
 
 jest.mock('@shared/i18n', () => ({
   useTranslation: () => ({
-    t: (key: string) => (key === 'account.user' ? 'Usuário' : key),
+    t: (key: string, options?: { name?: string }) => {
+      const translations: Record<string, string> = {
+        'account.user': 'Usuário',
+        'home.hello': `Olá, ${options?.name || 'Usuário'}`,
+        'home.welcomeShort': 'Bem-vindo de volta!',
+      };
+      return translations[key] || key;
+    },
     i18n: { language: 'pt-BR' },
   }),
 }));
@@ -64,13 +71,19 @@ describe('Header', () => {
   it('should render with default userName', () => {
     const { getByText } = renderWithProviders(<Header />);
 
-    expect(getByText('Usuário')).toBeTruthy();
+    // Verifica se o displayName padrão 'Usuário' é renderizado no avatar
+    expect(getByText('U')).toBeTruthy();
+    // Verifica se o texto traduzido com o nome padrão aparece
+    expect(getByText('Olá, Usuário')).toBeTruthy();
   });
 
   it('should render with custom userName', () => {
     const { getByText } = renderWithProviders(<Header userName="John Doe" />);
 
-    expect(getByText('John Doe')).toBeTruthy();
+    // Verifica se a inicial é renderizada no avatar
+    expect(getByText('J')).toBeTruthy();
+    // Verifica se o texto traduzido com o nome personalizado aparece
+    expect(getByText('Olá, John Doe')).toBeTruthy();
   });
 
   it('should render avatar with first letter of userName', () => {
@@ -84,8 +97,9 @@ describe('Header', () => {
       <Header userName="John" userAvatar="avatar-url" />
     );
 
-    // Should still show first letter when avatar is provided but not rendered as Image
-    expect(getByText('J')).toBeTruthy();
+    // Quando userAvatar é fornecido, o componente renderiza uma imagem em vez do texto
+    // Vamos verificar se o nome do usuário aparece no texto traduzido
+    expect(getByText('Olá, John')).toBeTruthy();
   });
 
   it('should call onProfilePress when user section is pressed', () => {
@@ -94,7 +108,8 @@ describe('Header', () => {
       <Header userName="John" onProfilePress={onProfilePress} />
     );
 
-    fireEvent.press(getByText('John'));
+    // Pressiona o texto traduzido que contém o nome
+    fireEvent.press(getByText('Olá, John'));
     expect(onProfilePress).toHaveBeenCalledTimes(1);
   });
 
