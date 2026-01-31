@@ -79,7 +79,15 @@ export const MedicineReminderCalendar: React.FC<
               return (
                 <TouchableOpacity
                   key={day.toISOString()}
-                  style={[styles.dayItem, isToday && styles.dayItemToday]}
+                  style={[
+                    styles.dayItem,
+                    { backgroundColor: theme.colors.surface },
+                    isToday && styles.dayItemToday,
+                    isToday && {
+                      backgroundColor: theme.colors.primary,
+                      shadowColor: theme.colors.primary,
+                    },
+                  ]}
                   onPress={() => onDateChange(day)}
                 >
                   <Text
