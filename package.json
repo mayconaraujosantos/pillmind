@@ -28,7 +28,6 @@
     "validate": "npm run lint && npm run format:check && npm run test && npx expo-doctor",
     "validate:fast": "npm run lint -- --cache && npm run typecheck",
     "nodered": "node-red --settings settings.js",
-    "sonar:report": "echo '📊 SonarCloud Report: https://sonarcloud.io/project/overview?id=mayconaraujosantos_pillmind' && echo '💡 Use VS Code SonarQube Extension for detailed analysis'",
     "build:dev:android": "eas build --profile development --platform android",
     "build:dev:ios": "eas build --profile development --platform ios",
     "commit": "cz commit",
