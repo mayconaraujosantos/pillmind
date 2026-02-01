@@ -2,16 +2,10 @@ import React from 'react';
 import {
   TouchableOpacity,
   Text,
-  StyleSheet,
   ViewStyle,
   ActivityIndicator,
 } from 'react-native';
-import { borderRadius } from '@shared/theme/borderRadius';
-import {
-  adaptiveSpacing,
-  adaptiveFontSizes,
-  deviceSize,
-} from '@shared/utils/dimensions';
+import { onboardingButtonStyles } from './onboardingButtonStyles';
 
 interface OnboardingPrimaryButtonProps {
   label: string;
@@ -39,7 +33,7 @@ export const OnboardingPrimaryButton: React.FC<
       onPress={onPress}
       disabled={isLoading}
       style={[
-        styles.button,
+        onboardingButtonStyles.button,
         {
           backgroundColor,
           shadowColor,
@@ -53,7 +47,7 @@ export const OnboardingPrimaryButton: React.FC<
       ) : (
         <Text
           style={[
-            styles.label,
+            onboardingButtonStyles.label,
             { color: textColor, textAlignVertical: 'center' },
           ]}
           numberOfLines={1}
@@ -68,27 +62,3 @@ export const OnboardingPrimaryButton: React.FC<
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    paddingVertical: adaptiveSpacing.sm,
-    paddingHorizontal: adaptiveSpacing.md,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: deviceSize(46, 50, 54),
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  label: {
-    fontSize: adaptiveFontSizes.md,
-    fontWeight: '600',
-    textAlign: 'center',
-    letterSpacing: 0.4,
-  },
-});
