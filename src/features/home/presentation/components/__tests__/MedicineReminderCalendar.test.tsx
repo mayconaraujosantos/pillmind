@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactTestInstance } from 'react-test-renderer';
 import { render, fireEvent } from '@testing-library/react-native';
 import { MedicineReminderCalendar } from '../MedicineReminderCalendar';
 import { ThemeProvider } from '@shared/theme';
@@ -63,10 +64,35 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('MedicineReminderCalendar', () => {
+  const getBackgroundColor = (node: ReactTestInstance) => {
+    let current: ReactTestInstance | null = node;
+    while (current && !current.props?.style) {
+      current = current.parent;
+    }
+
+    if (!current?.props?.style) return undefined;
+
+    const style = current.props.style as
+      | { backgroundColor?: string }
+      | Array<{ backgroundColor?: string }>;
+
+    return Array.isArray(style)
+      ? Object.assign({}, ...style).backgroundColor
+      : style.backgroundColor;
+  };
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-02-05T12:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('renders calendar with all days of the week', () => {
     const mockOnDateChange = jest.fn();
     const mockOnViewModeChange = jest.fn();
-    const today = new Date();
+    const today = new Date('2025-02-05T12:00:00.000Z');
 
     const { getByText } = render(
       <MedicineReminderCalendar
@@ -79,13 +105,13 @@ describe('MedicineReminderCalendar', () => {
     );
 
     // Verifica se o dia atual aparece (número do dia)
-    expect(getByText(today.getDate().toString())).toBeTruthy();
+    expect(getByText('5')).toBeTruthy();
   });
 
   it('renders view mode tabs', () => {
     const mockOnDateChange = jest.fn();
     const mockOnViewModeChange = jest.fn();
-    const today = new Date();
+    const today = new Date('2025-02-05T12:00:00.000Z');
 
     const { getByText } = render(
       <MedicineReminderCalendar
@@ -105,7 +131,7 @@ describe('MedicineReminderCalendar', () => {
   it('calls onViewModeChange when tab is pressed', () => {
     const mockOnDateChange = jest.fn();
     const mockOnViewModeChange = jest.fn();
-    const today = new Date();
+    const today = new Date('2025-02-05T12:00:00.000Z');
 
     const { getByText } = render(
       <MedicineReminderCalendar
@@ -119,5 +145,48 @@ describe('MedicineReminderCalendar', () => {
 
     fireEvent.press(getByText('Week'));
     expect(mockOnViewModeChange).toHaveBeenCalledWith('week');
+  });
+
+  it('calls onDateChange when navigating weeks', () => {
+    const mockOnDateChange = jest.fn();
+    const mockOnViewModeChange = jest.fn();
+    const today = new Date('2025-02-05T12:00:00.000Z');
+
+    const { getByTestId } = render(
+      <MedicineReminderCalendar
+        selectedDate={today}
+        onDateChange={mockOnDateChange}
+        viewMode="week"
+        onViewModeChange={mockOnViewModeChange}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    fireEvent.press(getByTestId('icon-chevron-back'));
+    fireEvent.press(getByTestId('icon-chevron-forward'));
+
+    expect(mockOnDateChange).toHaveBeenCalledTimes(2);
+  });
+
+  it('applies theme colors to today and default days', () => {
+    const mockOnDateChange = jest.fn();
+    const mockOnViewModeChange = jest.fn();
+    const today = new Date('2025-02-05T12:00:00.000Z');
+
+    const { getByTestId } = render(
+      <MedicineReminderCalendar
+        selectedDate={today}
+        onDateChange={mockOnDateChange}
+        viewMode="week"
+        onViewModeChange={mockOnViewModeChange}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    const todayItem = getByTestId('calendar-day-2025-02-05');
+    expect(getBackgroundColor(todayItem)).toBe('#000');
+
+    const nonTodayItem = getByTestId('calendar-day-2025-02-03');
+    expect(getBackgroundColor(nonTodayItem)).toBe('#f5f5f5');
   });
 });

@@ -79,6 +79,7 @@ export const MedicineReminderCalendar: React.FC<
               return (
                 <TouchableOpacity
                   key={day.toISOString()}
+                  testID={`calendar-day-${day.toISOString().split('T')[0]}`}
                   style={[
                     styles.dayItem,
                     { backgroundColor: theme.colors.surface },
