@@ -1,14 +1,56 @@
-import { renderHook, act, waitFor } from '@testing-library/react-native';
-import { useAuth } from '../useAuth';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { authService } from '../../../domain/services/auth.service';
-import { AuthResponse } from '../../../domain/models/auth.model';
-import { ApiResponse } from '@core/services/api.service';
+import { useAuth } from '../useAuth';
 
 jest.mock('../../../domain/services/auth.service');
 
 const mockAuthService = authService as jest.Mocked<typeof authService>;
 
-type AuthResult = ApiResponse<AuthResponse> | undefined;
+type AuthActionResult = Awaited<
+  ReturnType<ReturnType<typeof useAuth>['signUp']>
+>;
+type ServiceAuthResponse = Awaited<ReturnType<typeof authService.signUp>>;
+
+const baseAuthResponse: ServiceAuthResponse = {
+  success: true,
+  data: {
+    user: {
+      id: '1',
+      name: 'John Doe',
+      email: 'john@example.com',
+    },
+    token: 'mock-token',
+  },
+};
+
+const executeAuthAction = async (
+  action: (auth: ReturnType<typeof useAuth>) => Promise<AuthActionResult>
+) => {
+  const { result } = renderHook(() => useAuth());
+
+  expect(result.current.loading).toBe(false);
+
+  let response: AuthActionResult | undefined;
+  await act(async () => {
+    response = await action(result.current);
+  });
+
+  await waitFor(() => {
+    expect(result.current.loading).toBe(false);
+  });
+
+  return { result, response };
+};
+
+const expectSuccessfulAuth = async (
+  action: (auth: ReturnType<typeof useAuth>) => Promise<AuthActionResult>
+) => {
+  const { result, response } = await executeAuthAction(action);
+
+  expect(response?.success).toBe(true);
+  expect(response?.data).toEqual(baseAuthResponse.data);
+  expect(result.current.error).toBeNull();
+};
 
 describe('useAuth', () => {
   beforeEach(() => {
@@ -17,40 +59,15 @@ describe('useAuth', () => {
 
   describe('signUp', () => {
     it('should successfully sign up a user', async () => {
-      const mockResponse = {
-        success: true,
-        data: {
-          user: {
-            id: '1',
-            name: 'John Doe',
-            email: 'john@example.com',
-          },
-          token: 'mock-token',
-        },
-      };
+      mockAuthService.signUp.mockResolvedValueOnce(baseAuthResponse);
 
-      mockAuthService.signUp.mockResolvedValueOnce(mockResponse);
-
-      const { result } = renderHook(() => useAuth());
-
-      expect(result.current.loading).toBe(false);
-
-      let signUpResult: AuthResult;
-      await act(async () => {
-        signUpResult = await result.current.signUp({
+      await expectSuccessfulAuth((auth) =>
+        auth.signUp({
           name: 'John Doe',
           email: 'john@example.com',
           password: 'password123',
-        });
-      });
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      expect(signUpResult?.success).toBe(true);
-      expect(signUpResult?.data).toEqual(mockResponse.data);
-      expect(result.current.error).toBeNull();
+        })
+      );
     });
 
     it('should handle sign up error', async () => {
@@ -64,22 +81,15 @@ describe('useAuth', () => {
 
       mockAuthService.signUp.mockResolvedValueOnce(mockError);
 
-      const { result } = renderHook(() => useAuth());
-
-      let signUpResult: AuthResult;
-      await act(async () => {
-        signUpResult = await result.current.signUp({
+      const { result, response } = await executeAuthAction((auth) =>
+        auth.signUp({
           name: 'John Doe',
           email: 'john@example.com',
           password: 'password123',
-        });
-      });
+        })
+      );
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      expect(signUpResult?.success).toBe(false);
+      expect(response?.success).toBe(false);
       expect(result.current.error).toBe('Email already exists');
     });
 
@@ -128,37 +138,14 @@ describe('useAuth', () => {
 
   describe('signIn', () => {
     it('should successfully sign in a user', async () => {
-      const mockResponse = {
-        success: true,
-        data: {
-          user: {
-            id: '1',
-            name: 'John Doe',
-            email: 'john@example.com',
-          },
-          token: 'mock-token',
-        },
-      };
+      mockAuthService.signIn.mockResolvedValueOnce(baseAuthResponse);
 
-      mockAuthService.signIn.mockResolvedValueOnce(mockResponse);
-
-      const { result } = renderHook(() => useAuth());
-
-      let signInResult: AuthResult;
-      await act(async () => {
-        signInResult = await result.current.signIn({
+      await expectSuccessfulAuth((auth) =>
+        auth.signIn({
           email: 'john@example.com',
           password: 'password123',
-        });
-      });
-
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      expect(signInResult?.success).toBe(true);
-      expect(signInResult?.data).toEqual(mockResponse.data);
-      expect(result.current.error).toBeNull();
+        })
+      );
     });
 
     it('should handle sign in error', async () => {
@@ -172,21 +159,14 @@ describe('useAuth', () => {
 
       mockAuthService.signIn.mockResolvedValueOnce(mockError);
 
-      const { result } = renderHook(() => useAuth());
-
-      let signInResult: AuthResult;
-      await act(async () => {
-        signInResult = await result.current.signIn({
+      const { result, response } = await executeAuthAction((auth) =>
+        auth.signIn({
           email: 'john@example.com',
           password: 'wrongpassword',
-        });
-      });
+        })
+      );
 
-      await waitFor(() => {
-        expect(result.current.loading).toBe(false);
-      });
-
-      expect(signInResult?.success).toBe(false);
+      expect(response?.success).toBe(false);
       expect(result.current.error).toBe('Invalid credentials');
     });
   });

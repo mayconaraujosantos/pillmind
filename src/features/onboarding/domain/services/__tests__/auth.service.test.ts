@@ -5,6 +5,20 @@ jest.mock('@core/services/api.service');
 
 const mockApiService = apiService as jest.Mocked<typeof apiService>;
 
+const baseUser = {
+  id: '1',
+  name: 'John Doe',
+  email: 'john@example.com',
+};
+
+const baseSuccessResponse = {
+  success: true,
+  data: {
+    user: baseUser,
+    token: 'mock-token',
+  },
+};
+
 describe('AuthService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -12,19 +26,7 @@ describe('AuthService', () => {
 
   describe('signUp', () => {
     it('should call apiService.post with correct data', async () => {
-      const mockResponse = {
-        success: true,
-        data: {
-          user: {
-            id: '1',
-            name: 'John Doe',
-            email: 'john@example.com',
-          },
-          token: 'mock-token',
-        },
-      };
-
-      mockApiService.post.mockResolvedValueOnce(mockResponse);
+      mockApiService.post.mockResolvedValueOnce(baseSuccessResponse);
 
       const signUpData = {
         name: 'John Doe',
@@ -38,7 +40,7 @@ describe('AuthService', () => {
         '/api/signup',
         signUpData
       );
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(baseSuccessResponse);
     });
 
     it('should handle signup error', async () => {
@@ -101,19 +103,7 @@ describe('AuthService', () => {
 
   describe('signIn', () => {
     it('should call apiService.post with correct data', async () => {
-      const mockResponse = {
-        success: true,
-        data: {
-          user: {
-            id: '1',
-            name: 'John Doe',
-            email: 'john@example.com',
-          },
-          token: 'mock-token',
-        },
-      };
-
-      mockApiService.post.mockResolvedValueOnce(mockResponse);
+      mockApiService.post.mockResolvedValueOnce(baseSuccessResponse);
 
       const signInData = {
         email: 'john@example.com',
@@ -126,7 +116,7 @@ describe('AuthService', () => {
         '/api/signin',
         signInData
       );
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(baseSuccessResponse);
     });
 
     it('should handle signin error', async () => {
