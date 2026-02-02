@@ -1,12 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@shared/theme';
@@ -15,8 +8,7 @@ import {
   adaptiveFontSizes,
   deviceSize,
 } from '@shared/utils/dimensions';
-
-const { width: _SCREEN_WIDTH } = Dimensions.get('window');
+import { FloatingAlert } from './FloatingAlert';
 
 interface ValidationAlertProps {
   visible: boolean;
@@ -33,20 +25,6 @@ export const ValidationAlert: React.FC<ValidationAlertProps> = ({
 }) => {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const slideAnimation = useRef(new Animated.Value(-100)).current;
-  const fadeAnimation = useRef(new Animated.Value(0)).current;
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  // Auto dismiss after 4 seconds
-  useEffect(() => {
-    if (visible) {
-      const timer = setTimeout(() => {
-        onDismiss?.();
-      }, 4000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [visible, onDismiss]);
 
   const getTypeConfig = () => {
     switch (type) {
@@ -73,59 +51,15 @@ export const ValidationAlert: React.FC<ValidationAlertProps> = ({
 
   const typeConfig = getTypeConfig();
 
-  useEffect(() => {
-    if (visible) {
-      setIsAnimating(true);
-      // Slide down and fade in
-      Animated.parallel([
-        Animated.spring(slideAnimation, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 8,
-        }),
-        Animated.timing(fadeAnimation, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else if (isAnimating) {
-      // Slide up and fade out
-      Animated.parallel([
-        Animated.spring(slideAnimation, {
-          toValue: -100,
-          useNativeDriver: true,
-          tension: 100,
-          friction: 8,
-        }),
-        Animated.timing(fadeAnimation, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setIsAnimating(false);
-      });
-    }
-  }, [visible, slideAnimation, fadeAnimation, isAnimating]);
-
-  if (!visible && !isAnimating) {
-    return null;
-  }
-
   return (
-    <Animated.View
-      style={[
+    <FloatingAlert
+      visible={visible}
+      onDismiss={onDismiss}
+      topOffset={insets.top + adaptiveSpacing.sm}
+      containerStyle={[
         styles.container,
-        {
-          backgroundColor: typeConfig.backgroundColor,
-          top: insets.top + adaptiveSpacing.sm, // Usa safe area + pequeno espaço
-          transform: [{ translateY: slideAnimation }],
-          opacity: fadeAnimation,
-        },
+        { backgroundColor: typeConfig.backgroundColor },
       ]}
-      pointerEvents={visible ? 'auto' : 'none'}
     >
       <View style={styles.content}>
         <Ionicons
@@ -152,16 +86,14 @@ export const ValidationAlert: React.FC<ValidationAlertProps> = ({
           <Ionicons name="close" size={16} color={typeConfig.iconColor} />
         </TouchableOpacity>
       </View>
-    </Animated.View>
+    </FloatingAlert>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
     left: adaptiveSpacing.md,
     right: adaptiveSpacing.md,
-    zIndex: 1000,
     borderRadius: deviceSize(12, 14, 16),
     shadowColor: '#000',
     shadowOffset: {

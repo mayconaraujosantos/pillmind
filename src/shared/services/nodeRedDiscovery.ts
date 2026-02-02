@@ -21,13 +21,8 @@ export class NodeRedDiscoveryService {
     if (localIP) {
       const nodeRedURL = `http://${localIP}:1880`;
       console.log(`🎯 Testando Node-RED em: ${nodeRedURL}`);
-
-      const isWorking = await this.testNodeRedConnection(nodeRedURL);
-      if (isWorking) {
-        console.log(`✅ Node-RED encontrado: ${nodeRedURL}`);
-        this.currentService = { url: nodeRedURL, lastSeen: Date.now() };
-        return nodeRedURL;
-      }
+      const foundUrl = await this.tryNodeRedURL(nodeRedURL);
+      if (foundUrl) return foundUrl;
     }
 
     // 2. Fallback para IPs comuns se não encontrar
@@ -36,12 +31,8 @@ export class NodeRedDiscoveryService {
 
     for (const ip of fallbackIPs) {
       const nodeRedURL = `http://${ip}:1880`;
-      const isWorking = await this.testNodeRedConnection(nodeRedURL);
-      if (isWorking) {
-        console.log(`✅ Node-RED encontrado: ${nodeRedURL}`);
-        this.currentService = { url: nodeRedURL, lastSeen: Date.now() };
-        return nodeRedURL;
-      }
+      const foundUrl = await this.tryNodeRedURL(nodeRedURL);
+      if (foundUrl) return foundUrl;
     }
 
     console.log('❌ Node-RED não encontrado automaticamente');
@@ -70,6 +61,17 @@ export class NodeRedDiscoveryService {
       }
     } catch (error) {
       console.log('⚠️ Erro na descoberta do IP local:', error);
+    }
+
+    return null;
+  }
+
+  private async tryNodeRedURL(url: string): Promise<string | null> {
+    const isWorking = await this.testNodeRedConnection(url);
+    if (isWorking) {
+      console.log(`✅ Node-RED encontrado: ${url}`);
+      this.currentService = { url, lastSeen: Date.now() };
+      return url;
     }
 
     return null;

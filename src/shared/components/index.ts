@@ -10,6 +10,7 @@ export * from './Loader';
 export * from './ModernInput';
 export * from './PerformanceMonitor';
 export * from './ScreenWrapper';
+export * from './SimpleInfoScreen';
 export * from './Skeleton';
 export * from './SuccessTooltip';
 export * from './ThemedStatusBar';

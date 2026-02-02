@@ -23,6 +23,21 @@ export const AccountScreen: React.FC = () => {
   const { logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
+  const settingsOptions = [
+    {
+      key: 'notifications',
+      label: t('account.notifications'),
+    },
+    {
+      key: 'privacy',
+      label: t('account.privacy'),
+    },
+    {
+      key: 'about',
+      label: t('account.about'),
+    },
+  ];
+
   const handleDebugTheme = () => {
     const systemTheme = Appearance.getColorScheme();
     console.log('🐛 DEBUG MANUAL:');
@@ -147,54 +162,24 @@ export const AccountScreen: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             {t('account.settings')}
           </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.optionItem,
-              {
-                backgroundColor: theme.colors.surface,
-                borderBottomColor: theme.colors.border,
-              },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.optionText, { color: theme.colors.text }]}>
-              {t('account.notifications')}
-            </Text>
-            <Text style={styles.optionArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.optionItem,
-              {
-                backgroundColor: theme.colors.surface,
-                borderBottomColor: theme.colors.border,
-              },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.optionText, { color: theme.colors.text }]}>
-              {t('account.privacy')}
-            </Text>
-            <Text style={styles.optionArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.optionItem,
-              {
-                backgroundColor: theme.colors.surface,
-                borderBottomColor: theme.colors.border,
-              },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.optionText, { color: theme.colors.text }]}>
-              {t('account.about')}
-            </Text>
-            <Text style={styles.optionArrow}>›</Text>
-          </TouchableOpacity>
+          {settingsOptions.map((option) => (
+            <TouchableOpacity
+              key={option.key}
+              style={[
+                styles.optionItem,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderBottomColor: theme.colors.border,
+                },
+              ]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.optionText, { color: theme.colors.text }]}>
+                {option.label}
+              </Text>
+              <Text style={styles.optionArrow}>›</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Logout Button */}

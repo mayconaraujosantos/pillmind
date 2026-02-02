@@ -1,19 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  TouchableOpacity,
-} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '@shared/theme';
 import {
   adaptiveSpacing,
   adaptiveFontSizes,
   deviceSize,
 } from '@shared/utils/dimensions';
+import { FloatingAlert } from './FloatingAlert';
 
 interface SuccessTooltipProps {
   visible: boolean;
@@ -32,75 +26,15 @@ export const SuccessTooltip: React.FC<SuccessTooltipProps> = ({
   autoHide = true,
   duration = 4000,
 }) => {
-  const { theme: _theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const slideAnimation = useRef(new Animated.Value(-100)).current;
-  const fadeAnimation = useRef(new Animated.Value(0)).current;
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  // Auto dismiss
-  useEffect(() => {
-    if (visible && autoHide) {
-      const timer = setTimeout(() => {
-        onDismiss?.();
-      }, duration);
-
-      return () => clearTimeout(timer);
-    }
-  }, [visible, autoHide, duration, onDismiss]);
-
-  useEffect(() => {
-    if (visible) {
-      setIsAnimating(true);
-      // Slide down and fade in
-      Animated.parallel([
-        Animated.spring(slideAnimation, {
-          toValue: 0,
-          useNativeDriver: true,
-          tension: 120,
-          friction: 8,
-        }),
-        Animated.timing(fadeAnimation, {
-          toValue: 1,
-          duration: 350,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else if (isAnimating) {
-      // Slide up and fade out
-      Animated.parallel([
-        Animated.spring(slideAnimation, {
-          toValue: -100,
-          useNativeDriver: true,
-          tension: 120,
-          friction: 8,
-        }),
-        Animated.timing(fadeAnimation, {
-          toValue: 0,
-          duration: 250,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setIsAnimating(false);
-      });
-    }
-  }, [visible, slideAnimation, fadeAnimation, isAnimating]);
-
-  if (!visible && !isAnimating) {
-    return null;
-  }
-
   return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          top: insets.top + adaptiveSpacing.md,
-          transform: [{ translateY: slideAnimation }],
-          opacity: fadeAnimation,
-        },
-      ]}
-      pointerEvents={visible ? 'auto' : 'none'}
+    <FloatingAlert
+      visible={visible}
+      autoHide={autoHide}
+      duration={duration}
+      onDismiss={onDismiss}
+      topOffset={insets.top + adaptiveSpacing.md}
+      containerStyle={styles.container}
     >
       <View style={styles.content}>
         <View style={styles.iconContainer}>
@@ -120,16 +54,14 @@ export const SuccessTooltip: React.FC<SuccessTooltipProps> = ({
           <Ionicons name="close" size={16} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
-    </Animated.View>
+    </FloatingAlert>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
     left: adaptiveSpacing.lg,
     right: adaptiveSpacing.lg,
-    zIndex: 1000,
     backgroundColor: '#10B981', // Green success color
     borderRadius: deviceSize(14, 16, 18),
     borderWidth: 2,
