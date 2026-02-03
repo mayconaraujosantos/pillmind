@@ -49,8 +49,9 @@ jest.mock('@shared/components', () => {
         secureTextEntry: props.secureTextEntry,
         rightIcon: props.rightIcon ?? null,
       });
-      const rightIcon = React.isValidElement(props.rightIcon)
-        ? (props.rightIcon.props as { onPress?: () => void })
+      const rightIcon = props.rightIcon
+        ? (props.rightIcon as React.ReactElement<{ onPress?: () => void }>)
+            .props
         : null;
       return (
         <View>
