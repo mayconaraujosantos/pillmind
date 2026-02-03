@@ -12,12 +12,20 @@ type GoogleModule = {
   configure: jest.Mock;
   hasPlayServices: jest.Mock;
   signIn: jest.Mock;
+  signOut: jest.Mock;
+  revokeAccess: jest.Mock;
+  hasPreviousSignIn: jest.Mock;
+  getCurrentUser: jest.Mock;
 };
 
 const buildGoogleModule = (): GoogleModule => ({
   configure: jest.fn(),
   hasPlayServices: jest.fn().mockResolvedValue(true),
   signIn: jest.fn(),
+  signOut: jest.fn().mockResolvedValue(undefined),
+  revokeAccess: jest.fn().mockResolvedValue(undefined),
+  hasPreviousSignIn: jest.fn().mockResolvedValue(false),
+  getCurrentUser: jest.fn().mockResolvedValue(null),
 });
 
 const setupOAuthModule = (googleSigninModule: GoogleModule | 'throw') => {
@@ -92,6 +100,33 @@ describe('OAuthService', () => {
     expect(loggerMock.warn).toHaveBeenCalled();
   });
 
+  it('should configure Google Sign-In when available', () => {
+    const googleModule = buildGoogleModule();
+
+    const { configureGoogleSignIn } = setupOAuthModule(googleModule);
+
+    configureGoogleSignIn('client-id');
+
+    expect(googleModule.configure).toHaveBeenCalledWith({
+      webClientId: 'client-id',
+      offlineAccess: true,
+      forceCodeForRefreshToken: true,
+    });
+  });
+
+  it('should throw if configure fails', () => {
+    const googleModule = buildGoogleModule();
+    googleModule.configure.mockImplementation(() => {
+      throw new Error('configure failed');
+    });
+
+    const { configureGoogleSignIn } = setupOAuthModule(googleModule);
+
+    expect(() => configureGoogleSignIn('client-id')).toThrow(
+      'configure failed'
+    );
+  });
+
   it('should return error when Google Sign-In is unavailable', async () => {
     const { oauthService } = setupOAuthModule('throw');
 
@@ -143,6 +178,37 @@ describe('OAuthService', () => {
     expect(response.data?.token).toBe('backend-token');
   });
 
+  it('should return error when idToken is missing', async () => {
+    const googleModule = buildGoogleModule();
+    googleModule.signIn.mockResolvedValue({
+      data: { user: { email: 'user@example.com', name: 'User' } },
+    });
+
+    const { oauthService } = setupOAuthModule(googleModule);
+
+    const response = await oauthService.signInWithGoogle();
+
+    expect(response.success).toBe(false);
+    expect(response.error?.code).toBe('GOOGLE_SIGNIN_ERROR');
+  });
+
+  it('should return backend error when authentication fails', async () => {
+    const googleModule = buildGoogleModule();
+    googleModule.signIn.mockResolvedValue(createUserInfo());
+
+    const { oauthService, apiServiceMock } = setupOAuthModule(googleModule);
+
+    apiServiceMock.post.mockResolvedValue({
+      success: false,
+      error: { message: 'Backend error', code: 'BACKEND_ERROR' },
+    });
+
+    const response = await oauthService.signInWithGoogle();
+
+    expect(response.success).toBe(false);
+    expect(response.error?.code).toBe('BACKEND_ERROR');
+  });
+
   it('should handle user cancelled error', async () => {
     const googleModule = buildGoogleModule();
     googleModule.signIn.mockRejectedValue({ code: 'SIGN_IN_CANCELLED' });
@@ -179,5 +245,42 @@ describe('OAuthService', () => {
 
     expect(response.success).toBe(false);
     expect(response.error?.code).toBe('DEVELOPER_ERROR');
+  });
+
+  it('should sign out and revoke access when available', async () => {
+    const googleModule = buildGoogleModule();
+
+    const { oauthService } = setupOAuthModule(googleModule);
+
+    await oauthService.signOutGoogle();
+    await oauthService.revokeGoogleAccess();
+
+    expect(googleModule.signOut).toHaveBeenCalled();
+    expect(googleModule.revokeAccess).toHaveBeenCalled();
+  });
+
+  it('should return sign-in status and current user', async () => {
+    const googleModule = buildGoogleModule();
+    googleModule.hasPreviousSignIn.mockResolvedValue(true);
+    googleModule.getCurrentUser.mockResolvedValue({ user: { email: 'a' } });
+
+    const { oauthService } = setupOAuthModule(googleModule);
+
+    const signedIn = await oauthService.isSignedIn();
+    const currentUser = await oauthService.getCurrentUser();
+
+    expect(signedIn).toBe(true);
+    expect(currentUser).toEqual({ user: { email: 'a' } });
+  });
+
+  it('should return false when sign-in status check fails', async () => {
+    const googleModule = buildGoogleModule();
+    googleModule.hasPreviousSignIn.mockRejectedValue(new Error('fail'));
+
+    const { oauthService } = setupOAuthModule(googleModule);
+
+    const signedIn = await oauthService.isSignedIn();
+
+    expect(signedIn).toBe(false);
   });
 });
