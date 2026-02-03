@@ -93,6 +93,7 @@ export const DebugConsole: React.FC = () => {
       >
         <TouchableOpacity
           style={styles.debugButton}
+          testID="debug-console-open"
           onPress={() => setVisible(true)}
           activeOpacity={0.7}
         >
@@ -139,6 +140,7 @@ export const DebugConsole: React.FC = () => {
               <TouchableOpacity
                 onPress={handleExport}
                 style={styles.headerActionButton}
+                testID="debug-console-export"
               >
                 <Ionicons
                   name="download"
@@ -149,6 +151,7 @@ export const DebugConsole: React.FC = () => {
               <TouchableOpacity
                 onPress={handleResetStorage}
                 style={styles.headerActionButton}
+                testID="debug-console-reset"
               >
                 <Ionicons
                   name="refresh"
@@ -162,6 +165,7 @@ export const DebugConsole: React.FC = () => {
                   setLogs([]);
                 }}
                 style={styles.headerActionButton}
+                testID="debug-console-clear"
               >
                 <Ionicons
                   name="trash"
@@ -172,6 +176,7 @@ export const DebugConsole: React.FC = () => {
               <TouchableOpacity
                 onPress={() => setVisible(false)}
                 style={styles.headerActionButton}
+                testID="debug-console-close"
               >
                 <Ionicons
                   name="close"
