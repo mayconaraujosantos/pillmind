@@ -16,8 +16,8 @@ const mockColors = {
   SKIP_BUTTON_BORDER: '#ddd',
 };
 
-let latestValidationVisible = false;
-let latestInputs: Array<{
+let mockLatestValidationVisible = false;
+let mockLatestInputs: Array<{
   key?: string;
   secureTextEntry?: boolean;
   rightIcon?: React.ReactElement | null;
@@ -44,7 +44,7 @@ jest.mock('@shared/components', () => {
       secureTextEntry?: boolean;
       label?: string;
     }) => {
-      latestInputs.push({
+      mockLatestInputs.push({
         key: props.label,
         secureTextEntry: props.secureTextEntry,
         rightIcon: props.rightIcon ?? null,
@@ -64,7 +64,7 @@ jest.mock('@shared/components', () => {
       );
     },
     ValidationAlert: ({ visible }: { visible: boolean }) => {
-      latestValidationVisible = visible;
+      mockLatestValidationVisible = visible;
       return null;
     },
   };
@@ -91,8 +91,8 @@ jest.mock('../OnboardingSecondaryButton', () => {
 describe('OnboardingAuth', () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    latestValidationVisible = false;
-    latestInputs = [];
+    mockLatestValidationVisible = false;
+    mockLatestInputs = [];
     mockPrimaryPress.mockReset();
     mockSecondaryPress.mockReset();
   });
@@ -138,13 +138,13 @@ describe('OnboardingAuth', () => {
     fireEvent.press(getByTestId('primary'));
 
     expect(mockPrimaryPress).not.toHaveBeenCalled();
-    expect(latestValidationVisible).toBe(true);
+    expect(mockLatestValidationVisible).toBe(true);
 
     act(() => {
       jest.advanceTimersByTime(3000);
     });
 
-    expect(latestValidationVisible).toBe(false);
+    expect(mockLatestValidationVisible).toBe(false);
   });
 
   it('calls primary action when required fields are filled', () => {
@@ -195,7 +195,7 @@ describe('OnboardingAuth', () => {
 
     expect(mockPrimaryPress).toHaveBeenCalled();
     expect(mockSecondaryPress).toHaveBeenCalled();
-    expect(latestValidationVisible).toBe(false);
+    expect(mockLatestValidationVisible).toBe(false);
   });
 
   it('toggles password visibility when eye icon is pressed', () => {
@@ -222,7 +222,7 @@ describe('OnboardingAuth', () => {
       />
     );
 
-    const initialMatches = latestInputs.filter(
+    const initialMatches = mockLatestInputs.filter(
       (input) => input.key === 'Password'
     );
     const initial = initialMatches[initialMatches.length - 1];
@@ -230,7 +230,7 @@ describe('OnboardingAuth', () => {
 
     fireEvent.press(getByTestId('toggle-Password'));
 
-    latestInputs = [];
+    mockLatestInputs = [];
 
     rerender(
       <OnboardingAuth
@@ -245,7 +245,7 @@ describe('OnboardingAuth', () => {
       />
     );
 
-    const updatedMatches = latestInputs.filter(
+    const updatedMatches = mockLatestInputs.filter(
       (input) => input.key === 'Password'
     );
     const updated = updatedMatches[updatedMatches.length - 1];
