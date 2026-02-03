@@ -32,7 +32,7 @@ jest.mock('@shared/theme', () => ({
   useTheme: () => ({ isDark: false }),
 }));
 
-jest.mock('../constants/onboarding.constants', () => ({
+jest.mock('../../constants/onboarding.constants', () => ({
   getOnboardingColors: () => mockColors,
 }));
 
