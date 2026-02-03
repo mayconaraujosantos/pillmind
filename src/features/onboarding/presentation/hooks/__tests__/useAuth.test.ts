@@ -2,6 +2,15 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { authService } from '../../../domain/services/auth.service';
 import { useAuth } from '../useAuth';
 
+jest.mock('@shared/utils/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    error: jest.fn(),
+  },
+}));
+
 jest.mock('../../../domain/services/auth.service');
 
 const mockAuthService = authService as jest.Mocked<typeof authService>;
@@ -168,6 +177,52 @@ describe('useAuth', () => {
 
       expect(response?.success).toBe(false);
       expect(result.current.error).toBe('Invalid credentials');
+    });
+
+    it('should handle sign in exception', async () => {
+      mockAuthService.signIn.mockRejectedValueOnce(new Error('Boom'));
+
+      const { result, response } = await executeAuthAction((auth) =>
+        auth.signIn({
+          email: 'john@example.com',
+          password: 'wrongpassword',
+        })
+      );
+
+      expect(response?.success).toBe(false);
+      expect(result.current.error).toBe('Boom');
+    });
+  });
+
+  describe('logout', () => {
+    it('should logout successfully', async () => {
+      mockAuthService.logout.mockImplementationOnce(() => undefined);
+
+      const { result } = renderHook(() => useAuth());
+
+      let response: ReturnType<typeof result.current.logout> | undefined;
+      await act(async () => {
+        response = result.current.logout();
+      });
+
+      expect(response?.success).toBe(true);
+      expect(result.current.error).toBeNull();
+    });
+
+    it('should handle logout errors', async () => {
+      mockAuthService.logout.mockImplementationOnce(() => {
+        throw new Error('Logout failed');
+      });
+
+      const { result } = renderHook(() => useAuth());
+
+      let response: ReturnType<typeof result.current.logout> | undefined;
+      await act(async () => {
+        response = result.current.logout();
+      });
+
+      expect(response?.success).toBe(false);
+      expect(result.current.error).toBe('Logout failed');
     });
   });
 });
