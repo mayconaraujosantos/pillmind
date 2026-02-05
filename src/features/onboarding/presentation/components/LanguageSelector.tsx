@@ -175,22 +175,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: adaptiveSpacing.md,
-    paddingVertical: adaptiveSpacing.sm,
+    paddingVertical: 8, // Fixed padding for consistent spacing
     borderRadius: deviceSize(20, 22, 24),
     borderWidth: deviceSize(1.5, 2, 2),
     minWidth: deviceSize(120, 130, 140),
-    height: deviceSize(44, 46, 48), // Moderate height
+    height: deviceSize(44, 46, 48), // Match skip button height
   },
   selectedLanguage: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
     justifyContent: 'flex-start',
-    minWidth: 0, // Prevent overflow
+    minWidth: 0,
   },
   selectedFlag: {
-    fontSize: adaptiveFontSizes.lg,
-    marginRight: adaptiveSpacing.xs, // Reduced margin for more space
+    fontSize: adaptiveFontSizes.lg, // Back to larger size
+    marginRight: adaptiveSpacing.xs,
+    textAlign: 'center',
   },
   selectedText: {
     fontSize: adaptiveFontSizes.sm,
@@ -230,6 +231,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: adaptiveSpacing.md,
     paddingVertical: adaptiveSpacing.md,
     borderBottomWidth: 0.5,
+    minHeight: 56, // Adequate height for flags
   },
   languageInfo: {
     flexDirection: 'row',
@@ -237,8 +239,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   flag: {
-    fontSize: adaptiveFontSizes.lg,
+    fontSize: adaptiveFontSizes.lg, // Back to original size
     marginRight: adaptiveSpacing.md,
+    textAlign: 'center',
   },
   textContainer: {
     flex: 1,
@@ -247,6 +250,7 @@ const styles = StyleSheet.create({
     fontSize: adaptiveFontSizes.sm,
     fontWeight: '500',
     marginBottom: 2,
+    lineHeight: adaptiveFontSizes.sm * 1.1, // Moderate line height
   },
   languageSubName: {
     fontSize: adaptiveFontSizes.xs,

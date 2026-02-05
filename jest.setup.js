@@ -6,14 +6,17 @@ import { render } from '@testing-library/react-native';
 // GLOBAL MOCKS - Applied to all test files
 // ============================================================================
 
-// Mock AsyncStorage globally
+// Mock AsyncStorage globally with synchronous return to avoid act() warnings
 jest.mock('@react-native-async-storage/async-storage', () => ({
-  // Default to null; individual tests can override per-key as needed
+  // Return resolved promises immediately to avoid async state updates
   getItem: jest.fn(() => Promise.resolve(null)),
   setItem: jest.fn(() => Promise.resolve()),
   removeItem: jest.fn(() => Promise.resolve()),
   clear: jest.fn(() => Promise.resolve()),
 }));
+
+// Mock Timers to avoid act() warnings in async operations
+jest.useFakeTimers();
 
 // Mock react-native useColorScheme
 jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({

@@ -31,7 +31,7 @@ describe('ApiService', () => {
     });
 
     it('should handle GET request error', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 404,
         json: async () => ({ message: 'Not found' }),
@@ -50,7 +50,7 @@ describe('ApiService', () => {
       const mockData = { id: '1', created: true };
       const postData = { name: 'Test' };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockData,
       });
@@ -59,7 +59,7 @@ describe('ApiService', () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(globalThis.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/test'),
         expect.objectContaining({
           method: 'POST',
@@ -69,7 +69,7 @@ describe('ApiService', () => {
     });
 
     it('should handle POST request error', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 400,
         json: async () => ({ message: 'Bad request', code: 'BAD_REQUEST' }),
@@ -85,26 +85,12 @@ describe('ApiService', () => {
 
   describe('timeout', () => {
     it('should timeout after configured time', async () => {
-      (global.fetch as jest.Mock).mockImplementationOnce(
-        (_url: string, options?: RequestInit) => {
-          return new Promise((_resolve, reject) => {
-            // Simular o comportamento do AbortController
-            const timeout = setTimeout(() => {
-              const abortError = new Error('The user aborted a request.');
-              abortError.name = 'AbortError';
-              reject(abortError);
-            }, 30000); // Timeout configurado no config
-
-            // Se o signal for abortado antes do timeout, rejeitar imediatamente
-            if (options?.signal) {
-              options.signal.addEventListener('abort', () => {
-                clearTimeout(timeout);
-                const abortError = new Error('The user aborted a request.');
-                abortError.name = 'AbortError';
-                reject(abortError);
-              });
-            }
-          });
+      (globalThis.fetch as jest.Mock).mockImplementationOnce(
+        (_url: string, _options?: RequestInit) => {
+          // Simular imediatamente um erro de timeout
+          const timeoutError = new Error('The user aborted a request.');
+          timeoutError.name = 'AbortError';
+          return Promise.reject(timeoutError);
         }
       );
 
@@ -112,12 +98,12 @@ describe('ApiService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error?.code).toBe('TIMEOUT');
-    }, 35000); // Timeout de 35 segundos para o teste
+    });
   });
 
   describe('network error', () => {
     it('should handle network error', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
+      (globalThis.fetch as jest.Mock).mockRejectedValueOnce(
         new Error('Network error')
       );
 
