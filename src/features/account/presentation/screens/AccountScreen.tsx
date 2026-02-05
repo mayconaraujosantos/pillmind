@@ -6,14 +6,37 @@ import {
   ScrollView,
   TouchableOpacity,
   Appearance,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { ThemeSelector } from '@shared/components';
 import { useTheme } from '@shared/theme';
 import { useTranslation } from '@shared/i18n';
+import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
+import { useAuth } from '@features/onboarding/presentation/hooks/useAuth';
+import { logger } from '@shared/utils/logger';
 
 export const AccountScreen: React.FC = () => {
   const { theme, isDark, themeMode } = useTheme();
   const { t } = useTranslation();
+  const authContext = useAuthContext();
+  const { logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+
+  const settingsOptions = [
+    {
+      key: 'notifications',
+      label: t('account.notifications'),
+    },
+    {
+      key: 'privacy',
+      label: t('account.privacy'),
+    },
+    {
+      key: 'about',
+      label: t('account.about'),
+    },
+  ];
 
   const handleDebugTheme = () => {
     const systemTheme = Appearance.getColorScheme();
@@ -22,6 +45,59 @@ export const AccountScreen: React.FC = () => {
     console.log('  - Modo app:', themeMode);
     console.log('  - isDark:', isDark);
     alert(`Sistema: ${systemTheme}\nModo: ${themeMode}\nisDark: ${isDark}`);
+  };
+
+  const handleLogout = async () => {
+    logger.info('AccountScreen', '📤 Logout button pressed');
+    Alert.alert(
+      t('common.logout'),
+      t('account.logoutConfirm') || 'Are you sure you want to logout?',
+      [
+        {
+          text: t('common.cancel') || 'Cancel',
+          onPress: () => logger.debug('AccountScreen', 'Logout cancelled'),
+          style: 'cancel',
+        },
+        {
+          text: t('common.logout') || 'Logout',
+          onPress: async () => {
+            setIsLoggingOut(true);
+            try {
+              logger.info('AccountScreen', '🚪 Initiating logout');
+              const result = logout();
+              if (result.success) {
+                await authContext.logout();
+                logger.info(
+                  'AccountScreen',
+                  '✅ Logout completed - navigating to login'
+                );
+                // Não precisa de Alert - a navegação automática para login é suficiente
+              } else {
+                logger.warn('AccountScreen', '⚠️ Logout failed', result.error);
+                Alert.alert(
+                  t('common.error') || 'Error',
+                  t('account.logoutFailed') || 'Failed to logout'
+                );
+              }
+            } catch (err) {
+              logger.error(
+                'AccountScreen',
+                '❌ Logout error',
+                { error: err instanceof Error ? err.message : String(err) },
+                err instanceof Error ? err : undefined
+              );
+              Alert.alert(
+                t('common.error') || 'Error',
+                t('account.logoutError') || 'An error occurred during logout'
+              );
+            } finally {
+              setIsLoggingOut(false);
+            }
+          },
+          style: 'destructive',
+        },
+      ]
+    );
   };
 
   return (
@@ -40,16 +116,20 @@ export const AccountScreen: React.FC = () => {
             <View
               style={[styles.avatar, { backgroundColor: theme.colors.primary }]}
             >
-              <Text style={styles.avatarText}>U</Text>
+              <Text style={styles.avatarText}>
+                {authContext.user?.name?.charAt(0).toUpperCase() || 'U'}
+              </Text>
             </View>
           </View>
           <Text style={[styles.userName, { color: theme.colors.text }]}>
-            {t('account.user')}
+            {authContext.user?.name || t('account.user') || 'User'}
           </Text>
           <Text
             style={[styles.userEmail, { color: theme.colors.textSecondary }]}
           >
-            {t('account.email')}
+            {authContext.user?.email ||
+              t('account.email') ||
+              'email@example.com'}
           </Text>
         </View>
 
@@ -82,54 +162,24 @@ export const AccountScreen: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             {t('account.settings')}
           </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.optionItem,
-              {
-                backgroundColor: theme.colors.surface,
-                borderBottomColor: theme.colors.border,
-              },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.optionText, { color: theme.colors.text }]}>
-              {t('account.notifications')}
-            </Text>
-            <Text style={styles.optionArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.optionItem,
-              {
-                backgroundColor: theme.colors.surface,
-                borderBottomColor: theme.colors.border,
-              },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.optionText, { color: theme.colors.text }]}>
-              {t('account.privacy')}
-            </Text>
-            <Text style={styles.optionArrow}>›</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.optionItem,
-              {
-                backgroundColor: theme.colors.surface,
-                borderBottomColor: theme.colors.border,
-              },
-            ]}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.optionText, { color: theme.colors.text }]}>
-              {t('account.about')}
-            </Text>
-            <Text style={styles.optionArrow}>›</Text>
-          </TouchableOpacity>
+          {settingsOptions.map((option) => (
+            <TouchableOpacity
+              key={option.key}
+              style={[
+                styles.optionItem,
+                {
+                  backgroundColor: theme.colors.surface,
+                  borderBottomColor: theme.colors.border,
+                },
+              ]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.optionText, { color: theme.colors.text }]}>
+                {option.label}
+              </Text>
+              <Text style={styles.optionArrow}>›</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Logout Button */}
@@ -140,8 +190,14 @@ export const AccountScreen: React.FC = () => {
               { backgroundColor: theme.colors.error },
             ]}
             activeOpacity={0.7}
+            onPress={handleLogout}
+            disabled={isLoggingOut}
           >
-            <Text style={styles.logoutText}>{t('common.logout')}</Text>
+            {isLoggingOut ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.logoutText}>{t('common.logout')}</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>

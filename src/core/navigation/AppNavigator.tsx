@@ -1,6 +1,9 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useTranslation } from '@shared/i18n';
+import { useTheme } from '@shared/theme';
+import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
 import { HomeScreen } from '@features/home/presentation/screens/HomeScreen';
 import { AppointmentsScreen } from '@features/appointments/presentation/screens/AppointmentsScreen';
 import { AccountScreen } from '@features/account/presentation/screens/AccountScreen';
@@ -11,8 +14,6 @@ import { TabBarIcon } from './components/TabBarIcon';
 import { TabParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
-
-const renderHeader = () => <Header />;
 
 const renderTabBarIcon =
   (routeName: keyof TabParamList) =>
@@ -35,44 +36,59 @@ const renderTabBarIcon =
     );
 
 export const AppNavigator: React.FC = () => {
+  const { t } = useTranslation();
+  const { theme, isDark: _isDark } = useTheme();
+  const authContext = useAuthContext();
+
+  const renderHeader = () => (
+    <Header
+      userName={authContext.user?.name}
+      userAvatar={authContext.user?.pictureUrl || undefined}
+    />
+  );
+
   return (
     <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: renderTabBarIcon(route.name),
-          tabBarActiveTintColor: '#007AFF',
-          tabBarInactiveTintColor: '#8E8E93',
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.textSecondary,
+          tabBarStyle: {
+            backgroundColor: theme.colors.background,
+            borderTopColor: theme.colors.border,
+          },
           headerShown: true,
           header: renderHeader,
           headerStyle: {
-            backgroundColor: '#FFF',
+            backgroundColor: theme.colors.background,
           },
         })}
       >
         <Tab.Screen
           name="HomeTab"
           component={HomeScreen}
-          options={{ title: 'Home' }}
+          options={{ title: t('tabs.home') }}
         />
         <Tab.Screen
           name="AppointmentsTab"
           component={AppointmentsScreen}
-          options={{ title: 'Appointments' }}
+          options={{ title: t('tabs.appointments') }}
         />
         <Tab.Screen
           name="AccountTab"
           component={AccountScreen}
-          options={{ title: 'Account' }}
+          options={{ title: t('tabs.account') }}
         />
         <Tab.Screen
           name="ParentalTab"
           component={ParentalScreen}
-          options={{ title: 'Parental' }}
+          options={{ title: t('tabs.parental') }}
         />
         <Tab.Screen
           name="NearbyTab"
           component={NearbyScreen}
-          options={{ title: 'Nearby' }}
+          options={{ title: t('tabs.nearby') }}
         />
       </Tab.Navigator>
     </NavigationContainer>

@@ -10,7 +10,7 @@ export const useOnboardingScroll = (totalSteps: number) => {
       event.nativeEvent.contentOffset.x / SCREEN_WIDTH
     );
 
-    // Garante que o passo está dentro dos limites válidos
+    // Garante que o passo está dentro dos limites válidos (0, 1, 2)
     if (newStep >= 0 && newStep < totalSteps) {
       setCurrentStep(newStep);
     }

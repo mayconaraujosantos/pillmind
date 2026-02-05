@@ -1,6 +1,20 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import { AppNavigator } from '../AppNavigator';
+import { ThemeProvider } from '@shared/theme';
+
+// Mock AuthContext
+jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
+  useAuthContext: () => ({
+    user: { name: 'Test User', email: 'test@example.com' },
+    isAuthenticated: true,
+    isLoading: false,
+    signIn: jest.fn(),
+    signUp: jest.fn(),
+    signOut: jest.fn(),
+    signInWithGoogle: jest.fn(),
+  }),
+}));
 
 jest.mock('@react-navigation/native', () => {
   const React = require('react');
@@ -96,7 +110,11 @@ jest.mock('@features/nearby/presentation/screens/NearbyScreen', () => ({
 
 describe('AppNavigator', () => {
   it('renders tabs and header', () => {
-    render(<AppNavigator />);
+    render(
+      <ThemeProvider>
+        <AppNavigator />
+      </ThemeProvider>
+    );
     expect(true).toBe(true);
   });
 });

@@ -1,12 +1,16 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
-import { spacing } from '@shared/theme/spacing';
-import { borderRadius } from '@shared/theme/borderRadius';
-import { button as buttonTypography } from '@shared/theme/typography';
+import {
+  TouchableOpacity,
+  Text,
+  ViewStyle,
+  ActivityIndicator,
+} from 'react-native';
+import { onboardingButtonStyles } from './onboardingButtonStyles';
 
 interface OnboardingPrimaryButtonProps {
   label: string;
   onPress?: () => void;
+  isLoading?: boolean;
   backgroundColor: string;
   textColor: string;
   shadowColor: string;
@@ -15,40 +19,46 @@ interface OnboardingPrimaryButtonProps {
 
 export const OnboardingPrimaryButton: React.FC<
   OnboardingPrimaryButtonProps
-> = ({ label, onPress, backgroundColor, textColor, shadowColor, style }) => {
+> = ({
+  label,
+  onPress,
+  isLoading = false,
+  backgroundColor,
+  textColor,
+  shadowColor,
+  style,
+}) => {
   return (
     <TouchableOpacity
       onPress={onPress}
+      disabled={isLoading}
       style={[
-        styles.button,
+        onboardingButtonStyles.button,
         {
           backgroundColor,
           shadowColor,
+          opacity: isLoading ? 0.7 : 1,
         },
         style,
       ]}
     >
-      <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+      {isLoading ? (
+        <ActivityIndicator color={textColor} />
+      ) : (
+        <Text
+          style={[
+            onboardingButtonStyles.label,
+            { color: textColor, textAlignVertical: 'center' },
+          ]}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          adjustsFontSizeToFit
+          minimumFontScale={0.9}
+          allowFontScaling
+        >
+          {label}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  label: {
-    ...buttonTypography.mMedium,
-  },
-});

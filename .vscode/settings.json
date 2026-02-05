@@ -4,5 +4,109 @@
     "projectKey": "mayconaraujosantos_pillmind"
   },
   "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // Performance optimizations
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": false,
+    "**/*.map": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.expo": true,
+    "**/.scannerwork": true,
+    "**/coverage": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.expo": true,
+    "**/.scannerwork": true,
+    "**/coverage": true,
+    "**/*.map": true,
+    "**/.git": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "**/.expo/**": true,
+    "**/.scannerwork/**": true,
+    "**/coverage/**": true,
+    "**/*.map": true,
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true
+  },
+  "typescript.tsc.autoDetect": "off",
+  "eslint.runtime": "node",
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "git.enabled": true,
+  "git.untrackedChanges": "hidden",
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "never"
+  },
+
+  // Explorer configuration
+  "explorer.sortOrder": "type",
+  "explorer.compactFolders": false,
+  "explorer.autoReveal": true,
+  "explorer.autoRevealExclude": {
+    "**/node_modules": true,
+    "**/.git": true
+  },
+
+  // Disable breadcrumb and commonly used
+  "breadcrumbs.enabled": true,
+  "workbench.explorer.fileNesting.enabled": false,
+
+  // Session management
+  "workbench.startupEditor": "none",
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.editor.revealIfOpen": true,
+  "workbench.editor.tabCloseButton": "right",
+  "workbench.editor.tabSizing": "fit",
+  "window.restoreWindows": "none",
+
+  // GPU/Rendering optimization (NVIDIA conflict fix)
+
+  "editor.smoothScrolling": false,
+  "workbench.list.smoothScrolling": false,
+  "terminal.integrated.smoothScrolling": false,
+  "editor.cursorSmoothCaretAnimation": "off",
+  "editor.minimap.enabled": false,
+  "editor.renderWhitespace": "selection",
+  "editor.renderControlCharacters": false,
+  "editor.renderLineHighlight": "line",
+  "editor.occurrencesHighlight": "off",
+  "editor.selectionHighlight": false,
+  "editor.suggest.preview": false,
+  "editor.inlineSuggest.enabled": true,
+
+  // Extension optimization
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  },
+
+  // Git optimization
+  "git.autorefresh": false,
+  "git.autofetch": false,
+  "git.decorations.enabled": true,
+
+  // Search optimization
+  "search.followSymlinks": false,
+  "search.smartCase": true,
+
+  // File optimization
+  "files.autoSave": "afterDelay",
+  "files.hotExit": "onExitAndWindowClose",
+  "workbench.editor.tabActionLocation": "right"
 }

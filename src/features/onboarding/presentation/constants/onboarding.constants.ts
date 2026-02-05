@@ -2,7 +2,7 @@
 const DEV_CONFIG = {
   // true = sempre mostra onboarding (bom para testar onboarding)
   // false = respeita o AsyncStorage (bom para testar fluxo de usuário existente)
-  FORCE_SHOW_ONBOARDING: false,
+  FORCE_SHOW_ONBOARDING: true,
 
   // true = pula splash screen (desenvolvimento mais rápido)
   SKIP_SPLASH: false,

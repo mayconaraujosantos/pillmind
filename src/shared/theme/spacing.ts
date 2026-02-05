@@ -3,7 +3,10 @@
  *
  * Sistema de espaçamento consistente baseado em múltiplos de 8px.
  * Valores: 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96
+ * AGORA COM SISTEMA RESPONSIVO AUTOMÁTICO
  */
+import { ViewStyle } from 'react-native';
+import { useResponsive } from '../hooks/useResponsive';
 
 /**
  * Spacing Values
@@ -335,6 +338,128 @@ export const createCustomSpacing = (options: {
   paddingBottom: options.bottom ? spacing[options.bottom] : 0,
   paddingLeft: options.left ? spacing[options.left] : 0,
 });
+
+/**
+ * SISTEMA RESPONSIVO DE ESPAÇAMENTO
+ * Hook para aplicar espaçamentos que se adaptam automaticamente ao tamanho da tela
+ */
+export interface ResponsiveSpacingSystem {
+  // Valores originais
+  spacing: typeof spacing;
+  spacingScale: typeof spacingScale;
+
+  // Funções responsivas
+  pad: (value: keyof typeof spacing | number) => number;
+  margin: (value: keyof typeof spacing | number) => number;
+  gap: (value: keyof typeof spacing | number) => number;
+
+  // Helpers para estilos comuns responsivos
+  paddingHorizontal: (
+    value: keyof typeof spacing | number
+  ) => Pick<ViewStyle, 'paddingHorizontal'>;
+  paddingVertical: (
+    value: keyof typeof spacing | number
+  ) => Pick<ViewStyle, 'paddingVertical'>;
+  marginHorizontal: (
+    value: keyof typeof spacing | number
+  ) => Pick<ViewStyle, 'marginHorizontal'>;
+  marginVertical: (
+    value: keyof typeof spacing | number
+  ) => Pick<ViewStyle, 'marginVertical'>;
+
+  // Presets responsivos comuns
+  containerPadding: ViewStyle;
+  sectionSpacing: ViewStyle;
+  cardPadding: ViewStyle;
+  buttonPadding: ViewStyle;
+  inputPadding: ViewStyle;
+}
+
+export const useResponsiveSpacing = (): ResponsiveSpacingSystem => {
+  const { rs, isSmallDevice, isMediumDevice, isLargeDevice } = useResponsive();
+
+  // Fator de escala baseado no dispositivo
+  const getSpacingFactor = () => {
+    if (isSmallDevice) return 0.3; // Escala conservadora
+    if (isMediumDevice) return 0.4; // Escala padrão
+    if (isLargeDevice) return 0.5; // Escala maior para tablets
+    return 0.4;
+  };
+
+  const spacingFactor = getSpacingFactor();
+
+  // Função para converter spacing key ou número em valor responsivo
+  const getResponsiveValue = (value: keyof typeof spacing | number): number => {
+    const baseValue = typeof value === 'string' ? spacing[value] : value;
+    return rs(baseValue, spacingFactor);
+  };
+
+  // Funções principais
+  const pad = (value: keyof typeof spacing | number) =>
+    getResponsiveValue(value);
+  const margin = (value: keyof typeof spacing | number) =>
+    getResponsiveValue(value);
+  const gap = (value: keyof typeof spacing | number) =>
+    getResponsiveValue(value);
+
+  // Helpers para estilos
+  const paddingHorizontal = (value: keyof typeof spacing | number) => ({
+    paddingHorizontal: getResponsiveValue(value),
+  });
+
+  const paddingVertical = (value: keyof typeof spacing | number) => ({
+    paddingVertical: getResponsiveValue(value),
+  });
+
+  const marginHorizontal = (value: keyof typeof spacing | number) => ({
+    marginHorizontal: getResponsiveValue(value),
+  });
+
+  const marginVertical = (value: keyof typeof spacing | number) => ({
+    marginVertical: getResponsiveValue(value),
+  });
+
+  // Presets comuns responsivos
+  const containerPadding: ViewStyle = {
+    paddingHorizontal: pad(isLargeDevice ? 'xl' : 'lg'),
+    paddingVertical: pad(isLargeDevice ? 'lg' : 'md'),
+  };
+
+  const sectionSpacing: ViewStyle = {
+    marginVertical: margin(isLargeDevice ? 'xl' : 'lg'),
+  };
+
+  const cardPadding: ViewStyle = {
+    padding: pad(isLargeDevice ? 'xl' : isSmallDevice ? 'md' : 'lg'),
+  };
+
+  const buttonPadding: ViewStyle = {
+    paddingHorizontal: pad(isLargeDevice ? 'xl' : 'lg'),
+    paddingVertical: pad(isLargeDevice ? 'lg' : isSmallDevice ? 'sm' : 'md'),
+  };
+
+  const inputPadding: ViewStyle = {
+    paddingHorizontal: pad('md'),
+    paddingVertical: pad(isLargeDevice ? 'lg' : isSmallDevice ? 'sm' : 'md'),
+  };
+
+  return {
+    spacing,
+    spacingScale,
+    pad,
+    margin,
+    gap,
+    paddingHorizontal,
+    paddingVertical,
+    marginHorizontal,
+    marginVertical,
+    containerPadding,
+    sectionSpacing,
+    cardPadding,
+    buttonPadding,
+    inputPadding,
+  };
+};
 
 /**
  * Tipos para TypeScript

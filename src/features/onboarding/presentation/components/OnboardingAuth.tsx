@@ -1,20 +1,24 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   TextInputProps,
 } from 'react-native';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { useTheme } from '@shared/theme';
-import { spacing } from '@shared/theme/spacing';
-import { borderRadius } from '@shared/theme/borderRadius';
-import { body } from '@shared/theme/typography';
+import { ModernInput, ValidationAlert } from '@shared/components';
+import {
+  adaptiveSpacing,
+  scaleHeight,
+  deviceSize,
+} from '@shared/utils/dimensions';
 import { getOnboardingColors } from '../constants/onboarding.constants';
 import { OnboardingTitleBlock } from './OnboardingTitleBlock';
 import { OnboardingPrimaryButton } from './OnboardingPrimaryButton';
+import { OnboardingSecondaryButton } from './OnboardingSecondaryButton';
 
 type AuthField = {
   key: string;
@@ -40,10 +44,18 @@ interface OnboardingAuthProps {
   fields: AuthField[];
   primaryLabel: string;
   onPrimaryPress?: () => void;
+  secondaryLabel?: string;
+  onSecondaryPress?: () => void;
+  isLoading?: boolean;
   appleLabel: string;
+  onApplePress?: () => void;
+  appleDisabled?: boolean;
   googleLabel: string;
+  onGooglePress?: () => void;
+  googleDisabled?: boolean;
   termsText?: string;
   linkCta?: LinkCta;
+  footerInfo?: string;
 }
 
 export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
@@ -53,13 +65,48 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
   fields,
   primaryLabel,
   onPrimaryPress,
-  appleLabel,
-  googleLabel,
+  secondaryLabel,
+  onSecondaryPress,
+  isLoading = false,
+  appleLabel: _appleLabel,
+  onApplePress,
+  appleDisabled = false,
+  googleLabel: _googleLabel,
+  onGooglePress,
+  googleDisabled = false,
   termsText,
   linkCta,
+  footerInfo,
 }) => {
   const { isDark } = useTheme();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
+
+  const validateFields = (): boolean => {
+    const requiredFields = fields.filter(
+      (field) =>
+        field.key === 'email' ||
+        field.key === 'password' ||
+        field.key === 'name'
+    );
+
+    return requiredFields.every(
+      (field) => field.value && field.value.trim() !== ''
+    );
+  };
+
+  const handlePrimaryPress = () => {
+    if (!validateFields()) {
+      setShowValidation(true);
+      // Remove validation state after 3 seconds
+      setTimeout(() => setShowValidation(false), 3000);
+      return;
+    }
+
+    setShowValidation(false);
+    onPrimaryPress?.();
+  };
 
   return (
     <ScrollView
@@ -67,6 +114,12 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
+      <ValidationAlert
+        visible={showValidation}
+        message="Por favor, preencha todos os campos obrigatórios (*)"
+        onDismiss={() => setShowValidation(false)}
+      />
+
       <OnboardingTitleBlock
         title={title}
         subtitle={subtitle}
@@ -75,30 +128,93 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
       />
 
       <View style={styles.form}>
-        {fields.map((field) => (
-          <View key={field.key} style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.TEXT_PRIMARY }]}>
-              {field.label}
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  borderColor: colors.INDICATOR_INACTIVE,
-                  color: colors.TEXT_PRIMARY,
-                },
-              ]}
+        {fields.map((field) => {
+          const isPasswordField =
+            field.key === 'password' || field.key === 'confirmPassword';
+          const isRequired = field.key === 'email' || field.key === 'password';
+
+          const getLeftIcon = () => {
+            if (field.key === 'email') {
+              return (
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color={colors.TEXT_SECONDARY}
+                />
+              );
+            }
+            if (isPasswordField) {
+              return (
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={colors.TEXT_SECONDARY}
+                />
+              );
+            }
+            return null;
+          };
+
+          return (
+            <ModernInput
+              key={field.key}
+              label={field.label}
               placeholder={field.placeholder}
-              placeholderTextColor={colors.TEXT_SECONDARY}
               value={field.value}
               onChangeText={field.onChangeText}
               keyboardType={field.keyboardType}
               autoCapitalize={field.autoCapitalize}
-              secureTextEntry={field.secureTextEntry}
+              secureTextEntry={isPasswordField && !showPassword}
+              variant="modern"
+              size="md"
+              required={isRequired}
+              showValidation={showValidation}
+              leftIcon={getLeftIcon()}
+              rightIcon={
+                isPasswordField ? (
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    activeOpacity={0.6}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye' : 'eye-off'}
+                      size={20}
+                      color={colors.TEXT_SECONDARY}
+                    />
+                  </TouchableOpacity>
+                ) : null
+              }
             />
-          </View>
-        ))}
+          );
+        })}
       </View>
+
+      <View style={styles.buttonsContainer}>
+        <OnboardingPrimaryButton
+          label={primaryLabel}
+          isLoading={isLoading}
+          onPress={handlePrimaryPress}
+          backgroundColor={colors.PRIMARY}
+          shadowColor={colors.PRIMARY}
+          textColor={colors.BUTTON_TEXT}
+        />
+        {secondaryLabel && (
+          <OnboardingSecondaryButton
+            label={secondaryLabel}
+            onPress={onSecondaryPress}
+            borderColor={colors.PRIMARY}
+            textColor={colors.PRIMARY}
+          />
+        )}
+      </View>
+
+      {termsText ? (
+        <View style={styles.termsContainer}>
+          <Text style={[styles.termsText, { color: colors.TEXT_SECONDARY }]}>
+            {termsText}
+          </Text>
+        </View>
+      ) : null}
 
       <View style={styles.divider}>
         <View
@@ -119,40 +235,38 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
       </View>
 
       <View style={styles.socialButtons}>
-        {[appleLabel, googleLabel].map((label) => (
-          <TouchableOpacity
-            key={label}
-            style={[
-              styles.socialButton,
-              { borderColor: colors.INDICATOR_INACTIVE },
-            ]}
-          >
-            <Text
-              style={[styles.socialButtonText, { color: colors.TEXT_PRIMARY }]}
-            >
-              {label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+        <TouchableOpacity
+          style={[
+            styles.socialButton,
+            {
+              backgroundColor: colors.BACKGROUND,
+              borderColor: colors.INDICATOR_INACTIVE,
+              opacity: !onGooglePress || googleDisabled ? 0.5 : 1,
+            },
+          ]}
+          onPress={onGooglePress}
+          activeOpacity={0.7}
+          disabled={!onGooglePress || googleDisabled}
+        >
+          <FontAwesome5 name="google" size={22} color="#EA4335" />
+        </TouchableOpacity>
 
-      <View style={styles.primaryButtonContainer}>
-        <OnboardingPrimaryButton
-          label={primaryLabel}
-          onPress={onPrimaryPress}
-          backgroundColor={colors.PRIMARY}
-          shadowColor={colors.PRIMARY}
-          textColor={colors.BUTTON_TEXT}
-        />
+        <TouchableOpacity
+          style={[
+            styles.socialButton,
+            {
+              backgroundColor: colors.BACKGROUND,
+              borderColor: colors.INDICATOR_INACTIVE,
+              opacity: !onApplePress || appleDisabled ? 0.5 : 1,
+            },
+          ]}
+          onPress={onApplePress}
+          activeOpacity={0.7}
+          disabled={!onApplePress || appleDisabled}
+        >
+          <FontAwesome5 name="apple" size={22} color={colors.TEXT_PRIMARY} />
+        </TouchableOpacity>
       </View>
-
-      {termsText ? (
-        <View style={styles.termsContainer}>
-          <Text style={[styles.termsText, { color: colors.TEXT_SECONDARY }]}>
-            {termsText}
-          </Text>
-        </View>
-      ) : null}
 
       {linkCta ? (
         <View style={styles.linkContainer}>
@@ -160,10 +274,18 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
             {linkCta.text}{' '}
             <Text
               onPress={linkCta.onPress}
-              style={{ color: colors.PRIMARY, fontWeight: '600' }}
+              style={{ color: colors.PRIMARY, fontWeight: '700' }}
             >
               {linkCta.linkLabel}
             </Text>
+          </Text>
+        </View>
+      ) : null}
+
+      {footerInfo ? (
+        <View style={styles.footerContainer}>
+          <Text style={[styles.footerText, { color: colors.TEXT_SECONDARY }]}>
+            {footerInfo}
           </Text>
         </View>
       ) : null}
@@ -176,71 +298,108 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.xl,
+    paddingHorizontal: adaptiveSpacing.lg,
+    paddingTop: scaleHeight(50), // Reduzido de 40 para 32
+    paddingBottom: adaptiveSpacing.xl, // Reduzido de xxl para xl
   },
   form: {
-    marginBottom: spacing.lg,
-    gap: spacing.md,
+    marginBottom: adaptiveSpacing.lg,
+    gap: adaptiveSpacing.sm, // Reduzido de lg para sm
   },
   inputGroup: {
-    gap: spacing.xs,
+    gap: adaptiveSpacing.sm,
   },
   label: {
-    ...body.lMedium,
+    fontSize: 14,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    marginBottom: 4,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 0,
+    borderBottomWidth: 1.5,
+    paddingHorizontal: 0,
+    paddingVertical: adaptiveSpacing.md,
+    gap: adaptiveSpacing.sm,
+    minHeight: deviceSize(48, 52, 56),
   },
   input: {
-    borderWidth: 1.5,
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-    ...body.mRegular,
+    flex: 1,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  eyeIcon: {
+    padding: adaptiveSpacing.sm,
+    marginRight: -adaptiveSpacing.sm,
+  },
+  buttonsContainer: {
+    marginVertical: adaptiveSpacing.md, // Reduzido de lg para md
+    gap: adaptiveSpacing.sm,
+  },
+  termsContainer: {
+    marginVertical: adaptiveSpacing.md,
+  },
+  termsText: {
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: deviceSize(16, 18, 20),
+    fontWeight: '400',
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: spacing.md,
-    gap: spacing.xs,
+    marginVertical: adaptiveSpacing.lg, // Reduzido de xl para lg
+    gap: adaptiveSpacing.md,
   },
   dividerLine: {
     flex: 1,
     height: 1,
   },
   dividerText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
   },
   socialButtons: {
-    gap: spacing.xs,
-    marginBottom: spacing.md,
+    flexDirection: 'row',
+    gap: adaptiveSpacing.lg,
+    justifyContent: 'center',
+    marginBottom: adaptiveSpacing.lg, // Reduzido de xl para lg
   },
   socialButton: {
-    borderWidth: 1.5,
-    borderRadius: borderRadius.sm,
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
     justifyContent: 'center',
-  },
-  socialButtonText: {
-    ...body.lMedium,
-  },
-  primaryButtonContainer: {
-    marginVertical: spacing.md,
-  },
-  termsContainer: {
-    marginTop: spacing.sm,
-  },
-  termsText: {
-    ...body.xmRegular,
-    textAlign: 'center',
+    alignItems: 'center',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
   },
   linkContainer: {
-    marginTop: spacing.md,
+    marginTop: adaptiveSpacing.md, // Reduzido de lg para md
     alignItems: 'center',
   },
   linkText: {
-    ...body.mRegular,
+    fontSize: 20,
     textAlign: 'center',
+    fontWeight: '600',
+  },
+  footerContainer: {
+    marginTop: adaptiveSpacing.md,
+    alignItems: 'center',
+    paddingHorizontal: adaptiveSpacing.sm,
+  },
+  footerText: {
+    fontSize: 12,
+    textAlign: 'center',
+    fontWeight: '400',
+    lineHeight: 18,
   },
 });

@@ -4,7 +4,15 @@
     "next": "Próximo",
     "back": "Voltar",
     "getStarted": "Começar",
-    "logout": "Sair"
+    "logout": "Sair",
+    "cancel": "Cancelar",
+    "error": "Erro",
+    "ok": "OK",
+    "success": "Sucesso",
+    "loading": "Carregando...",
+    "retry": "Tentar Novamente",
+    "continueAnyway": "Continuar Assim Mesmo",
+    "selectLanguage": "Selecionar Idioma"
   },
   "tabs": {
     "home": "Início",
@@ -16,9 +24,22 @@
   "home": {
     "title": "PillMind Início",
     "welcome": "Bem-vindo ao seu assistente de medicamentos!",
+    "hello": "Olá, {{name}}",
+    "welcomeShort": "Bem-vindo!",
+    "todayLabel": "Hoje",
+    "dateLabel": "Data",
     "debugControls": "🛠️ Controles de Debug",
     "resetOnboarding": "↻ Resetar Onboarding",
-    "resetInfo": "Pressione para testar o onboarding novamente"
+    "resetInfo": "Pressione para testar o onboarding novamente",
+    "loadingMedications": "Carregando seus medicamentos...",
+    "refreshingMedications": "Atualizando...",
+    "yourMedications": "Seus Medicamentos",
+    "noMedicationsFound": "Nenhum medicamento encontrado",
+    "noMedicationsScheduled": "Nenhum medicamento programado para este dia",
+    "addFirstMedication": "Se você ainda não adicionou um medicamento, faça isso agora.",
+    "addMedication": "Adicionar medicamento",
+    "viewAll": "Ver tudo",
+    "viewLess": "Ver menos"
   },
   "appointments": {
     "title": "Consultas",
@@ -41,13 +62,19 @@
     "notifications": "Notificações",
     "privacy": "Privacidade",
     "about": "Sobre",
-    "debugTheme": "🐛 Debug: Ver detecção do tema"
+    "debugTheme": "🐛 Debug: Ver detecção do tema",
+    "logoutConfirm": "Tem certeza de que deseja sair?",
+    "logoutFailed": "Falha ao sair",
+    "logoutError": "Ocorreu um erro durante o logout"
   },
   "theme": {
     "automatic": "Automático",
     "light": "Claro",
     "dark": "Escuro",
-    "title": "Tema"
+    "title": "Aparência",
+    "systemDescription": "Segue a configuração do sistema",
+    "lightDescription": "Sempre usa o tema claro",
+    "darkDescription": "Sempre usa o tema escuro"
   },
   "onboarding": {
     "step1": {
@@ -79,7 +106,22 @@
       "and": "e",
       "privacyPolicy": "Política de Privacidade",
       "alreadyHaveAccount": "Já tem uma conta?",
-      "signIn": "Entrar"
+      "signIn": "Entrar",
+      "signUpButton": "Cadastrar"
+    },
+    "auth": {
+      "title": "Bem-vindo",
+      "subtitle": "Entre ou crie sua conta para começar",
+      "email": "E-mail",
+      "emailPlaceholder": "Digite seu endereço de e-mail",
+      "password": "Senha",
+      "passwordPlaceholder": "Digite sua senha",
+      "or": "Ou",
+      "continueWithApple": "Continuar com Apple",
+      "continueWithGoogle": "Continuar com Google",
+      "signInButton": "Entrar",
+      "signUpButton": "Criar Conta",
+      "terms": "Ao continuar, você concorda com os Termos de Serviço e Política de Privacidade"
     },
     "signIn": {
       "title": "Entrar",
@@ -104,5 +146,17 @@
       "createAccount": "Criar uma conta",
       "login": "Entrar"
     }
+  },
+  "errors": {
+    "pleaseFieldAllFields": "Por favor, preencha todos os campos",
+    "failedToSignIn": "Falha ao fazer login",
+    "authenticationError": "Erro de autenticação",
+    "failedToCreateAccount": "Falha ao criar conta",
+    "accountCreatedSuccess": "Conta criada com sucesso! Faça login.",
+    "networkError": "Erro de rede",
+    "invalidUrl": "Por favor, insira uma URL válida",
+    "configuredSuccess": "Node-RED configurado com sucesso!",
+    "connectionFailed": "Não foi possível conectar ao Node-RED neste endereço",
+    "clearStorageFailed": "Falha ao limpar armazenamento"
   }
 }

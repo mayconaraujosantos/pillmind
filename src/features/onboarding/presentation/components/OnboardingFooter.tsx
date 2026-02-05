@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@shared/theme';
-import { spacing } from '@shared/theme/spacing';
+import { logger } from '@shared/utils/logger';
+import { adaptiveSpacing, deviceSize } from '@shared/utils/dimensions';
 import { useTranslation } from '@shared/i18n';
 import { getOnboardingColors } from '../constants/onboarding.constants';
 import { OnboardingPrimaryButton } from './OnboardingPrimaryButton';
@@ -26,6 +27,12 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
   const { t } = useTranslation();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
 
+  useEffect(() => {
+    logger.debug('OnboardingFooter', 'Footer mounted', { currentStep });
+  }, [currentStep]);
+
+  logger.debug('OnboardingFooter', 'Footer rendering', { currentStep });
+
   // Step 0-1: Mostrar "Next"
   // Step 2 (último info): Mostrar "Create an account" e "Login"
   // Step 3-5: Não mostrar footer (SignUp, SignIn, Success)
@@ -43,7 +50,7 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
   if (isLastInfoScreen) {
     return (
       <View style={styles.footer}>
-        <View style={styles.buttonRow}>
+        <View style={styles.buttonColumn}>
           <OnboardingPrimaryButton
             label={t('onboarding.buttons.createAccount')}
             onPress={onSignUp}
@@ -56,9 +63,8 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
           <OnboardingSecondaryButton
             label={t('onboarding.buttons.login')}
             onPress={onSignIn}
-            borderColor={colors.PRIMARY}
-            textColor={colors.PRIMARY}
-            backgroundColor={colors.BACKGROUND}
+            textColor={colors.BUTTON_TEXT}
+            backgroundColor={colors.PRIMARY}
             style={styles.button}
           />
         </View>
@@ -84,21 +90,35 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
 
 const styles = StyleSheet.create({
   footer: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-    paddingTop: spacing.none,
+    paddingHorizontal: adaptiveSpacing.lg,
+    paddingBottom: deviceSize(70, 90, 110),
+    paddingTop: adaptiveSpacing.sm,
+    marginTop: -adaptiveSpacing.xs,
+    alignContent: 'center',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    minHeight: 120,
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: 8,
+    width: '100%',
     alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  buttonColumn: {
+    width: '100%',
+    gap: 16,
+    maxWidth: 400,
   },
   singleButtonContainer: {
-    flexDirection: 'row',
-    gap: spacing.sm,
+    width: '100%',
+    gap: adaptiveSpacing.sm,
     alignItems: 'center',
+    maxWidth: 400,
   },
   button: {
-    flex: 1,
+    width: '100%',
+    minHeight: 48,
   },
 });

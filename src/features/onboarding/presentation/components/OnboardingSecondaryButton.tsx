@@ -1,48 +1,42 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
-import { spacing } from '@shared/theme/spacing';
-import { borderRadius } from '@shared/theme/borderRadius';
-import { button as buttonTypography } from '@shared/theme/typography';
+import { TouchableOpacity, Text, ViewStyle } from 'react-native';
+import { onboardingButtonStyles } from './onboardingButtonStyles';
 
 interface OnboardingSecondaryButtonProps {
   label: string;
   onPress?: () => void;
-  borderColor: string;
   textColor: string;
+  borderColor?: string;
   backgroundColor?: string;
   style?: ViewStyle;
 }
 
 export const OnboardingSecondaryButton: React.FC<
   OnboardingSecondaryButtonProps
-> = ({ label, onPress, borderColor, textColor, backgroundColor, style }) => {
+> = ({ label, onPress, textColor, borderColor, backgroundColor, style }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[
-        styles.button,
+        onboardingButtonStyles.button,
         {
-          borderColor,
           backgroundColor: backgroundColor ?? 'transparent',
+          borderColor: borderColor ?? textColor,
+          borderWidth: borderColor ? 2 : 0,
         },
         style,
       ]}
     >
-      <Text style={[styles.label, { color: textColor }]}>{label}</Text>
+      <Text
+        style={[onboardingButtonStyles.label, { color: textColor }]}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        adjustsFontSizeToFit
+        minimumFontScale={0.9}
+        allowFontScaling
+      >
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-    borderWidth: 1.5,
-  },
-  label: {
-    ...buttonTypography.mMedium,
-  },
-});

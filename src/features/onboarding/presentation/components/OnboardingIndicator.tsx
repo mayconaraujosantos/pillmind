@@ -1,6 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@shared/theme';
+import { logger } from '@shared/utils/logger';
+import { adaptiveSpacing, deviceSize } from '@shared/utils/dimensions';
 import {
   getOnboardingColors,
   ONBOARDING_STEPS,
@@ -25,10 +27,20 @@ export const OnboardingIndicator: React.FC<OnboardingIndicatorProps> = ({
 
   const steps = useMemo(() => ONBOARDING_STEPS.slice(0, INDICATOR_STEPS), []);
 
+  useEffect(() => {
+    logger.debug('OnboardingIndicator', 'Indicator state', {
+      currentStep,
+      shouldShowIndicator,
+      stepsCount: steps.length,
+    });
+  }, [currentStep, steps.length]);
+
   if (!shouldShowIndicator) {
+    logger.debug('OnboardingIndicator', 'Indicator hidden');
     return null;
   }
 
+  logger.debug('OnboardingIndicator', 'Indicator rendering');
   return (
     <View style={styles.container}>
       {steps.map((step, index) => (
@@ -54,15 +66,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    gap: adaptiveSpacing.xs,
+    paddingBottom: adaptiveSpacing.xs,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: deviceSize(6, 8, 10),
+    height: deviceSize(6, 8, 10),
+    borderRadius: deviceSize(3, 4, 5),
   },
   activeDot: {
-    width: 24,
+    width: deviceSize(20, 24, 28),
   },
   inactiveDot: {},
 });

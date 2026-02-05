@@ -27,23 +27,5 @@ export const getOnboardingSteps = (): OnboardingStep[] => {
         'https://static.vecteezy.com/system/resources/previews/044/632/641/non_2x/weekend-holiday-flat-illustration-design-vector.jpg',
       type: 'info' as const,
     },
-    {
-      id: '4',
-      title: i18n.t('onboarding.signUp.title'),
-      description: i18n.t('onboarding.signUp.subtitle'),
-      type: 'signup' as const,
-    },
-    {
-      id: '5',
-      title: i18n.t('onboarding.signIn.title'),
-      description: i18n.t('onboarding.signIn.subtitle'),
-      type: 'signin' as const,
-    },
-    {
-      id: '6',
-      title: i18n.t('onboarding.success.title'),
-      description: i18n.t('onboarding.success.subtitle'),
-      type: 'success' as const,
-    },
   ];
 };
