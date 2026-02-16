@@ -157,6 +157,8 @@
     "invalidUrl": "Por favor, insira uma URL válida",
     "configuredSuccess": "Node-RED configurado com sucesso!",
     "connectionFailed": "Não foi possível conectar ao Node-RED neste endereço",
-    "clearStorageFailed": "Falha ao limpar armazenamento"
+    "clearStorageFailed": "Falha ao limpar armazenamento",
+    "emailNotFound": "Email não encontrado. Verifique seu email ou crie uma conta.",
+    "invalidCredentials": "Email ou senha incorretos"
   }
 }
