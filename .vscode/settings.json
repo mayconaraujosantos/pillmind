@@ -108,5 +108,6 @@
   // File optimization
   "files.autoSave": "afterDelay",
   "files.hotExit": "onExitAndWindowClose",
-  "workbench.editor.tabActionLocation": "right"
+  "workbench.editor.tabActionLocation": "right",
+  "java.compile.nullAnalysis.mode": "automatic"
 }
