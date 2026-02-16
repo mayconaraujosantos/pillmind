@@ -61,12 +61,20 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
       await authContext.login(result.data);
       onSignUpComplete?.();
     } else {
-      const errorMsg =
-        result.error?.code === 'NETWORK_ERROR'
-          ? t('errors.networkError')
-          : result.error?.message ||
-            authError ||
-            t('errors.failedToCreateAccount');
+      // Tratamento específico para diferentes códigos de erro
+      let errorMsg: string;
+
+      if (result.error?.code === 'NETWORK_ERROR') {
+        errorMsg = t('errors.networkError');
+      } else if (result.error?.code === 'EMAIL_EXISTS') {
+        errorMsg = result.error.message || 'Email já existe';
+      } else {
+        errorMsg =
+          result.error?.message ||
+          authError ||
+          t('errors.failedToCreateAccount');
+      }
+
       logger.error('OnboardingSignUp', '❌ Sign up failed', {
         email,
         error: errorMsg,

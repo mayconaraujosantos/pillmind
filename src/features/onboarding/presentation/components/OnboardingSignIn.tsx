@@ -55,10 +55,19 @@ export const OnboardingSignIn: React.FC<OnboardingSignInProps> = ({
       // Removed success alert - PostLoginLoadingScreen provides better UX feedback
       onSignInComplete?.();
     } else {
-      const errorMsg =
-        result.error?.code === 'NETWORK_ERROR'
-          ? t('errors.networkError')
-          : result.error?.message || error || t('errors.failedToSignIn');
+      // Tratamento específico para diferentes códigos de erro
+      let errorMsg: string;
+
+      if (result.error?.code === 'NETWORK_ERROR') {
+        errorMsg = t('errors.networkError');
+      } else if (result.error?.code === 'EMAIL_NOT_FOUND') {
+        errorMsg = t('errors.emailNotFound');
+      } else if (result.error?.code === 'INVALID_CREDENTIALS') {
+        errorMsg = t('errors.invalidCredentials');
+      } else {
+        errorMsg = result.error?.message || error || t('errors.failedToSignIn');
+      }
+
       logger.error('OnboardingSignIn', '❌ Sign in failed', {
         email,
         error: errorMsg,
