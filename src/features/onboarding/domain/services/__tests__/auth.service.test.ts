@@ -143,6 +143,31 @@ describe('AuthService', () => {
       expect(result.error?.status).toBe(401);
     });
 
+    it('should handle email not found error', async () => {
+      const mockError = {
+        success: false,
+        error: {
+          message: 'Email not found',
+          code: 'EMAIL_NOT_FOUND',
+          status: 404,
+        },
+      };
+
+      mockApiService.post.mockResolvedValueOnce(mockError);
+
+      const signInData = {
+        email: 'nonexistent@example.com',
+        password: 'password123',
+      };
+
+      const result = await authService.signIn(signInData);
+
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toBe('Email not found');
+      expect(result.error?.code).toBe('EMAIL_NOT_FOUND');
+      expect(result.error?.status).toBe(404);
+    });
+
     it('should map backend response format on signin', async () => {
       const mockResponse = {
         success: true,

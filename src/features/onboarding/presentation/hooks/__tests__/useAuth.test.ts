@@ -102,6 +102,28 @@ describe('useAuth', () => {
       expect(result.current.error).toBe('Email already exists');
     });
 
+    it('should handle email not found error on sign in', async () => {
+      const mockError = {
+        success: false,
+        error: {
+          message: 'Email not found',
+          code: 'EMAIL_NOT_FOUND',
+        },
+      };
+
+      mockAuthService.signIn.mockResolvedValueOnce(mockError);
+
+      const { result, response } = await executeAuthAction((auth) =>
+        auth.signIn({
+          email: 'nonexistent@example.com',
+          password: 'password123',
+        })
+      );
+
+      expect(response?.success).toBe(false);
+      expect(result.current.error).toBe('Email not found');
+    });
+
     it('should set loading state during sign up', async () => {
       mockAuthService.signUp.mockImplementationOnce(
         () =>
