@@ -139,7 +139,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   // Monitora mudanças no tema do sistema (com fallback para Expo Go e re-detecção para iOS)
   useEffect(() => {
     // Atualiza o tema detectado quando o sistema muda
-    setDetectedTheme(detectSystemTheme());
+    const currentDetected = detectSystemTheme();
+    console.log(
+      `[ThemeProvider] useEffect detectou: ${currentDetected}, systemColorScheme: ${systemColorScheme}`
+    );
+    setDetectedTheme(currentDetected);
 
     // Tenta adicionar listener para mudanças no tema do sistema
     // Pode falhar no Expo Go, então usamos try/catch
@@ -149,6 +153,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     try {
       subscription = Appearance.addChangeListener(({ colorScheme }) => {
         const newTheme = colorScheme === 'dark' ? 'dark' : 'light';
+        console.log(
+          `[ThemeProvider] ✅ Appearance listener disparou: ${colorScheme} -> ${newTheme}`
+        );
         setDetectedTheme(newTheme);
         console.log(`[ThemeProvider] Sistema mudou para: ${newTheme}`);
       });

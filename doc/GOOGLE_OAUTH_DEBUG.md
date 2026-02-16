@@ -6,9 +6,19 @@ You're getting error code 10 (DEVELOPER_ERROR) when trying to sign in with Googl
 
 ## Your Debug Keystore SHA-1
 
+**Current SHA-1 (add this to Google Console):**
+
+```
+15:19:55:3D:EA:B3:6F:72:44:7B:77:2F:19:3E:50:B6:7B:D3:99:84
+```
+
+**Previous SHA-1 (keep if already configured):**
+
 ```
 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25
 ```
+
+> **Note:** Google allows multiple SHA-1 fingerprints per Android OAuth Client. Add both to ensure compatibility.
 
 ## Solution: Configure Google Cloud Console
 
@@ -28,14 +38,16 @@ You're getting error code 10 (DEVELOPER_ERROR) when trying to sign in with Googl
 
 ### Step 3: Create/Update Android OAuth Client
 
-1. Click **+ Create Credentials** → **OAuth Client ID**
+1. Click **+ Create Credentials** → **OAuth Client ID** (or edit existing Android OAuth Client)
 2. Select **Android** as Application type
 3. Package name: `com.mayconaraujosantos.pillmind`
-4. Under **SHA-1 certificate fingerprints**, add:
+4. Under **SHA-1 certificate fingerprints**, add BOTH:
    ```
+   15:19:55:3D:EA:B3:6F:72:44:7B:77:2F:19:3E:50:B6:7B:D3:99:84
    5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25
    ```
-5. Click **Create**
+   (You can have multiple SHA-1 fingerprints in the same client)
+5. Click **Create** or **Save**
 6. Copy the **Client ID** that's generated (this is your Android Client ID)
 
 ### Step 4: Update Your Environment
@@ -69,7 +81,10 @@ Edit `app.json` and update the iOS/Android client IDs from Google Cloud Console:
 
 ### For Development (Current Setup)
 
-- **Package Name**: `com.mayconaraujosantos.pillmind`
+(Current)\*\*: `15:19:55:3D:EA:B3:6F:72:44:7B:77:2F:19:3E:50:B6:7B:D3:99:84` (debug.keystore)
+
+- **SHA-1 (Previous)**: `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (old debug.keystore)
+- This is what you're using now with `eas build --profile development` or `npx expo run:android
 - **SHA-1**: `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25` (debug.keystore)
 - This is what you're using now with `eas build --profile development`
 
