@@ -96,6 +96,15 @@ Acesse o editor em: http://localhost:1880
 }
 ```
 
+**Response (Error - 404):**
+
+```json
+{
+  "message": "Email not found",
+  "code": "EMAIL_NOT_FOUND"
+}
+```
+
 ## 🎯 Fluxo Node-RED (Exemplo)
 
 ### Sign Up Flow
