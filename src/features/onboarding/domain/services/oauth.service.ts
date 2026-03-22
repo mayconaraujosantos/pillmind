@@ -208,7 +208,7 @@ class OAuthService {
           };
         }
 
-        const flat = backendData as FlatGoogleAuthBackend;
+        const flat = backendData;
         const userId = flat.userId ?? flat.accountId;
         if (!userId || !flat.accessToken) {
           logger.error(

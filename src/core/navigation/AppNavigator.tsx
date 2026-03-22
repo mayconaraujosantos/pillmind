@@ -15,6 +15,24 @@ import { TabParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
+type AppNavigatorHeaderProps = {
+  userName?: string;
+  userAvatar?: string;
+  onProfilePress: () => void;
+};
+
+const AppNavigatorHeader: React.FC<AppNavigatorHeaderProps> = ({
+  userName,
+  userAvatar,
+  onProfilePress,
+}) => (
+  <Header
+    userName={userName}
+    userAvatar={userAvatar}
+    onProfilePress={onProfilePress}
+  />
+);
+
 const renderTabBarIcon =
   (routeName: keyof TabParamList) =>
   ({
@@ -53,7 +71,7 @@ export const AppNavigator: React.FC = () => {
           },
           headerShown: true,
           header: () => (
-            <Header
+            <AppNavigatorHeader
               userName={authContext.user?.name}
               userAvatar={authContext.displayPictureUrl}
               onProfilePress={() => navigation.navigate('AccountTab')}

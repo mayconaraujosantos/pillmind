@@ -66,12 +66,12 @@ export const AccountScreen: React.FC = () => {
     async (asset: ImagePicker.ImagePickerAsset) => {
       const uri = asset.uri;
       const mimeType = asset.mimeType ?? 'image/jpeg';
-      const ext =
-        mimeType === 'image/png'
-          ? 'png'
-          : mimeType === 'image/webp'
-          ? 'webp'
-          : 'jpg';
+      let ext = 'jpg';
+      if (mimeType === 'image/png') {
+        ext = 'png';
+      } else if (mimeType === 'image/webp') {
+        ext = 'webp';
+      }
       const token = authContext.token;
       if (!token) {
         return;

@@ -30,7 +30,7 @@ class ApiService {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
     const requestId = `${Date.now()}-${Math.random()
       .toString(36)
-      .substr(2, 9)}`;
+      .slice(2, 11)}`;
 
     logger.debug('ApiService', `📤 Starting request`, {
       requestId,
@@ -202,7 +202,7 @@ class ApiService {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
     const requestId = `${Date.now()}-${Math.random()
       .toString(36)
-      .substr(2, 9)}`;
+      .slice(2, 11)}`;
 
     logger.debug('ApiService', `📤 Starting multipart request`, {
       requestId,
