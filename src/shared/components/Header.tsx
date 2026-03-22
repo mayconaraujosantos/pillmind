@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from '@shared/i18n';
@@ -26,16 +33,21 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { theme, isDark: _isDark } = useTheme();
+  const { theme, isDark } = useTheme();
 
   const displayName = userName || t('account.user');
   const titleText = greeting || t('home.hello', { name: displayName });
   const subtitleText = subtitle || t('home.welcomeShort');
 
+  const avatarBorderColor = isDark
+    ? 'rgba(255,255,255,0.12)'
+    : 'rgba(0,0,0,0.08)';
+
   const dynamicStyles = {
     avatar: {
       ...styles.avatar,
       backgroundColor: theme.colors.surface,
+      borderColor: avatarBorderColor,
     },
     avatarText: {
       ...styles.avatarText,
@@ -56,9 +68,12 @@ export const Header: React.FC<HeaderProps> = ({
       style={[
         styles.container,
         {
-          paddingTop: Math.max(insets.top, 0),
+          paddingTop: Math.max(insets.top, adaptiveSpacing.sm),
           backgroundColor: theme.colors.background,
-          borderBottomColor: 'transparent',
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: isDark
+            ? 'rgba(255,255,255,0.08)'
+            : 'rgba(0,0,0,0.06)',
         },
       ]}
     >
@@ -67,10 +82,16 @@ export const Header: React.FC<HeaderProps> = ({
           style={styles.userSection}
           onPress={onProfilePress}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={t('home.openProfileA11y')}
         >
           <View style={dynamicStyles.avatar}>
             {userAvatar ? (
-              <Image source={{ uri: userAvatar }} style={styles.avatarImage} />
+              <Image
+                key={userAvatar}
+                source={{ uri: userAvatar }}
+                style={styles.avatarImage}
+              />
             ) : (
               <Text style={dynamicStyles.avatarText}>
                 {displayName.charAt(0).toUpperCase()}
@@ -86,10 +107,16 @@ export const Header: React.FC<HeaderProps> = ({
         <TouchableOpacity
           style={[
             styles.notificationButton,
-            { backgroundColor: theme.colors.surface },
+            {
+              backgroundColor: theme.colors.surface,
+              borderWidth: StyleSheet.hairlineWidth,
+              borderColor: avatarBorderColor,
+            },
           ]}
           onPress={onNotificationPress}
           activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={t('home.notificationsA11y')}
         >
           <Ionicons
             name="notifications-outline"
@@ -114,7 +141,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    maxWidth: 400,
   },
   userSection: {
     flexDirection: 'row',
@@ -122,26 +148,37 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: COMMON_STYLES.padding.horizontal.small,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.06)',
+    borderWidth: StyleSheet.hairlineWidth + 1,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
   avatarImage: {
     width: '100%',
     height: '100%',
   },
   avatarText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: COMMON_STYLES.fontWeight.bold,
   },
   userName: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: COMMON_STYLES.fontWeight.semibold,
   },
   userSubtitle: {
@@ -149,15 +186,22 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   notificationButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
 });

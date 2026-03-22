@@ -8,13 +8,25 @@ import {
   Appearance,
   Alert,
   ActivityIndicator,
+  Image,
+  type AlertButton,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeSelector } from '@shared/components';
 import { useTheme } from '@shared/theme';
 import { useTranslation } from '@shared/i18n';
 import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
 import { useAuth } from '@features/onboarding/presentation/hooks/useAuth';
+import { authService } from '@features/onboarding/domain/services/auth.service';
 import { logger } from '@shared/utils/logger';
+
+const pickerOptions: ImagePicker.ImagePickerOptions = {
+  mediaTypes: ['images'],
+  allowsEditing: true,
+  aspect: [1, 1],
+  quality: 0.85,
+};
 
 export const AccountScreen: React.FC = () => {
   const { theme, isDark, themeMode } = useTheme();
@@ -22,6 +34,9 @@ export const AccountScreen: React.FC = () => {
   const authContext = useAuthContext();
   const { logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = React.useState(false);
+
+  const displayPictureUrl = authContext.displayPictureUrl;
 
   const settingsOptions = [
     {
@@ -47,6 +62,149 @@ export const AccountScreen: React.FC = () => {
     alert(`Sistema: ${systemTheme}\nModo: ${themeMode}\nisDark: ${isDark}`);
   };
 
+  const uploadPickedAsset = React.useCallback(
+    async (asset: ImagePicker.ImagePickerAsset) => {
+      const uri = asset.uri;
+      const mimeType = asset.mimeType ?? 'image/jpeg';
+      const ext =
+        mimeType === 'image/png'
+          ? 'png'
+          : mimeType === 'image/webp'
+          ? 'webp'
+          : 'jpg';
+      const token = authContext.token;
+      if (!token) {
+        return;
+      }
+      setUploadingPhoto(true);
+      try {
+        const res = await authService.uploadProfilePicture(
+          uri,
+          token,
+          mimeType,
+          `profile.${ext}`
+        );
+        if (res.success && res.data) {
+          await authContext.applyServerUser(res.data);
+        } else {
+          Alert.alert(
+            t('common.error'),
+            res.error?.message || t('account.uploadPhotoFailed')
+          );
+        }
+      } finally {
+        setUploadingPhoto(false);
+      }
+    },
+    [authContext, t]
+  );
+
+  const pickFromLibrary = React.useCallback(async () => {
+    if (!authContext.user?.id) {
+      return;
+    }
+    try {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(t('common.error'), t('account.photoPermissionDenied'));
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
+      if (!result.canceled && result.assets[0]) {
+        await uploadPickedAsset(result.assets[0]);
+      }
+    } catch (err) {
+      logger.error(
+        'AccountScreen',
+        'Photo library error',
+        { error: err instanceof Error ? err.message : String(err) },
+        err instanceof Error ? err : undefined
+      );
+      Alert.alert(t('common.error'), t('account.photoPickerError'));
+    }
+  }, [authContext.user?.id, t, uploadPickedAsset]);
+
+  const takePhoto = React.useCallback(async () => {
+    if (!authContext.user?.id) {
+      return;
+    }
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(t('common.error'), t('account.photoPermissionDenied'));
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync(pickerOptions);
+      if (!result.canceled && result.assets[0]) {
+        await uploadPickedAsset(result.assets[0]);
+      }
+    } catch (err) {
+      logger.error(
+        'AccountScreen',
+        'Camera error',
+        { error: err instanceof Error ? err.message : String(err) },
+        err instanceof Error ? err : undefined
+      );
+      Alert.alert(t('common.error'), t('account.photoPickerError'));
+    }
+  }, [authContext.user?.id, t, uploadPickedAsset]);
+
+  const removePhoto = React.useCallback(async () => {
+    const hasServerPicture =
+      typeof authContext.user?.pictureUrl === 'string' &&
+      authContext.user.pictureUrl.length > 0;
+    if (hasServerPicture && authContext.token) {
+      setUploadingPhoto(true);
+      try {
+        const res = await authService.deleteProfilePicture(authContext.token);
+        if (res.success && res.data) {
+          await authContext.applyServerUser(res.data);
+        } else {
+          Alert.alert(
+            t('common.error'),
+            res.error?.message || t('account.uploadPhotoFailed')
+          );
+        }
+      } finally {
+        setUploadingPhoto(false);
+      }
+    } else {
+      await authContext.setProfilePhotoUri(null);
+    }
+  }, [authContext, t]);
+
+  const openPhotoOptions = React.useCallback(() => {
+    if (!authContext.user?.id) {
+      return;
+    }
+    const buttons: AlertButton[] = [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('account.chooseFromLibrary'),
+        onPress: () => {
+          void pickFromLibrary();
+        },
+      },
+      {
+        text: t('account.takePhoto'),
+        onPress: () => {
+          void takePhoto();
+        },
+      },
+    ];
+    if (displayPictureUrl) {
+      buttons.push({
+        text: t('account.removePhoto'),
+        style: 'destructive',
+        onPress: () => {
+          void removePhoto();
+        },
+      });
+    }
+    Alert.alert(t('account.changePhotoTitle'), undefined, buttons);
+  }, [displayPictureUrl, pickFromLibrary, takePhoto, removePhoto, t]);
+
   const handleLogout = async () => {
     logger.info('AccountScreen', '📤 Logout button pressed');
     Alert.alert(
@@ -71,7 +229,6 @@ export const AccountScreen: React.FC = () => {
                   'AccountScreen',
                   '✅ Logout completed - navigating to login'
                 );
-                // Não precisa de Alert - a navegação automática para login é suficiente
               } else {
                 logger.warn('AccountScreen', '⚠️ Logout failed', result.error);
                 Alert.alert(
@@ -100,6 +257,10 @@ export const AccountScreen: React.FC = () => {
     );
   };
 
+  const initial = (
+    authContext.user?.name?.trim()?.charAt(0) || t('account.user').charAt(0)
+  ).toUpperCase();
+
   return (
     <View
       style={[styles.wrapper, { backgroundColor: theme.colors.background }]}
@@ -108,18 +269,57 @@ export const AccountScreen: React.FC = () => {
         {t('account.title')}
       </Text>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* User Info Section */}
         <View
           style={[styles.section, { backgroundColor: theme.colors.surface }]}
         >
-          <View style={styles.avatarContainer}>
-            <View
-              style={[styles.avatar, { backgroundColor: theme.colors.primary }]}
+          <View style={styles.avatarBlock}>
+            <TouchableOpacity
+              style={styles.avatarTouchable}
+              onPress={openPhotoOptions}
+              activeOpacity={0.85}
+              disabled={!authContext.user?.id || uploadingPhoto}
+              testID="account-change-photo-button"
+              accessibilityRole="button"
+              accessibilityLabel={t('account.changePhoto')}
             >
-              <Text style={styles.avatarText}>
-                {authContext.user?.name?.charAt(0).toUpperCase() || 'U'}
-              </Text>
-            </View>
+              <View
+                style={[
+                  styles.avatar,
+                  { backgroundColor: theme.colors.primary },
+                ]}
+              >
+                {displayPictureUrl ? (
+                  <Image
+                    key={displayPictureUrl}
+                    source={{ uri: displayPictureUrl }}
+                    style={styles.avatarImage}
+                    resizeMode="cover"
+                    accessibilityIgnoresInvertColors
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>{initial}</Text>
+                )}
+              </View>
+              <View
+                style={[
+                  styles.avatarEditBadge,
+                  { backgroundColor: theme.colors.primary },
+                ]}
+              >
+                {uploadingPhoto ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Ionicons name="camera" size={16} color="#FFFFFF" />
+                )}
+              </View>
+            </TouchableOpacity>
+            <Text
+              style={[styles.changePhotoHint, { color: theme.colors.primary }]}
+            >
+              {uploadingPhoto
+                ? t('account.uploadingPhoto')
+                : t('account.changePhoto')}
+            </Text>
           </View>
           <Text style={[styles.userName, { color: theme.colors.text }]}>
             {authContext.user?.name || t('account.user') || 'User'}
@@ -133,14 +333,12 @@ export const AccountScreen: React.FC = () => {
           </Text>
         </View>
 
-        {/* Theme Section */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             {t('account.appearance')}
           </Text>
           <ThemeSelector />
 
-          {/* Debug Button */}
           <TouchableOpacity
             style={[
               styles.debugButton,
@@ -157,7 +355,6 @@ export const AccountScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Settings Options */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             {t('account.settings')}
@@ -182,7 +379,6 @@ export const AccountScreen: React.FC = () => {
           ))}
         </View>
 
-        {/* Logout Button */}
         <View style={styles.section}>
           <TouchableOpacity
             style={[
@@ -223,21 +419,46 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
-  avatarContainer: {
+  avatarBlock: {
     alignItems: 'center',
     marginBottom: 16,
   },
+  avatarTouchable: {
+    position: 'relative',
+  },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
   },
   avatarText: {
     color: '#FFFFFF',
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: '700',
+  },
+  avatarEditBadge: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  changePhotoHint: {
+    marginTop: 10,
+    fontSize: 14,
+    fontWeight: '600',
   },
   userName: {
     fontSize: 24,

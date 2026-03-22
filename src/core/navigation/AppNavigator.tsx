@@ -40,17 +40,10 @@ export const AppNavigator: React.FC = () => {
   const { theme, isDark: _isDark } = useTheme();
   const authContext = useAuthContext();
 
-  const renderHeader = () => (
-    <Header
-      userName={authContext.user?.name}
-      userAvatar={authContext.user?.pictureUrl || undefined}
-    />
-  );
-
   return (
     <NavigationContainer>
       <Tab.Navigator
-        screenOptions={({ route }) => ({
+        screenOptions={({ route, navigation }) => ({
           tabBarIcon: renderTabBarIcon(route.name),
           tabBarActiveTintColor: theme.colors.primary,
           tabBarInactiveTintColor: theme.colors.textSecondary,
@@ -59,7 +52,13 @@ export const AppNavigator: React.FC = () => {
             borderTopColor: theme.colors.border,
           },
           headerShown: true,
-          header: renderHeader,
+          header: () => (
+            <Header
+              userName={authContext.user?.name}
+              userAvatar={authContext.displayPictureUrl}
+              onProfilePress={() => navigation.navigate('AccountTab')}
+            />
+          ),
           headerStyle: {
             backgroundColor: theme.colors.background,
           },
