@@ -1,5 +1,7 @@
 module.exports = {
   preset: 'jest-expo',
+  /** RN + ThemeProvider + AuthProvider async mount often exceeds 5s under parallel workers */
+  testTimeout: 20000,
   transformIgnorePatterns: [
     'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg)',
   ],

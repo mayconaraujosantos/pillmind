@@ -15,9 +15,6 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   clear: jest.fn(() => Promise.resolve()),
 }));
 
-// Mock Timers to avoid act() warnings in async operations
-jest.useFakeTimers();
-
 // Mock react-native useColorScheme
 jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({
   default: jest.fn(() => 'light'),
