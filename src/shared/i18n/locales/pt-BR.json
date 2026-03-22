@@ -39,7 +39,9 @@
     "addFirstMedication": "Se você ainda não adicionou um medicamento, faça isso agora.",
     "addMedication": "Adicionar medicamento",
     "viewAll": "Ver tudo",
-    "viewLess": "Ver menos"
+    "viewLess": "Ver menos",
+    "openProfileA11y": "Abrir perfil",
+    "notificationsA11y": "Notificações"
   },
   "appointments": {
     "title": "Consultas",
@@ -65,7 +67,16 @@
     "debugTheme": "🐛 Debug: Ver detecção do tema",
     "logoutConfirm": "Tem certeza de que deseja sair?",
     "logoutFailed": "Falha ao sair",
-    "logoutError": "Ocorreu um erro durante o logout"
+    "logoutError": "Ocorreu um erro durante o logout",
+    "changePhoto": "Alterar foto",
+    "changePhotoTitle": "Foto do perfil",
+    "chooseFromLibrary": "Escolher da galeria",
+    "takePhoto": "Tirar foto",
+    "removePhoto": "Remover foto",
+    "photoPermissionDenied": "É necessária permissão para alterar a foto do perfil.",
+    "photoPickerError": "Não foi possível abrir a galeria. Tente novamente.",
+    "uploadingPhoto": "Enviando…",
+    "uploadPhotoFailed": "Não foi possível enviar a foto ao servidor. Verifique o MinIO e tente de novo."
   },
   "theme": {
     "automatic": "Automático",

@@ -39,7 +39,9 @@
     "addFirstMedication": "If you haven't added a medication, please do so now.",
     "addMedication": "Add Medication",
     "viewAll": "View all",
-    "viewLess": "View less"
+    "viewLess": "View less",
+    "openProfileA11y": "Open profile",
+    "notificationsA11y": "Notifications"
   },
   "appointments": {
     "title": "Appointments",
@@ -65,7 +67,16 @@
     "debugTheme": "🐛 Debug: View theme detection",
     "logoutConfirm": "Are you sure you want to logout?",
     "logoutFailed": "Failed to logout",
-    "logoutError": "An error occurred during logout"
+    "logoutError": "An error occurred during logout",
+    "changePhoto": "Change photo",
+    "changePhotoTitle": "Profile photo",
+    "chooseFromLibrary": "Choose from library",
+    "takePhoto": "Take photo",
+    "removePhoto": "Remove photo",
+    "photoPermissionDenied": "Permission is required to change your profile photo.",
+    "photoPickerError": "Could not open the photo picker. Please try again.",
+    "uploadingPhoto": "Uploading…",
+    "uploadPhotoFailed": "Could not sync your photo with the server. Check MinIO settings or try again."
   },
   "theme": {
     "automatic": "Automatic",
