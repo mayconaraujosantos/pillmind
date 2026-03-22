@@ -131,6 +131,54 @@ describe('AuthContext', () => {
     expect(AsyncStorage.setItem).toHaveBeenCalled();
   });
 
+  it('clears local profile cache on login when server sends pictureUrl', async () => {
+    const { result } = renderHook(() => useAuthContext(), { wrapper });
+
+    await act(async () => {
+      await result.current.login({
+        user: {
+          id: '5',
+          name: 'A',
+          email: 'a@a.com',
+          pictureUrl: 'https://lh3.googleusercontent.com/x',
+        },
+        token: 'tok',
+      });
+    });
+
+    expect(AsyncStorage.removeItem).toHaveBeenCalledWith(
+      '@pillmind_profile_photo_5'
+    );
+  });
+
+  it('clears local profile cache when restore refreshes profile with pictureUrl', async () => {
+    const stored = JSON.stringify({
+      user: { id: '1', name: 'User', email: 'user@example.com' },
+      token: 'token',
+    });
+
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(stored);
+    mockGetProfile.mockResolvedValue({
+      success: true,
+      data: {
+        id: '1',
+        name: 'User',
+        email: 'user@example.com',
+        pictureUrl: 'https://cdn/avatar.png',
+      },
+    });
+
+    const { result } = renderHook(() => useAuthContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.user?.pictureUrl).toBe('https://cdn/avatar.png');
+    });
+
+    expect(AsyncStorage.removeItem).toHaveBeenCalledWith(
+      '@pillmind_profile_photo_1'
+    );
+  });
+
   it('logs out and clears session with Google sign-out', async () => {
     mockIsSignedIn.mockResolvedValue(true);
 

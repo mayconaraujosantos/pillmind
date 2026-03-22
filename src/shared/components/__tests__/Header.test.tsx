@@ -38,6 +38,8 @@ jest.mock('@shared/i18n', () => ({
         'account.user': 'Usuário',
         'home.hello': `Olá, ${options?.name || 'Usuário'}`,
         'home.welcomeShort': 'Bem-vindo de volta!',
+        'home.openProfileA11y': 'Abrir perfil',
+        'home.notificationsA11y': 'Notificações',
       };
       return translations[key] || key;
     },
@@ -115,11 +117,11 @@ describe('Header', () => {
 
   it('should call onNotificationPress when notification button is pressed', () => {
     const onNotificationPress = jest.fn();
-    const { getByTestId } = renderWithProviders(
+    const { getByLabelText } = renderWithProviders(
       <Header onNotificationPress={onNotificationPress} />
     );
 
-    fireEvent.press(getByTestId('icon-notifications-outline'));
+    fireEvent.press(getByLabelText('Notificações'));
     expect(onNotificationPress).toHaveBeenCalledTimes(1);
   });
 

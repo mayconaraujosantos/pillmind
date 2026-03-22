@@ -45,7 +45,8 @@ jest.mock('../../hooks/useAuth', () => ({
 
 jest.mock('../../hooks/useSocialAuth', () => ({
   useSocialAuth: () => ({
-    modalState: { visible: true, provider: 'google', loading: true },
+    modalState: { visible: false, provider: 'apple', loading: false },
+    googleLoading: false,
     openSocialAuth: mockOpenSocialAuth,
     closeSocialAuth: mockCloseSocialAuth,
     confirmSocialAuth: mockConfirmSocialAuth,
@@ -188,9 +189,9 @@ describe('ExampleAuthScreen', () => {
     );
 
     expect(lastModalProps).toMatchObject({
-      visible: true,
-      provider: 'google',
-      loading: true,
+      visible: false,
+      provider: 'apple',
+      loading: false,
       onConfirm: mockConfirmSocialAuth,
       onCancel: mockCloseSocialAuth,
     });

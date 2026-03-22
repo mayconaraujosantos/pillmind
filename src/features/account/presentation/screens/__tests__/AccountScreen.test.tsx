@@ -5,6 +5,59 @@ import { AccountScreen } from '../AccountScreen';
 import { ThemeProvider } from '@shared/theme';
 import { AuthProvider } from '@features/onboarding/presentation/contexts/AuthContext';
 
+jest.mock('expo-image-picker', () => ({
+  requestMediaLibraryPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: 'granted' })
+  ),
+  requestCameraPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: 'granted' })
+  ),
+  launchImageLibraryAsync: jest.fn(() =>
+    Promise.resolve({ canceled: true, assets: [] })
+  ),
+  launchCameraAsync: jest.fn(() =>
+    Promise.resolve({ canceled: true, assets: [] })
+  ),
+}));
+
+jest.mock('@features/onboarding/domain/services/auth.service', () => ({
+  authService: {
+    getProfile: jest.fn(() =>
+      Promise.resolve({ success: false, error: { status: 500 } })
+    ),
+    uploadProfilePicture: jest.fn(() =>
+      Promise.resolve({
+        success: true,
+        data: {
+          id: '1',
+          name: 'User',
+          email: 'u@u.com',
+          pictureUrl: 'https://example.com/p.jpg',
+        },
+      })
+    ),
+    deleteProfilePicture: jest.fn(() =>
+      Promise.resolve({
+        success: true,
+        data: {
+          id: '1',
+          name: 'User',
+          email: 'u@u.com',
+          pictureUrl: null,
+        },
+      })
+    ),
+  },
+}));
+
+jest.mock('@features/onboarding/domain/services/oauth.service', () => ({
+  oauthService: {
+    signInWithGoogle: jest.fn(),
+    isSignedIn: jest.fn(() => Promise.resolve(false)),
+    signOutGoogle: jest.fn(),
+  },
+}));
+
 jest.mock('@features/onboarding/presentation/hooks/useAuth', () => ({
   useAuth: jest.fn(() => ({
     logout: jest.fn(() => ({ success: true })),
@@ -29,6 +82,15 @@ jest.mock('@shared/i18n', () => {
     'common.logout': 'Logout',
     'common.cancel': 'Cancel',
     'common.error': 'Error',
+    'account.changePhoto': 'Change photo',
+    'account.changePhotoTitle': 'Profile photo',
+    'account.chooseFromLibrary': 'Choose from library',
+    'account.takePhoto': 'Take photo',
+    'account.removePhoto': 'Remove photo',
+    'account.photoPermissionDenied': 'Permission denied',
+    'account.photoPickerError': 'Picker error',
+    'account.uploadingPhoto': 'Uploading…',
+    'account.uploadPhotoFailed': 'Upload failed',
   };
   return {
     useTranslation: () => ({
@@ -49,7 +111,21 @@ const renderWithLocalProviders = (component: React.ReactElement) => {
 describe('AccountScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue('automatic');
+    (AsyncStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+      if (key === '@pillmind_auth') {
+        return Promise.resolve(
+          JSON.stringify({
+            user: {
+              id: '1',
+              name: 'User',
+              email: 'usuario@pillmind.com',
+            },
+            token: 'test-token',
+          })
+        );
+      }
+      return Promise.resolve('automatic');
+    });
   });
 
   it('should render user profile section', async () => {

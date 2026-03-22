@@ -7,6 +7,9 @@ import { ThemeProvider } from '@shared/theme';
 jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
   useAuthContext: () => ({
     user: { name: 'Test User', email: 'test@example.com' },
+    displayPictureUrl: undefined,
+    setProfilePhotoUri: jest.fn(),
+    applyServerUser: jest.fn(),
     isAuthenticated: true,
     isLoading: false,
     signIn: jest.fn(),

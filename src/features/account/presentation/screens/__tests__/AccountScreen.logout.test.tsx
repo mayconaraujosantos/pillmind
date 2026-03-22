@@ -31,7 +31,10 @@ jest.mock('@shared/theme', () => ({
 
 jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
   useAuthContext: () => ({
-    user: { name: 'User', email: 'user@example.com' },
+    user: { id: '1', name: 'User', email: 'user@example.com' },
+    displayPictureUrl: undefined,
+    setProfilePhotoUri: jest.fn(),
+    applyServerUser: jest.fn(),
     logout: mockAuthLogout,
   }),
 }));

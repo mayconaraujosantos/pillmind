@@ -22,14 +22,20 @@ jest.mock('@shared/utils/logger', () => ({
 const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
 
 const TestComponent = ({ onSuccess }: { onSuccess?: () => void }) => {
-  const { modalState, openSocialAuth, closeSocialAuth, confirmSocialAuth } =
-    useSocialAuth(onSuccess);
+  const {
+    modalState,
+    googleLoading,
+    openSocialAuth,
+    closeSocialAuth,
+    confirmSocialAuth,
+  } = useSocialAuth(onSuccess);
 
   return (
     <>
       <Text testID="visible">{String(modalState.visible)}</Text>
       <Text testID="provider">{modalState.provider}</Text>
       <Text testID="loading">{String(modalState.loading)}</Text>
+      <Text testID="google-loading">{String(googleLoading)}</Text>
       <Button title="open-google" onPress={() => openSocialAuth('google')} />
       <Button title="open-apple" onPress={() => openSocialAuth('apple')} />
       <Button title="close" onPress={closeSocialAuth} />
@@ -45,27 +51,34 @@ describe('useSocialAuth', () => {
     mockAuthContext.signInWithGoogle.mockResolvedValue({ success: true });
   });
 
-  it('opens and closes modal', () => {
+  it('opens modal only for Apple; Google does not show modal', async () => {
     const { getByText, getByTestId } = render(<TestComponent />);
 
     fireEvent.press(getByText('open-google'));
+    await waitFor(() => {
+      expect(getByTestId('google-loading').props.children).toBe('false');
+    });
+    expect(getByTestId('visible').props.children).toBe('false');
+
+    fireEvent.press(getByText('open-apple'));
     expect(getByTestId('visible').props.children).toBe('true');
-    expect(getByTestId('provider').props.children).toBe('google');
+    expect(getByTestId('provider').props.children).toBe('apple');
 
     fireEvent.press(getByText('close'));
     expect(getByTestId('visible').props.children).toBe('false');
   });
 
-  it('confirms google auth and calls onSuccess', async () => {
+  it('starts Google auth immediately and calls onSuccess', async () => {
     const onSuccess = jest.fn();
-    const { getByText } = render(<TestComponent onSuccess={onSuccess} />);
+    const { getByText, getByTestId } = render(
+      <TestComponent onSuccess={onSuccess} />
+    );
 
     fireEvent.press(getByText('open-google'));
-    fireEvent.press(getByText('confirm'));
-
     await waitFor(() => {
       expect(mockAuthContext.signInWithGoogle).toHaveBeenCalledTimes(1);
       expect(onSuccess).toHaveBeenCalledTimes(1);
+      expect(getByTestId('google-loading').props.children).toBe('false');
     });
   });
 
@@ -76,13 +89,12 @@ describe('useSocialAuth', () => {
       error: 'Invalid credentials',
     });
 
-    const { getByText } = render(<TestComponent />);
+    const { getByText, getByTestId } = render(<TestComponent />);
 
     fireEvent.press(getByText('open-google'));
-    fireEvent.press(getByText('confirm'));
-
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalled();
+      expect(getByTestId('google-loading').props.children).toBe('false');
     });
   });
 
@@ -93,14 +105,14 @@ describe('useSocialAuth', () => {
       error: 'Login cancelado pelo usuário',
     });
 
-    const { getByText } = render(<TestComponent />);
+    const { getByText, getByTestId } = render(<TestComponent />);
 
     fireEvent.press(getByText('open-google'));
-    fireEvent.press(getByText('confirm'));
-
     await waitFor(() => {
-      expect(Alert.alert).not.toHaveBeenCalled();
+      expect(getByTestId('google-loading').props.children).toBe('false');
     });
+
+    expect(Alert.alert).not.toHaveBeenCalled();
   });
 
   it('shows alert for apple auth', async () => {

@@ -1,27 +1,40 @@
 import { ApiResponse } from '@core/services/api.service';
 import { AuthResponse } from '../../models/auth.model';
 
-type GoogleUserInfo = {
-  data?: {
-    idToken?: string;
-    user: { email: string; name: string };
-  };
-};
-
 type GoogleModule = {
   configure: jest.Mock;
   hasPlayServices: jest.Mock;
+  signInSilently: jest.Mock;
   signIn: jest.Mock;
+  getTokens: jest.Mock;
   signOut: jest.Mock;
   revokeAccess: jest.Mock;
   hasPreviousSignIn: jest.Mock;
   getCurrentUser: jest.Mock;
 };
 
+const buildGoogleUser = () => ({
+  user: {
+    id: '1',
+    email: 'user@example.com',
+    name: 'User',
+    photo: null as string | null,
+    familyName: null as string | null,
+    givenName: null as string | null,
+  },
+  scopes: [] as string[],
+  idToken: 'id-token',
+  serverAuthCode: null as string | null,
+});
+
 const buildGoogleModule = (): GoogleModule => ({
   configure: jest.fn(),
   hasPlayServices: jest.fn().mockResolvedValue(true),
+  signInSilently: jest
+    .fn()
+    .mockResolvedValue({ type: 'noSavedCredentialFound', data: null }),
   signIn: jest.fn(),
+  getTokens: jest.fn(),
   signOut: jest.fn().mockResolvedValue(undefined),
   revokeAccess: jest.fn().mockResolvedValue(undefined),
   hasPreviousSignIn: jest.fn().mockResolvedValue(false),
@@ -81,14 +94,11 @@ const toApiResponse = (data: AuthResponse): ApiResponse<AuthResponse> => ({
   data,
 });
 
-const createUserInfo = (
-  overrides: Partial<GoogleUserInfo> = {}
-): GoogleUserInfo => ({
-  data: {
-    idToken: 'id-token',
-    user: { email: 'user@example.com', name: 'User' },
-  },
-  ...overrides,
+const createSignInSuccess = (
+  overrides: Partial<ReturnType<typeof buildGoogleUser>> = {}
+) => ({
+  type: 'success' as const,
+  data: { ...buildGoogleUser(), ...overrides },
 });
 
 describe('OAuthService', () => {
@@ -109,8 +119,6 @@ describe('OAuthService', () => {
 
     expect(googleModule.configure).toHaveBeenCalledWith({
       webClientId: 'client-id',
-      offlineAccess: true,
-      forceCodeForRefreshToken: true,
     });
   });
 
@@ -138,7 +146,7 @@ describe('OAuthService', () => {
 
   it('should map backend response with user/token format', async () => {
     const googleModule = buildGoogleModule();
-    googleModule.signIn.mockResolvedValue(createUserInfo());
+    googleModule.signIn.mockResolvedValue(createSignInSuccess());
 
     const { oauthService, apiServiceMock } = setupOAuthModule(googleModule);
 
@@ -155,9 +163,9 @@ describe('OAuthService', () => {
     expect(response.data?.token).toBe('token');
   });
 
-  it('should map backend response with accessToken/accountId format', async () => {
+  it('should map GoogleAuthController payload (userId + pictureUrl)', async () => {
     const googleModule = buildGoogleModule();
-    googleModule.signIn.mockResolvedValue(createUserInfo());
+    googleModule.signIn.mockResolvedValue(createSignInSuccess());
 
     const { oauthService, apiServiceMock } = setupOAuthModule(googleModule);
 
@@ -165,9 +173,10 @@ describe('OAuthService', () => {
       success: true,
       data: {
         accessToken: 'backend-token',
-        accountId: '42',
+        userId: '42',
         name: 'Backend User',
         email: 'backend@example.com',
+        pictureUrl: 'https://lh3.googleusercontent.com/a/abc',
       },
     });
 
@@ -175,14 +184,42 @@ describe('OAuthService', () => {
 
     expect(response.success).toBe(true);
     expect(response.data?.user.id).toBe('42');
+    expect(response.data?.user.pictureUrl).toBe(
+      'https://lh3.googleusercontent.com/a/abc'
+    );
+    expect(response.data?.token).toBe('backend-token');
+  });
+
+  it('should map legacy accountId alias when userId absent', async () => {
+    const googleModule = buildGoogleModule();
+    googleModule.signIn.mockResolvedValue(createSignInSuccess());
+
+    const { oauthService, apiServiceMock } = setupOAuthModule(googleModule);
+
+    apiServiceMock.post.mockResolvedValue({
+      success: true,
+      data: {
+        accessToken: 'backend-token',
+        accountId: '99',
+        name: 'Legacy User',
+        email: 'legacy@example.com',
+      },
+    });
+
+    const response = await oauthService.signInWithGoogle();
+
+    expect(response.success).toBe(true);
+    expect(response.data?.user.id).toBe('99');
     expect(response.data?.token).toBe('backend-token');
   });
 
   it('should return error when idToken is missing', async () => {
     const googleModule = buildGoogleModule();
     googleModule.signIn.mockResolvedValue({
-      data: { user: { email: 'user@example.com', name: 'User' } },
+      type: 'success' as const,
+      data: { ...buildGoogleUser(), idToken: null },
     });
+    googleModule.getTokens.mockRejectedValue(new Error('no tokens'));
 
     const { oauthService } = setupOAuthModule(googleModule);
 
@@ -194,7 +231,7 @@ describe('OAuthService', () => {
 
   it('should return backend error when authentication fails', async () => {
     const googleModule = buildGoogleModule();
-    googleModule.signIn.mockResolvedValue(createUserInfo());
+    googleModule.signIn.mockResolvedValue(createSignInSuccess());
 
     const { oauthService, apiServiceMock } = setupOAuthModule(googleModule);
 
@@ -211,7 +248,10 @@ describe('OAuthService', () => {
 
   it('should handle user cancelled error', async () => {
     const googleModule = buildGoogleModule();
-    googleModule.signIn.mockRejectedValue({ code: 'SIGN_IN_CANCELLED' });
+    googleModule.signIn.mockResolvedValue({
+      type: 'cancelled',
+      data: null,
+    });
 
     const { oauthService } = setupOAuthModule(googleModule);
 
@@ -223,7 +263,7 @@ describe('OAuthService', () => {
 
   it('should handle play services error', async () => {
     const googleModule = buildGoogleModule();
-    googleModule.signIn.mockRejectedValue({
+    googleModule.hasPlayServices.mockRejectedValue({
       code: 'PLAY_SERVICES_NOT_AVAILABLE',
     });
 
@@ -245,6 +285,28 @@ describe('OAuthService', () => {
 
     expect(response.success).toBe(false);
     expect(response.error?.code).toBe('DEVELOPER_ERROR');
+  });
+
+  it('should skip interactive sign-in when silent returns id token', async () => {
+    const googleModule = buildGoogleModule();
+    googleModule.signInSilently.mockResolvedValue({
+      type: 'success',
+      data: buildGoogleUser(),
+    });
+
+    const { oauthService, apiServiceMock } = setupOAuthModule(googleModule);
+
+    apiServiceMock.post.mockResolvedValue(
+      toApiResponse({
+        user: { id: '1', name: 'User', email: 'user@example.com' },
+        token: 'token',
+      })
+    );
+
+    const response = await oauthService.signInWithGoogle();
+
+    expect(response.success).toBe(true);
+    expect(googleModule.signIn).not.toHaveBeenCalled();
   });
 
   it('should sign out and revoke access when available', async () => {
