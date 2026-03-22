@@ -34,8 +34,13 @@ export const ExampleAuthScreen: React.FC<ExampleAuthScreenProps> = ({
   const [loading, setLoading] = useState(false);
 
   // Hook para autenticação social (Google/Apple)
-  const { modalState, openSocialAuth, closeSocialAuth, confirmSocialAuth } =
-    useSocialAuth(onSuccess);
+  const {
+    modalState,
+    googleLoading,
+    openSocialAuth,
+    closeSocialAuth,
+    confirmSocialAuth,
+  } = useSocialAuth(onSuccess);
 
   /**
    * Lida com login/signup tradicional (email/senha)
@@ -55,8 +60,7 @@ export const ExampleAuthScreen: React.FC<ExampleAuthScreenProps> = ({
   };
 
   /**
-   * Lida com clique no botão Google
-   * Abre o modal de confirmação
+   * Lida com clique no botão Google — inicia o fluxo nativo (sem modal).
    */
   const handleGooglePress = () => {
     openSocialAuth('google');
@@ -145,10 +149,11 @@ export const ExampleAuthScreen: React.FC<ExampleAuthScreenProps> = ({
         // Botões sociais
         googleLabel={t('onboarding.auth.continueWithGoogle')}
         onGooglePress={handleGooglePress}
-        googleDisabled={loading}
+        googleDisabled={loading || googleLoading}
+        googleLoading={googleLoading}
         appleLabel={t('onboarding.auth.continueWithApple')}
         onApplePress={handleApplePress}
-        appleDisabled={loading}
+        appleDisabled={loading || googleLoading}
         // Link para trocar modo
         linkCta={{
           text:
@@ -180,20 +185,11 @@ export const ExampleAuthScreen: React.FC<ExampleAuthScreenProps> = ({
 /**
  * FLUXO DE AUTENTICAÇÃO GOOGLE:
  *
- * 1. Usuário clica no botão Google
- * 2. handleGooglePress() é chamado
- * 3. openSocialAuth('google') abre o modal de confirmação
- * 4. Usuário clica em "Continuar" no modal
- * 5. confirmSocialAuth() é chamado
- * 6. Google SDK abre popup para usuário selecionar conta
- * 7. Usuário aprova e Google retorna idToken
- * 8. idToken é enviado para backend: POST /api/auth/google
- * 9. Backend valida com Google e:
- *    - Se email não existe: cria conta (SIGNUP automático)
- *    - Se email existe: autentica (SIGNIN automático)
- * 10. Backend retorna JWT próprio
- * 11. App salva JWT e dados do usuário
- * 12. onSuccess() é chamado e usuário é redirecionado
+ * 1. Usuário clica no botão Google → openSocialAuth('google') inicia o SDK na hora
+ * 2. signInSilently() quando já há sessão Google (sem UI); senão fluxo interativo
+ * 3. idToken → POST /api/auth/google
+ * 4. Backend valida e cria ou autentica o usuário; retorna JWT
+ * 5. onSuccess() e redirecionamento
  *
  * IMPORTANTE:
  * - NÃO há diferença entre signup e signin com OAuth2

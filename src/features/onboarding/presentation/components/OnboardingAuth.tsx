@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInputProps,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { useTheme } from '@shared/theme';
@@ -53,6 +54,7 @@ interface OnboardingAuthProps {
   googleLabel: string;
   onGooglePress?: () => void;
   googleDisabled?: boolean;
+  googleLoading?: boolean;
   termsText?: string;
   linkCta?: LinkCta;
   footerInfo?: string;
@@ -74,6 +76,7 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
   googleLabel: _googleLabel,
   onGooglePress,
   googleDisabled = false,
+  googleLoading = false,
   termsText,
   linkCta,
   footerInfo,
@@ -241,14 +244,19 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
             {
               backgroundColor: colors.BACKGROUND,
               borderColor: colors.INDICATOR_INACTIVE,
-              opacity: !onGooglePress || googleDisabled ? 0.5 : 1,
+              opacity:
+                !onGooglePress || googleDisabled || googleLoading ? 0.5 : 1,
             },
           ]}
           onPress={onGooglePress}
           activeOpacity={0.7}
-          disabled={!onGooglePress || googleDisabled}
+          disabled={!onGooglePress || googleDisabled || googleLoading}
         >
-          <FontAwesome5 name="google" size={22} color="#EA4335" />
+          {googleLoading ? (
+            <ActivityIndicator size="small" color="#EA4335" />
+          ) : (
+            <FontAwesome5 name="google" size={22} color="#EA4335" />
+          )}
         </TouchableOpacity>
 
         <TouchableOpacity

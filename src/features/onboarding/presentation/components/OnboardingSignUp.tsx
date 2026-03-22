@@ -26,8 +26,13 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
   const [password, setPassword] = useState('');
 
   // Hook para autenticação social (Google/Apple)
-  const { modalState, openSocialAuth, closeSocialAuth, confirmSocialAuth } =
-    useSocialAuth(onSignUpComplete);
+  const {
+    modalState,
+    googleLoading,
+    openSocialAuth,
+    closeSocialAuth,
+    confirmSocialAuth,
+  } = useSocialAuth(onSignUpComplete);
 
   const handleSignUp = async () => {
     logger.info('OnboardingSignUp', '🔄 Sign up button pressed', {
@@ -127,8 +132,11 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
         isLoading={loading}
         appleLabel={t('onboarding.signUp.continueWithApple')}
         onApplePress={() => handleSocialSignUpClick('apple')}
+        appleDisabled={loading || modalState.loading || googleLoading}
         googleLabel={t('onboarding.signUp.continueWithGoogle')}
         onGooglePress={() => handleSocialSignUpClick('google')}
+        googleDisabled={loading || modalState.loading || googleLoading}
+        googleLoading={googleLoading}
         termsText={t('onboarding.signUp.terms')}
         linkCta={{
           text: t('onboarding.signUp.alreadyHaveAccount'),
