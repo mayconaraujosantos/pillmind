@@ -1,3 +1,4 @@
+import { randomUUID as expoRandomUUID } from 'expo-crypto';
 import { config } from '../config';
 import { logger } from '@shared/utils/logger';
 
@@ -14,6 +15,8 @@ export interface ApiResponse<T> {
 }
 
 class ApiService {
+  private static requestIdSeq = 0;
+
   private baseUrl: string;
   private readonly timeout: number;
 
@@ -22,15 +25,39 @@ class ApiService {
     this.timeout = config.api.timeout;
   }
 
+  /**
+   * Correlation id for logs: Web Crypto when available (Node/tests),
+   * else expo-crypto on native. Last resort is timestamp + seq (no PRNG).
+   */
+  private nextRequestId(): string {
+    const ts = Date.now();
+    const webCrypto = globalThis.crypto;
+    if (webCrypto?.randomUUID) {
+      return `${ts}-${webCrypto.randomUUID()}`;
+    }
+    if (webCrypto?.getRandomValues) {
+      const bytes = new Uint8Array(8);
+      webCrypto.getRandomValues(bytes);
+      const hex = [...bytes]
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      return `${ts}-${hex}`;
+    }
+    try {
+      return `${ts}-${expoRandomUUID()}`;
+    } catch {
+      ApiService.requestIdSeq += 1;
+      return `${ts}-seq${ApiService.requestIdSeq}`;
+    }
+  }
+
   private async request<T>(
     endpoint: string,
     options?: RequestInit
   ): Promise<ApiResponse<T>> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-    const requestId = `${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2, 11)}`;
+    const requestId = this.nextRequestId();
 
     logger.debug('ApiService', `📤 Starting request`, {
       requestId,
@@ -200,9 +227,7 @@ class ApiService {
   ): Promise<ApiResponse<T>> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-    const requestId = `${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2, 11)}`;
+    const requestId = this.nextRequestId();
 
     logger.debug('ApiService', `📤 Starting multipart request`, {
       requestId,
