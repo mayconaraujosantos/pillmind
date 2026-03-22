@@ -22,6 +22,13 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.1047433217870"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow PillMind to access your photos to set your profile picture.",
+          "cameraPermission": "Allow PillMind to use the camera for your profile picture."
+        }
       ]
     ],
     "ios": {
