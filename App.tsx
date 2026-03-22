@@ -52,8 +52,10 @@ export default function App() {
   };
 
   const handleOnboardingSkip = () => {
-    logger.info('App', '⏭️ Onboarding skipped');
-    markOnboardingAsSeen();
+    logger.info(
+      'App',
+      '⏭️ User skipped intro carousel (auth shown inside onboarding)'
+    );
   };
 
   // Log app initialization
@@ -164,6 +166,7 @@ const AppContentWithOnboarding: React.FC<{
         <OnboardingScreen
           onFinish={onOnboardingFinish}
           onSkip={onOnboardingSkip}
+          startWithAuth={!shouldShowOnboarding}
         />
       </>
     );
@@ -186,6 +189,7 @@ const AppContentWithOnboarding: React.FC<{
       <OnboardingScreen
         onFinish={onOnboardingFinish}
         onSkip={onOnboardingSkip}
+        startWithAuth
       />
     </>
   );

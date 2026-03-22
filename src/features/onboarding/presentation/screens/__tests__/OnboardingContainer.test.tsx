@@ -1,8 +1,8 @@
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { OnboardingContainer } from '../OnboardingContainer';
 import { WithThemeProvider } from '../../components/WithThemeProvider';
 import { AuthProvider } from '../../contexts/AuthContext';
+import { OnboardingContainer } from '../OnboardingContainer';
 
 jest.mock('../../hooks/useOnboardingScroll', () => ({
   useOnboardingScroll: jest.fn(() => ({
@@ -36,7 +36,7 @@ describe('OnboardingContainer', () => {
     });
   });
 
-  it('deve chamar onSkip quando Skip é pressionado', async () => {
+  it('deve ir para autenticação e chamar onSkip quando Skip é pressionado', async () => {
     mockUseOnboardingScroll().mockReturnValue({
       currentStep: 0,
       handleScroll: jest.fn(),
@@ -47,9 +47,14 @@ describe('OnboardingContainer', () => {
     );
 
     await waitFor(() => {
-      fireEvent.press(getByText('Skip'));
+      expect(getByText('Skip')).toBeTruthy();
     });
 
+    fireEvent.press(getByText('Skip'));
+
+    await waitFor(() => {
+      expect(getByText('Sign in to your account')).toBeTruthy();
+    });
     expect(onSkip).toHaveBeenCalledTimes(1);
   });
 
@@ -102,6 +107,47 @@ describe('OnboardingContainer', () => {
     fireEvent.press(getByText('Create an account'));
 
     expect(onFinish).not.toHaveBeenCalled();
+  });
+
+  it('abre cadastro (sign up) ao pressionar Create an account', async () => {
+    mockUseOnboardingScroll().mockReturnValue({
+      currentStep: 2,
+      handleScroll: jest.fn(),
+    });
+    const { getByText, getByPlaceholderText } = renderWithLocalProviders(
+      <OnboardingContainer />
+    );
+
+    await waitFor(() => {
+      expect(getByText('Create an account')).toBeTruthy();
+    });
+
+    fireEvent.press(getByText('Create an account'));
+
+    await waitFor(() => {
+      expect(getByPlaceholderText('Enter your name')).toBeTruthy();
+    });
+  });
+
+  it('abre entrar (sign in) ao pressionar Login', async () => {
+    mockUseOnboardingScroll().mockReturnValue({
+      currentStep: 2,
+      handleScroll: jest.fn(),
+    });
+    const { getByText, queryByPlaceholderText } = renderWithLocalProviders(
+      <OnboardingContainer />
+    );
+
+    await waitFor(() => {
+      expect(getByText('Login')).toBeTruthy();
+    });
+
+    fireEvent.press(getByText('Login'));
+
+    await waitFor(() => {
+      expect(getByText('Sign in to your account')).toBeTruthy();
+    });
+    expect(queryByPlaceholderText('Enter your name')).toBeNull();
   });
 
   it('deve inicializar com currentStep 0', async () => {

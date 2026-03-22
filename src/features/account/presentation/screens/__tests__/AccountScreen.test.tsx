@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react-native';
+import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AccountScreen } from '../AccountScreen';
 import { ThemeProvider } from '@shared/theme';
@@ -108,6 +109,13 @@ const renderWithLocalProviders = (component: React.ReactElement) => {
   );
 };
 
+const mockedAuthService = jest.requireMock(
+  '@features/onboarding/domain/services/auth.service'
+).authService as {
+  uploadProfilePicture: jest.Mock;
+  deleteProfilePicture: jest.Mock;
+};
+
 describe('AccountScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -206,5 +214,53 @@ describe('AccountScreen', () => {
     expect(alertMock).toHaveBeenCalled();
 
     globalThis.alert = originalAlert ?? (() => undefined);
+  });
+
+  it('picker → upload chama API e persiste URI local para exibição (preferDisplayWithLocalUri)', async () => {
+    const pickedUri = 'file:///cache/profile-pick.jpg';
+    const expoImagePicker = jest.requireMock('expo-image-picker') as {
+      launchImageLibraryAsync: jest.Mock;
+    };
+    expoImagePicker.launchImageLibraryAsync.mockResolvedValueOnce({
+      canceled: false,
+      assets: [{ uri: pickedUri, mimeType: 'image/jpeg' }],
+    });
+
+    const alertSpy = jest
+      .spyOn(Alert, 'alert')
+      .mockImplementation((_title, _message, buttons) => {
+        const choose = buttons?.find((b) => b.text === 'Choose from library');
+        if (choose && typeof choose.onPress === 'function') {
+          choose.onPress();
+        }
+      });
+
+    const { findByText, findByTestId } = renderWithLocalProviders(
+      <AccountScreen />
+    );
+
+    await findByText('Profile', {}, { timeout: 3000 });
+
+    await act(async () => {
+      fireEvent.press(await findByTestId('account-change-photo-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockedAuthService.uploadProfilePicture).toHaveBeenCalledWith(
+        pickedUri,
+        'test-token',
+        'image/jpeg',
+        'profile.jpg'
+      );
+    });
+
+    await waitFor(() => {
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+        '@pillmind_profile_photo_1',
+        pickedUri
+      );
+    });
+
+    alertSpy.mockRestore();
   });
 });

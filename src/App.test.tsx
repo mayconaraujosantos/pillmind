@@ -237,7 +237,7 @@ describe('App', () => {
     expect(markOnboardingAsSeen).toHaveBeenCalled();
   });
 
-  it('marks onboarding as seen when skipping onboarding', async () => {
+  it('does not mark onboarding as seen when skipping intro (auth is shown next)', async () => {
     const markOnboardingAsSeen = jest.fn();
     mockUseFonts.mockReturnValue({ fontsLoaded: true });
     mockUseOnboardingStorage.mockReturnValue({
@@ -255,6 +255,6 @@ describe('App', () => {
 
     getByText('skip').props.onPress();
 
-    expect(markOnboardingAsSeen).toHaveBeenCalled();
+    expect(markOnboardingAsSeen).not.toHaveBeenCalled();
   });
 });

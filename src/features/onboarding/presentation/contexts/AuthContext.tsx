@@ -11,6 +11,7 @@ import { AuthResponse } from '../../domain/models/auth.model';
 import { authService } from '../../domain/services/auth.service';
 import { oauthService } from '../../domain/services/oauth.service';
 import { logger } from '@shared/utils/logger';
+import { resolveProfilePictureUrlForDevice } from '@shared/utils/profilePictureUrl';
 
 export interface AuthContextType {
   user: AuthResponse['user'] | null;
@@ -20,8 +21,15 @@ export interface AuthContextType {
   /** URL pública do servidor (MinIO) ou URI local temporária — use for avatars in UI */
   displayPictureUrl: string | undefined;
   setProfilePhotoUri: (uri: string | null) => Promise<void>;
-  /** Após upload/remoção no backend: persiste usuário e limpa foto local em cache */
-  applyServerUser: (sessionUser: AuthResponse['user']) => Promise<void>;
+  /**
+   * Após upload/remoção no backend: persiste usuário.
+   * Use {@code preferDisplayWithLocalUri} após escolher foto no app para exibir o ficheiro local
+   * enquanto a URL remota (MinIO/LAN) pode falhar no {@code Image}.
+   */
+  applyServerUser: (
+    sessionUser: AuthResponse['user'],
+    options?: { preferDisplayWithLocalUri?: string }
+  ) => Promise<void>;
   login: (authData: AuthResponse) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
@@ -37,14 +45,35 @@ const profilePhotoStorageKey = (userId: string) =>
   `@pillmind_profile_photo_${userId}`;
 
 /**
+ * Só OAuth costuma reutilizar a mesma URL com foto nova; MinIO/S3 costumam ter chave única.
+ * Query extra (?pillmind_cb) em URLs MinIO pode fazer o GET falhar em alguns setups.
+ */
+function shouldApplyRemoteAvatarCacheBust(uri: string): boolean {
+  try {
+    const host = new URL(uri).hostname.toLowerCase();
+    return (
+      host.includes('googleusercontent.com') ||
+      host.includes('ggpht.com') ||
+      host.includes('facebook.com') ||
+      host.includes('fbcdn.net')
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Google (e outros CDNs) podem manter a mesma URL ao trocar a foto; o cliente cacheia por URL.
- * Anexa um nonce após cada sync de sessão para forçar novo fetch.
+ * Anexa um nonce após cada sync de sessão para forçar novo fetch (apenas hosts OAuth).
  */
 function withRemoteImageCacheBust(
   uri: string | undefined,
   cacheNonce: number
 ): string | undefined {
   if (!uri || cacheNonce <= 0 || !/^https?:\/\//i.test(uri)) {
+    return uri;
+  }
+  if (!shouldApplyRemoteAvatarCacheBust(uri)) {
     return uri;
   }
   const sep = uri.includes('?') ? '&' : '?';
@@ -131,18 +160,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   const displayPictureUrl = useMemo(() => {
-    const raw = user?.pictureUrl || localProfilePhotoUri || undefined;
-    return withRemoteImageCacheBust(raw, remoteAvatarCacheNonce);
+    const remoteRaw = user?.pictureUrl || undefined;
+    const resolvedRemote =
+      typeof remoteRaw === 'string' && /^https?:\/\//i.test(remoteRaw)
+        ? resolveProfilePictureUrlForDevice(remoteRaw)
+        : remoteRaw;
+    const bustedRemote = withRemoteImageCacheBust(
+      resolvedRemote,
+      remoteAvatarCacheNonce
+    );
+    if (localProfilePhotoUri) {
+      return localProfilePhotoUri;
+    }
+    return bustedRemote;
   }, [localProfilePhotoUri, remoteAvatarCacheNonce, user?.pictureUrl]);
 
   const applyServerUser = useCallback(
-    async (sessionUser: AuthResponse['user']) => {
+    async (
+      sessionUser: AuthResponse['user'],
+      options?: { preferDisplayWithLocalUri?: string }
+    ) => {
       if (!token) {
         return;
       }
       await persistSession(sessionUser, token);
-      await AsyncStorage.removeItem(profilePhotoStorageKey(sessionUser.id));
-      setLocalProfilePhotoUri(null);
+      const key = profilePhotoStorageKey(sessionUser.id);
+      if (options?.preferDisplayWithLocalUri) {
+        await AsyncStorage.setItem(key, options.preferDisplayWithLocalUri);
+        setLocalProfilePhotoUri(options.preferDisplayWithLocalUri);
+      } else {
+        await AsyncStorage.removeItem(key);
+        setLocalProfilePhotoUri(null);
+      }
     },
     [token, persistSession]
   );

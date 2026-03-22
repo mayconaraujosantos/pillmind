@@ -5,8 +5,6 @@
   },
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
-
-  // Performance optimizations
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
@@ -46,10 +44,9 @@
   "git.untrackedChanges": "hidden",
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "never"
+    "source.fixAll.eslint": "never",
+    "source.organizeImports": true
   },
-
-  // Explorer configuration
   "explorer.sortOrder": "type",
   "explorer.compactFolders": false,
   "explorer.autoReveal": true,
@@ -57,12 +54,8 @@
     "**/node_modules": true,
     "**/.git": true
   },
-
-  // Disable breadcrumb and commonly used
   "breadcrumbs.enabled": true,
   "workbench.explorer.fileNesting.enabled": false,
-
-  // Session management
   "workbench.startupEditor": "none",
   "workbench.editor.enablePreview": false,
   "workbench.editor.enablePreviewFromQuickOpen": false,
@@ -70,9 +63,6 @@
   "workbench.editor.tabCloseButton": "right",
   "workbench.editor.tabSizing": "fit",
   "window.restoreWindows": "none",
-
-  // GPU/Rendering optimization (NVIDIA conflict fix)
-
   "editor.smoothScrolling": false,
   "workbench.list.smoothScrolling": false,
   "terminal.integrated.smoothScrolling": false,
@@ -85,8 +75,6 @@
   "editor.selectionHighlight": false,
   "editor.suggest.preview": false,
   "editor.inlineSuggest.enabled": true,
-
-  // Extension optimization
   "extensions.autoUpdate": false,
   "extensions.autoCheckUpdates": false,
   "github.copilot.enable": {
@@ -95,19 +83,13 @@
     "markdown": false,
     "scminput": false
   },
-
-  // Git optimization
   "git.autorefresh": false,
   "git.autofetch": false,
   "git.decorations.enabled": true,
-
-  // Search optimization
   "search.followSymlinks": false,
   "search.smartCase": true,
-
-  // File optimization
   "files.autoSave": "afterDelay",
   "files.hotExit": "onExitAndWindowClose",
-  // "workbench.editor.tabActionLocation": "right",
-  "java.compile.nullAnalysis.mode": "automatic"
+  "java.compile.nullAnalysis.mode": "automatic",
+  "sonarlint.pathToNodeExecutable": "C:\\nvm4w\\nodejs\\node.exe"
 }

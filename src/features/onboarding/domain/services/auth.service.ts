@@ -23,6 +23,34 @@ type BackendProfilePayload = {
 };
 
 class AuthService {
+  /**
+   * Aceita camelCase ou snake_case (ex.: picture_url) por compatibilidade com serialização JSON.
+   */
+  private coerceProfilePayload(raw: unknown): BackendProfilePayload | null {
+    if (raw === null || typeof raw !== 'object') {
+      return null;
+    }
+    const r = raw as Record<string, unknown>;
+    const id = r.id;
+    const name = r.name;
+    const email = r.email;
+    if (
+      typeof id !== 'string' ||
+      typeof name !== 'string' ||
+      typeof email !== 'string'
+    ) {
+      return null;
+    }
+    const pic = r.pictureUrl ?? r.picture_url;
+    const pictureUrl =
+      pic == null || pic === ''
+        ? null
+        : typeof pic === 'string'
+        ? pic
+        : String(pic);
+    return { id, name, email, pictureUrl };
+  }
+
   private mapToSessionUser(data: BackendProfilePayload): AuthResponse['user'] {
     return {
       id: data.id,
@@ -44,13 +72,16 @@ class AuthService {
     }
 
     // Map backend format to frontend format
-    const backend = backendData;
+    const backend = backendData as BackendAuthResponse & {
+      picture_url?: string | null;
+    };
+    const pic = backend.pictureUrl ?? backend.picture_url;
     return {
       user: {
         id: backend.id,
         name: backend.name,
         email: backend.email,
-        pictureUrl: backend.pictureUrl ?? null,
+        pictureUrl: pic == null || pic === '' ? null : String(pic),
       },
       token: backend.accessToken,
     };
@@ -132,14 +163,20 @@ class AuthService {
     });
 
     if (response.success && response.data) {
+      const coerced = this.coerceProfilePayload(response.data);
+      if (!coerced) {
+        logger.warn('AuthService', '⚠️ Profile JSON shape inválido');
+        return {
+          success: false,
+          error: {
+            message: 'Invalid profile response',
+            code: 'INVALID_PAYLOAD',
+          },
+        };
+      }
       return {
         ...response,
-        data: {
-          id: response.data.id,
-          name: response.data.name,
-          email: response.data.email,
-          pictureUrl: response.data.pictureUrl ?? null,
-        },
+        data: this.mapToSessionUser(coerced),
       };
     }
 
@@ -177,10 +214,26 @@ class AuthService {
     );
 
     if (response.success && response.data) {
-      logger.info('AuthService', '✅ Profile picture uploaded');
+      const coerced = this.coerceProfilePayload(response.data);
+      if (!coerced) {
+        logger.warn(
+          'AuthService',
+          '⚠️ Upload respondeu OK mas payload de perfil inválido'
+        );
+        return {
+          success: false,
+          error: {
+            message: 'Invalid profile response',
+            code: 'INVALID_PAYLOAD',
+          },
+        };
+      }
+      logger.info('AuthService', '✅ Profile picture uploaded', {
+        hasPictureUrl: !!coerced.pictureUrl,
+      });
       return {
         ...response,
-        data: this.mapToSessionUser(response.data),
+        data: this.mapToSessionUser(coerced),
       };
     }
 
@@ -207,10 +260,24 @@ class AuthService {
     );
 
     if (response.success && response.data) {
+      const coerced = this.coerceProfilePayload(response.data);
+      if (!coerced) {
+        logger.warn(
+          'AuthService',
+          '⚠️ Delete OK mas payload de perfil inválido'
+        );
+        return {
+          success: false,
+          error: {
+            message: 'Invalid profile response',
+            code: 'INVALID_PAYLOAD',
+          },
+        };
+      }
       logger.info('AuthService', '✅ Profile picture removed on server');
       return {
         ...response,
-        data: this.mapToSessionUser(response.data),
+        data: this.mapToSessionUser(coerced),
       };
     }
 

@@ -299,6 +299,30 @@ describe('AuthService', () => {
       });
     });
 
+    it('should map picture_url (snake_case) from API response', async () => {
+      mockApiService.postFormData.mockResolvedValueOnce({
+        success: true,
+        data: {
+          id: 'u100',
+          name: 'Snake User',
+          email: 'snake@example.com',
+          picture_url: 'https://minio.example/bucket/a.jpg',
+        },
+      });
+
+      const result = await authService.uploadProfilePicture(
+        'file:///local/a.jpg',
+        'tok',
+        'image/jpeg',
+        'a.jpg'
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.data?.pictureUrl).toBe(
+        'https://minio.example/bucket/a.jpg'
+      );
+    });
+
     it('should return error when upload fails', async () => {
       mockApiService.postFormData.mockResolvedValueOnce({
         success: false,

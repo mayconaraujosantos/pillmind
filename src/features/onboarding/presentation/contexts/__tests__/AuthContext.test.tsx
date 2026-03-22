@@ -235,7 +235,7 @@ describe('AuthContext', () => {
     expect(response?.error).toBe('Fail');
   });
 
-  it('appends cache-bust query on remote avatar URLs after login', async () => {
+  it('appends cache-bust query on Google avatar URLs after login', async () => {
     const { result } = renderHook(() => useAuthContext(), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -246,7 +246,7 @@ describe('AuthContext', () => {
           id: '9',
           name: 'P',
           email: 'p@p.com',
-          pictureUrl: 'https://cdn.example/photo.jpg?size=128',
+          pictureUrl: 'https://lh3.googleusercontent.com/a/photo.jpg?size=128',
         },
         token: 't9',
       });
@@ -255,8 +255,33 @@ describe('AuthContext', () => {
     await waitFor(() => {
       expect(result.current.displayPictureUrl).toMatch(/pillmind_cb=\d+/);
       expect(result.current.displayPictureUrl).toContain(
-        'https://cdn.example/photo.jpg?size=128&pillmind_cb='
+        'https://lh3.googleusercontent.com/a/photo.jpg?size=128&pillmind_cb='
       );
+    });
+  });
+
+  it('does not append cache-bust to MinIO / LAN profile image URLs', async () => {
+    const { result } = renderHook(() => useAuthContext(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const minioUrl = 'http://192.168.1.7:9000/pillmind/profiles/u1/abc.jpg';
+
+    await act(async () => {
+      await result.current.login({
+        user: {
+          id: '10',
+          name: 'M',
+          email: 'm@m.com',
+          pictureUrl: minioUrl,
+        },
+        token: 't10',
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current.displayPictureUrl).toBe(minioUrl);
+      expect(result.current.displayPictureUrl).not.toContain('pillmind_cb');
     });
   });
 
@@ -422,6 +447,42 @@ describe('AuthContext', () => {
       expect(result.current.user?.pictureUrl).toBe(
         'https://minio/bucket/a.png'
       );
+    });
+  });
+
+  it('applyServerUser preferDisplayWithLocalUri shows local file over remote URL', async () => {
+    const { result } = renderHook(() => useAuthContext(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.login({
+        user: {
+          id: '11',
+          name: 'Eleven',
+          email: '11@11.com',
+          pictureUrl: 'https://minio/bucket/server.png',
+        },
+        token: 't11',
+      });
+    });
+
+    const localUri = 'file:///cache/picked-photo.jpg';
+
+    await act(async () => {
+      await result.current.applyServerUser(
+        {
+          id: '11',
+          name: 'Eleven',
+          email: '11@11.com',
+          pictureUrl: 'https://minio/bucket/server.png',
+        },
+        { preferDisplayWithLocalUri: localUri }
+      );
+    });
+
+    await waitFor(() => {
+      expect(result.current.displayPictureUrl).toBe(localUri);
     });
   });
 

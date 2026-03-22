@@ -13,6 +13,7 @@ import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
 import { COMMON_STYLES } from '@shared/constants/styles';
 import { adaptiveSpacing } from '@shared/utils/dimensions';
+import { logger } from '@shared/utils/logger';
 
 interface HeaderProps {
   userName?: string;
@@ -91,6 +92,12 @@ export const Header: React.FC<HeaderProps> = ({
                 key={userAvatar}
                 source={{ uri: userAvatar }}
                 style={styles.avatarImage}
+                onError={(e) => {
+                  logger.warn('Header', 'Avatar image failed to load', {
+                    uri: userAvatar,
+                    error: e.nativeEvent?.error,
+                  });
+                }}
               />
             ) : (
               <Text style={dynamicStyles.avatarText}>

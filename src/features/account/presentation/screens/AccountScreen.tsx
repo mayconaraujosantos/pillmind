@@ -77,6 +77,7 @@ export const AccountScreen: React.FC = () => {
         return;
       }
       setUploadingPhoto(true);
+      await authContext.setProfilePhotoUri(uri);
       try {
         const res = await authService.uploadProfilePicture(
           uri,
@@ -85,13 +86,25 @@ export const AccountScreen: React.FC = () => {
           `profile.${ext}`
         );
         if (res.success && res.data) {
-          await authContext.applyServerUser(res.data);
+          await authContext.applyServerUser(res.data, {
+            preferDisplayWithLocalUri: uri,
+          });
         } else {
+          await authContext.setProfilePhotoUri(null);
           Alert.alert(
             t('common.error'),
             res.error?.message || t('account.uploadPhotoFailed')
           );
         }
+      } catch (err) {
+        await authContext.setProfilePhotoUri(null);
+        logger.error(
+          'AccountScreen',
+          'Profile picture upload threw',
+          { error: err instanceof Error ? err.message : String(err) },
+          err instanceof Error ? err : undefined
+        );
+        Alert.alert(t('common.error'), t('account.uploadPhotoFailed'));
       } finally {
         setUploadingPhoto(false);
       }
@@ -295,6 +308,16 @@ export const AccountScreen: React.FC = () => {
                     style={styles.avatarImage}
                     resizeMode="cover"
                     accessibilityIgnoresInvertColors
+                    onError={(e) => {
+                      logger.warn(
+                        'AccountScreen',
+                        'Profile image failed to load',
+                        {
+                          uri: displayPictureUrl,
+                          error: e.nativeEvent?.error,
+                        }
+                      );
+                    }}
                   />
                 ) : (
                   <Text style={styles.avatarText}>{initial}</Text>

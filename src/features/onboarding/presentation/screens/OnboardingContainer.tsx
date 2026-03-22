@@ -1,7 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ScrollView } from 'react-native';
 import { OnboardingView } from '../components/OnboardingView';
-import { OnboardingUnifiedAuth } from '../components/OnboardingUnifiedAuth';
+import {
+  OnboardingUnifiedAuth,
+  type AuthScreen,
+} from '../components/OnboardingUnifiedAuth';
 import { OnboardingSuccess } from '../components/OnboardingSuccess';
 import { PostLoginLoadingScreen } from './PostLoginLoadingScreen';
 import { useOnboardingScroll } from '../hooks/useOnboardingScroll';
@@ -14,17 +17,23 @@ type ScreenType = 'carousel' | 'auth' | 'success' | 'postLoginLoading';
 interface OnboardingContainerProps {
   onFinish?: () => void;
   onSkip?: () => void;
+  /** Abre login/cadastro direto (ex.: usuário já dispensou o carrossel antes) */
+  startWithAuth?: boolean;
 }
 
 export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
   onFinish,
   onSkip,
+  startWithAuth = false,
 }) => {
   const scrollViewRef = useRef<ScrollView>(null);
   const { currentStep, handleScroll } = useOnboardingScroll(
     TOTAL_ONBOARDING_STEPS
   );
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('carousel');
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>(
+    startWithAuth ? 'auth' : 'carousel'
+  );
+  const [authEntryScreen, setAuthEntryScreen] = useState<AuthScreen>('signIn');
 
   useEffect(() => {
     logger.info('OnboardingContainer', '📋 Onboarding container mounted');
@@ -38,12 +47,24 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
   }, [currentScreen]);
 
   const handleSkip = () => {
-    logger.info('OnboardingContainer', '⏭️ Skip pressed');
+    logger.info('OnboardingContainer', '⏭️ Skip pressed → auth');
+    setAuthEntryScreen('signIn');
+    setCurrentScreen('auth');
     onSkip?.();
   };
 
-  const handleAuth = () => {
-    logger.debug('OnboardingContainer', 'Auth button pressed');
+  const handleGoToAuthSignIn = () => {
+    logger.debug('OnboardingContainer', 'Login entry → auth (sign in)');
+    setAuthEntryScreen('signIn');
+    setCurrentScreen('auth');
+  };
+
+  const handleGoToAuthSignUp = () => {
+    logger.debug(
+      'OnboardingContainer',
+      'Create account entry → auth (sign up)'
+    );
+    setAuthEntryScreen('signUp');
     setCurrentScreen('auth');
   };
 
@@ -66,7 +87,12 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
   // Renderiza a tela apropriada baseado no estado
   if (currentScreen === 'auth') {
     logger.debug('OnboardingContainer', 'Rendering unified auth screen');
-    return <OnboardingUnifiedAuth onAuthComplete={handleAuthComplete} />;
+    return (
+      <OnboardingUnifiedAuth
+        defaultScreen={authEntryScreen}
+        onAuthComplete={handleAuthComplete}
+      />
+    );
   }
 
   if (currentScreen === 'postLoginLoading') {
@@ -88,8 +114,8 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
       totalSteps={TOTAL_ONBOARDING_STEPS}
       onScroll={handleScroll}
       onSkip={handleSkip}
-      onCreateAccount={handleAuth}
-      onLogin={handleAuth}
+      onCreateAccount={handleGoToAuthSignUp}
+      onLogin={handleGoToAuthSignIn}
       onFinish={onFinish}
     />
   );
