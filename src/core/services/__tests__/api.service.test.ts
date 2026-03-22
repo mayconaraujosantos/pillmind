@@ -1,11 +1,27 @@
+import * as ExpoCrypto from 'expo-crypto';
 import { apiService, ApiResponse } from '../api.service';
 
 // Mock global fetch
 globalThis.fetch = jest.fn();
 
 describe('ApiService', () => {
+  const originalCrypto = globalThis.crypto;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(globalThis, 'crypto', {
+      value: originalCrypto,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(globalThis, 'crypto', {
+      value: originalCrypto,
+      configurable: true,
+      writable: true,
+    });
   });
 
   describe('get', () => {
@@ -112,6 +128,109 @@ describe('ApiService', () => {
       expect(result.success).toBe(false);
       expect(result.error?.message).toBe('Network error');
       expect(result.error?.code).toBe('NETWORK_ERROR');
+    });
+
+    it('should return UNKNOWN when fetch rejects a non-Error', async () => {
+      (globalThis.fetch as jest.Mock).mockRejectedValueOnce('not an Error');
+
+      const result = await apiService.get('/test');
+
+      expect(result.success).toBe(false);
+      expect(result.error?.code).toBe('UNKNOWN');
+      expect(result.error?.message).toBe('Unknown error occurred');
+    });
+  });
+
+  describe('request id generation', () => {
+    it('uses getRandomValues when randomUUID is missing', async () => {
+      Object.defineProperty(globalThis, 'crypto', {
+        value: {
+          getRandomValues(arr: Uint8Array) {
+            for (let i = 0; i < arr.length; i += 1) {
+              arr[i] = 0xcd;
+            }
+            return arr;
+          },
+        },
+        configurable: true,
+      });
+
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ok: true }),
+      });
+
+      const result = await apiService.get('/rid-grv');
+
+      expect(result.success).toBe(true);
+    });
+
+    it('uses seq suffix when expo randomUUID throws', async () => {
+      Object.defineProperty(globalThis, 'crypto', {
+        value: {},
+        configurable: true,
+      });
+
+      const spy = jest
+        .spyOn(ExpoCrypto, 'randomUUID')
+        .mockImplementation(() => {
+          throw new Error('no native module');
+        });
+
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ok: true }),
+      });
+
+      const result = await apiService.get('/rid-seq');
+
+      spy.mockRestore();
+
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe('put', () => {
+    it('should make a successful PUT request', async () => {
+      const mockData = { id: '1', updated: true };
+      const body = { name: 'X' };
+
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockData,
+      });
+
+      const result = await apiService.put('/resource/1', body);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual(mockData);
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/resource/1'),
+        expect.objectContaining({
+          method: 'PUT',
+          body: JSON.stringify(body),
+        })
+      );
+    });
+  });
+
+  describe('delete', () => {
+    it('should make a successful DELETE request', async () => {
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ deleted: true }),
+      });
+
+      const result = await apiService.delete('/resource/1');
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({ deleted: true });
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/resource/1'),
+        expect.objectContaining({
+          method: 'DELETE',
+        })
+      );
     });
   });
 

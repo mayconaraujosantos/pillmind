@@ -2,6 +2,7 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthProvider, useAuthContext } from '../AuthContext';
+import { logger } from '@shared/utils/logger';
 
 const mockGetProfile = jest.fn();
 const mockSignInWithGoogle = jest.fn();
@@ -453,6 +454,94 @@ describe('AuthContext', () => {
         await result.current.logout();
       })
     ).rejects.toThrow('signOut failed');
+  });
+
+  it('does not persist profile photo when there is no logged-in user', async () => {
+    const { result } = renderHook(() => useAuthContext(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const setCallsBefore = (AsyncStorage.setItem as jest.Mock).mock.calls
+      .length;
+
+    await act(async () => {
+      await result.current.setProfilePhotoUri('file:///ignored.png');
+    });
+
+    expect((AsyncStorage.setItem as jest.Mock).mock.calls.length).toBe(
+      setCallsBefore
+    );
+  });
+
+  it('removes cached profile photo when setProfilePhotoUri is called with null', async () => {
+    const { result } = renderHook(() => useAuthContext(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.login({
+        user: { id: 'ph', name: 'Ph', email: 'ph@ph.com' },
+        token: 'tph',
+      });
+    });
+
+    await act(async () => {
+      await result.current.setProfilePhotoUri(null);
+    });
+
+    expect(AsyncStorage.removeItem).toHaveBeenCalledWith(
+      '@pillmind_profile_photo_ph'
+    );
+  });
+
+  it('ignores profile photo load errors from AsyncStorage', async () => {
+    const stored = JSON.stringify({
+      user: { id: 'u1', name: 'N', email: 'e@e.com' },
+      token: 'tok',
+    });
+
+    (AsyncStorage.getItem as jest.Mock).mockImplementation((key: string) => {
+      if (key === '@pillmind_auth') {
+        return Promise.resolve(stored);
+      }
+      if (key === '@pillmind_profile_photo_u1') {
+        return Promise.reject(new Error('profile key read failed'));
+      }
+      return Promise.resolve(null);
+    });
+
+    mockGetProfile.mockResolvedValue({
+      success: false,
+      error: { status: 503 },
+    });
+
+    const { result } = renderHook(() => useAuthContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.user?.id).toBe('u1');
+    });
+  });
+
+  it('logs when clearSession fails during restore error handling', async () => {
+    (AsyncStorage.getItem as jest.Mock).mockRejectedValue(
+      new Error('storage read failed')
+    );
+    (AsyncStorage.removeItem as jest.Mock).mockRejectedValue(
+      new Error('clear failed')
+    );
+
+    const { result } = renderHook(() => useAuthContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'AuthContext',
+      'Failed to clear corrupted storage',
+      expect.objectContaining({ error: 'clear failed' })
+    );
   });
 });
 
