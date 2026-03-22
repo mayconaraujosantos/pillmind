@@ -190,6 +190,93 @@ class ApiService {
     });
   }
 
+  /**
+   * POST multipart (não define Content-Type — o runtime define o boundary).
+   */
+  async postFormData<T>(
+    endpoint: string,
+    formData: FormData,
+    extraHeaders?: Record<string, string>
+  ): Promise<ApiResponse<T>> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    const requestId = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    logger.debug('ApiService', `📤 Starting multipart request`, {
+      requestId,
+      endpoint,
+      url: `${this.baseUrl}${endpoint}`,
+    });
+
+    try {
+      const startTime = Date.now();
+      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+        method: 'POST',
+        body: formData,
+        signal: controller.signal,
+        headers: extraHeaders ?? {},
+      });
+
+      clearTimeout(timeoutId);
+      const duration = Date.now() - startTime;
+
+      const data: unknown = await response.json();
+
+      if (!response.ok) {
+        const errBody = data as { message?: string; error?: string };
+        const errorMessage =
+          errBody?.message || errBody?.error || 'Request failed';
+
+        logger.warn('ApiService', `⚠️ Multipart API error`, {
+          requestId,
+          endpoint,
+          status: response.status,
+          errorMessage,
+          duration,
+        });
+
+        return {
+          success: false,
+          error: {
+            message: errorMessage,
+            status: response.status,
+          },
+        };
+      }
+
+      logger.info('ApiService', `✅ Multipart request successful`, {
+        requestId,
+        endpoint,
+        duration,
+      });
+
+      return {
+        success: true,
+        data: data as T,
+      };
+    } catch (error) {
+      clearTimeout(timeoutId);
+
+      if (error instanceof Error && error.name === 'AbortError') {
+        return {
+          success: false,
+          error: { message: 'Request timeout', code: 'TIMEOUT' },
+        };
+      }
+
+      return {
+        success: false,
+        error: {
+          message:
+            error instanceof Error ? error.message : 'Unknown error occurred',
+          code: 'NETWORK_ERROR',
+        },
+      };
+    }
+  }
+
   // Update base URL (useful for switching between environments)
   setBaseUrl(url: string): void {
     this.baseUrl = url;

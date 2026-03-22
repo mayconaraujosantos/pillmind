@@ -11,7 +11,7 @@ interface SocialAuthState {
 
 /**
  * Hook para gerenciar autenticação social (Google/Apple)
- * Unifica a lógica de modal e autenticação
+ * Google inicia o fluxo nativo direto (sem modal). Apple mantém modal de confirmação.
  */
 export const useSocialAuth = (onSuccess?: () => void) => {
   const { signInWithGoogle } = useAuthContext();
@@ -20,15 +20,51 @@ export const useSocialAuth = (onSuccess?: () => void) => {
     provider: 'google',
     loading: false,
   });
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const runGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      const result = await signInWithGoogle();
+
+      if (result.success) {
+        logger.info('useSocialAuth', '✅ Google auth successful');
+        onSuccess?.();
+      } else {
+        logger.warn('useSocialAuth', '⚠️ Google auth failed', {
+          error: result.error,
+        });
+        if (result.error !== 'Login cancelado pelo usuário') {
+          Alert.alert(
+            'Erro ao fazer login',
+            result.error || 'Erro desconhecido'
+          );
+        }
+      }
+    } catch (error) {
+      logger.error('useSocialAuth', '❌ Google auth error', { error });
+      Alert.alert(
+        'Erro',
+        error instanceof Error ? error.message : 'Erro ao fazer login'
+      );
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   /**
-   * Abre modal de confirmação para autenticação social
+   * Google: fluxo nativo imediato. Apple: modal de confirmação.
    */
   const openSocialAuth = (provider: 'google' | 'apple') => {
-    logger.info('useSocialAuth', `Opening ${provider} auth modal`);
+    if (provider === 'google') {
+      logger.info('useSocialAuth', 'Starting Google sign-in (no modal)');
+      void runGoogleSignIn();
+      return;
+    }
+    logger.info('useSocialAuth', 'Opening Apple auth modal');
     setModalState({
       visible: true,
-      provider,
+      provider: 'apple',
       loading: false,
     });
   };
@@ -59,45 +95,25 @@ export const useSocialAuth = (onSuccess?: () => void) => {
     }));
 
     try {
-      if (provider === 'google') {
-        const result = await signInWithGoogle();
-
-        if (result.success) {
-          logger.info('useSocialAuth', '✅ Google auth successful');
-          closeSocialAuth();
-          onSuccess?.();
-        } else {
-          logger.warn('useSocialAuth', '⚠️ Google auth failed', {
-            error: result.error,
-          });
-          closeSocialAuth();
-
-          // Não mostra erro se usuário cancelou
-          if (result.error !== 'Login cancelado pelo usuário') {
-            Alert.alert(
-              'Erro ao fazer login',
-              result.error || 'Erro desconhecido'
-            );
-          }
-        }
-      } else {
+      if (provider === 'apple') {
         // Apple Sign-In ainda não implementado
         logger.warn('useSocialAuth', 'Apple Sign-In not implemented yet');
-        closeSocialAuth();
         Alert.alert('Em breve', 'Login com Apple será implementado em breve!');
       }
     } catch (error) {
       logger.error('useSocialAuth', '❌ Social auth error', { error });
-      closeSocialAuth();
       Alert.alert(
         'Erro',
         error instanceof Error ? error.message : 'Erro ao fazer login'
       );
+    } finally {
+      closeSocialAuth();
     }
   };
 
   return {
     modalState,
+    googleLoading,
     openSocialAuth,
     closeSocialAuth,
     confirmSocialAuth,

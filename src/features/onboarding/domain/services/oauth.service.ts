@@ -4,6 +4,8 @@ import { AuthResponse } from '../models/auth.model';
 
 type GoogleSigninType =
   typeof import('@react-native-google-signin/google-signin').GoogleSignin;
+type GoogleSignInUser =
+  import('@react-native-google-signin/google-signin').User;
 
 // Lazy import Google Sign-In to avoid crash in Expo Go
 let GoogleSignin: GoogleSigninType | null = null;
@@ -44,9 +46,7 @@ export const configureGoogleSignIn = (webClientId: string) => {
 
   try {
     googleSignin.configure({
-      webClientId, // Web Client ID do Google Cloud Console
-      offlineAccess: true, // Para obter refresh token
-      forceCodeForRefreshToken: true,
+      webClientId,
     });
     logger.info('OAuthService', '✅ Google Sign-In configured successfully');
   } catch (error) {
@@ -99,38 +99,78 @@ class OAuthService {
     try {
       logger.info('OAuthService', '🔐 Google Sign-In started');
 
-      // 1. Verifica se Google Play Services está disponível
       await googleSignin.hasPlayServices({
-        showPlayServicesUpdateDialog: true,
+        showPlayServicesUpdateDialog: false,
       });
 
-      // 2. Abre popup do Google para autenticação
-      const userInfo = await googleSignin.signIn();
+      const resolveIdToken = async (
+        user: GoogleSignInUser
+      ): Promise<string | null> => {
+        if (user.idToken) {
+          return user.idToken;
+        }
+        try {
+          const tokens = await googleSignin.getTokens();
+          return tokens.idToken ?? null;
+        } catch {
+          return null;
+        }
+      };
 
-      logger.info('OAuthService', '✅ Google authentication successful', {
-        email: userInfo.data?.user.email,
-        name: userInfo.data?.user.name,
-      });
+      let idToken: string | null = null;
+      let sessionUser: GoogleSignInUser | null = null;
 
-      // 3. Pega o ID Token do Google
-      const idToken = userInfo.data?.idToken;
-      console.log('Google ID Token:', idToken);
+      const silent = await googleSignin.signInSilently();
+      if (silent.type === 'success' && silent.data) {
+        idToken = await resolveIdToken(silent.data);
+        if (idToken) {
+          sessionUser = silent.data;
+        }
+      }
 
       if (!idToken) {
+        const interactive = await googleSignin.signIn();
+        if (interactive.type === 'cancelled') {
+          logger.info('OAuthService', 'ℹ️ User cancelled Google Sign-In');
+          return {
+            success: false,
+            error: {
+              message: 'Login cancelado pelo usuário',
+              code: 'USER_CANCELLED',
+            },
+          };
+        }
+        if (interactive.type !== 'success' || !interactive.data) {
+          throw new Error('Google Sign-In failed');
+        }
+        idToken = await resolveIdToken(interactive.data);
+        sessionUser = interactive.data;
+      }
+
+      if (!idToken || !sessionUser) {
         throw new Error('ID Token not received from Google');
       }
+
+      logger.info('OAuthService', '✅ Google authentication successful', {
+        email: sessionUser.user.email,
+        name: sessionUser.user.name,
+      });
 
       logger.info('OAuthService', '📤 Sending ID Token to backend');
 
       // 4. Envia ID Token para o backend validar
-      type BackendResponse =
-        | AuthResponse
-        | {
-            accessToken: string;
-            accountId: string;
-            name: string;
-            email: string;
-          };
+      type FlatGoogleAuthBackend = {
+        accessToken: string;
+        /** Resposta atual do {@code GoogleAuthController} (Java) */
+        userId?: string;
+        /** Alias legado */
+        accountId?: string;
+        name: string;
+        email: string;
+        pictureUrl?: string | null;
+      };
+
+      type BackendResponse = AuthResponse | FlatGoogleAuthBackend;
 
       const response = await apiService.post<BackendResponse>(
         '/api/auth/google',
@@ -148,22 +188,59 @@ class OAuthService {
       });
 
       if (response.success && response.data) {
-        // Mapeia a resposta do backend Java para o formato esperado pelo frontend
         const backendData = response.data;
 
-        // Verifica se o backend retornou no formato antigo (user/token) ou novo (accountId/accessToken)
-        const mappedResponse: AuthResponse =
-          'user' in backendData
-            ? backendData // Formato já correto
-            : {
-                // Mapeia formato do backend Java
-                user: {
-                  id: backendData.accountId,
-                  name: backendData.name,
-                  email: backendData.email,
-                },
-                token: backendData.accessToken,
-              };
+        if ('user' in backendData && 'token' in backendData) {
+          logger.info(
+            'OAuthService',
+            '✅ Backend authentication successful - User created/authenticated',
+            {
+              userId: backendData.user.id,
+              userName: backendData.user.name,
+              email: backendData.user.email,
+              hasToken: !!backendData.token,
+              hasPicture: !!backendData.user.pictureUrl,
+            }
+          );
+          return {
+            success: true,
+            data: backendData,
+          };
+        }
+
+        const flat = backendData as FlatGoogleAuthBackend;
+        const userId = flat.userId ?? flat.accountId;
+        if (!userId || !flat.accessToken) {
+          logger.error(
+            'OAuthService',
+            '❌ Google auth backend payload missing userId or accessToken',
+            { keys: Object.keys(flat) }
+          );
+          return {
+            success: false,
+            error: {
+              message: 'Resposta inválida do servidor após login Google',
+              code: 'INVALID_GOOGLE_AUTH_PAYLOAD',
+            },
+          };
+        }
+
+        const serverPicture =
+          flat.pictureUrl != null && String(flat.pictureUrl).trim() !== ''
+            ? flat.pictureUrl
+            : null;
+        const googleSdkPicture = sessionUser.user.photo?.trim() || null;
+        const pictureUrl = serverPicture ?? googleSdkPicture;
+
+        const mappedResponse: AuthResponse = {
+          user: {
+            id: userId,
+            name: flat.name,
+            email: flat.email,
+            pictureUrl,
+          },
+          token: flat.accessToken,
+        };
 
         logger.info(
           'OAuthService',
@@ -173,6 +250,7 @@ class OAuthService {
             userName: mappedResponse.user.name,
             email: mappedResponse.user.email,
             hasToken: !!mappedResponse.token,
+            hasPicture: !!mappedResponse.user.pictureUrl,
           }
         );
 

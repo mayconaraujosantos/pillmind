@@ -15,7 +15,23 @@ type BackendAuthResponse = {
   pictureUrl?: string | null;
 };
 
+type BackendProfilePayload = {
+  id: string;
+  name: string;
+  email: string;
+  pictureUrl?: string | null;
+};
+
 class AuthService {
+  private mapToSessionUser(data: BackendProfilePayload): AuthResponse['user'] {
+    return {
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      pictureUrl: data.pictureUrl ?? null,
+    };
+  }
+
   /**
    * Maps backend response format to frontend AuthResponse format
    */
@@ -130,6 +146,76 @@ class AuthService {
     logger.warn('AuthService', '⚠️ Load profile failed', {
       error: response.error?.message,
       code: response.error?.code,
+      status: response.error?.status,
+    });
+
+    return response as ApiResponse<AuthResponse['user']>;
+  }
+
+  /**
+   * Envia imagem de perfil para o backend (MinIO); atualiza {@code pictureUrl} no servidor.
+   */
+  async uploadProfilePicture(
+    localUri: string,
+    token: string,
+    mimeType: string,
+    fileName: string
+  ): Promise<ApiResponse<AuthResponse['user']>> {
+    logger.info('AuthService', '📷 Upload profile picture started');
+
+    const form = new FormData();
+    form.append('file', {
+      uri: localUri,
+      name: fileName,
+      type: mimeType,
+    } as unknown as Blob);
+
+    const response = await apiService.postFormData<BackendProfilePayload>(
+      '/api/profile/picture',
+      form,
+      { 'x-access-token': token }
+    );
+
+    if (response.success && response.data) {
+      logger.info('AuthService', '✅ Profile picture uploaded');
+      return {
+        ...response,
+        data: this.mapToSessionUser(response.data),
+      };
+    }
+
+    logger.warn('AuthService', '⚠️ Profile picture upload failed', {
+      error: response.error?.message,
+      status: response.error?.status,
+    });
+
+    return response as ApiResponse<AuthResponse['user']>;
+  }
+
+  async deleteProfilePicture(
+    token: string
+  ): Promise<ApiResponse<AuthResponse['user']>> {
+    logger.info('AuthService', '🗑️ Delete profile picture started');
+
+    const response = await apiService.delete<BackendProfilePayload>(
+      '/api/profile/picture',
+      {
+        headers: {
+          'x-access-token': token,
+        },
+      }
+    );
+
+    if (response.success && response.data) {
+      logger.info('AuthService', '✅ Profile picture removed on server');
+      return {
+        ...response,
+        data: this.mapToSessionUser(response.data),
+      };
+    }
+
+    logger.warn('AuthService', '⚠️ Delete profile picture failed', {
+      error: response.error?.message,
       status: response.error?.status,
     });
 

@@ -17,6 +17,11 @@ export interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  /** URL pública do servidor (MinIO) ou URI local temporária — use for avatars in UI */
+  displayPictureUrl: string | undefined;
+  setProfilePhotoUri: (uri: string | null) => Promise<void>;
+  /** Após upload/remoção no backend: persiste usuário e limpa foto local em cache */
+  applyServerUser: (sessionUser: AuthResponse['user']) => Promise<void>;
   login: (authData: AuthResponse) => Promise<void>;
   logout: () => Promise<void>;
   restoreSession: () => Promise<void>;
@@ -28,6 +33,23 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 );
 
 const AUTH_STORAGE_KEY = '@pillmind_auth';
+const profilePhotoStorageKey = (userId: string) =>
+  `@pillmind_profile_photo_${userId}`;
+
+/**
+ * Google (e outros CDNs) podem manter a mesma URL ao trocar a foto; o cliente cacheia por URL.
+ * Anexa um nonce após cada sync de sessão para forçar novo fetch.
+ */
+function withRemoteImageCacheBust(
+  uri: string | undefined,
+  cacheNonce: number
+): string | undefined {
+  if (!uri || cacheNonce <= 0 || !/^https?:\/\//i.test(uri)) {
+    return uri;
+  }
+  const sep = uri.includes('?') ? '&' : '?';
+  return `${uri}${sep}pillmind_cb=${cacheNonce}`;
+}
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -35,6 +57,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [user, setUser] = useState<AuthResponse['user'] | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [localProfilePhotoUri, setLocalProfilePhotoUri] = useState<
+    string | null
+  >(null);
+  const [remoteAvatarCacheNonce, setRemoteAvatarCacheNonce] = useState(0);
 
   const setSessionState = useCallback(
     (sessionUser: AuthResponse['user'], sessionToken: string) => {
@@ -51,6 +77,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         AUTH_STORAGE_KEY,
         JSON.stringify({ user: sessionUser, token: sessionToken })
       );
+      setRemoteAvatarCacheNonce(Date.now());
     },
     [setSessionState]
   );
@@ -58,8 +85,67 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const clearSession = useCallback(async () => {
     setUser(null);
     setToken(null);
+    setLocalProfilePhotoUri(null);
+    setRemoteAvatarCacheNonce(0);
     await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
   }, []);
+
+  useEffect(() => {
+    if (!user?.id) {
+      setLocalProfilePhotoUri(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const uri = await AsyncStorage.getItem(profilePhotoStorageKey(user.id));
+        if (!cancelled) {
+          setLocalProfilePhotoUri(uri);
+        }
+      } catch {
+        if (!cancelled) {
+          setLocalProfilePhotoUri(null);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  const setProfilePhotoUri = useCallback(
+    async (uri: string | null) => {
+      if (!user?.id) {
+        return;
+      }
+      const key = profilePhotoStorageKey(user.id);
+      if (uri === null) {
+        await AsyncStorage.removeItem(key);
+        setLocalProfilePhotoUri(null);
+      } else {
+        await AsyncStorage.setItem(key, uri);
+        setLocalProfilePhotoUri(uri);
+      }
+    },
+    [user?.id]
+  );
+
+  const displayPictureUrl = useMemo(() => {
+    const raw = user?.pictureUrl || localProfilePhotoUri || undefined;
+    return withRemoteImageCacheBust(raw, remoteAvatarCacheNonce);
+  }, [localProfilePhotoUri, remoteAvatarCacheNonce, user?.pictureUrl]);
+
+  const applyServerUser = useCallback(
+    async (sessionUser: AuthResponse['user']) => {
+      if (!token) {
+        return;
+      }
+      await persistSession(sessionUser, token);
+      await AsyncStorage.removeItem(profilePhotoStorageKey(sessionUser.id));
+      setLocalProfilePhotoUri(null);
+    },
+    [token, persistSession]
+  );
 
   const hasValidAuthData = useCallback(
     (data: AuthResponse | null): data is AuthResponse =>
@@ -72,10 +158,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       const profileResponse = await authService.getProfile(parsedData.token);
 
       if (profileResponse.success && profileResponse.data) {
-        await persistSession(profileResponse.data, parsedData.token);
+        const refreshed = profileResponse.data;
+        await persistSession(refreshed, parsedData.token);
+        const avatar = refreshed.pictureUrl;
+        if (typeof avatar === 'string' && avatar.trim().length > 0) {
+          await AsyncStorage.removeItem(profilePhotoStorageKey(refreshed.id));
+          setLocalProfilePhotoUri(null);
+        }
         logger.info('AuthContext', '✅ Session restored (refreshed)', {
-          userId: profileResponse.data.id,
-          email: profileResponse.data.email,
+          userId: refreshed.id,
+          email: refreshed.email,
         });
         return;
       }
@@ -88,6 +180,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       setSessionState(parsedData.user, parsedData.token);
+      setRemoteAvatarCacheNonce(Date.now());
       logger.info('AuthContext', '✅ Session restored (cached)', {
         userId: parsedData.user.id,
         email: parsedData.user.email,
@@ -175,6 +268,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       });
       try {
         await persistSession(authData.user, authData.token);
+        const serverAvatar = authData.user.pictureUrl;
+        if (
+          typeof serverAvatar === 'string' &&
+          serverAvatar.trim().length > 0
+        ) {
+          await AsyncStorage.removeItem(
+            profilePhotoStorageKey(authData.user.id)
+          );
+          setLocalProfilePhotoUri(null);
+        }
         logger.info('AuthContext', '✅ Login successful', {
           userId: authData.user.id,
         });
@@ -248,12 +351,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       token,
       isLoading,
       isAuthenticated: !!user,
+      displayPictureUrl,
+      setProfilePhotoUri,
+      applyServerUser,
       login,
       logout,
       restoreSession,
       signInWithGoogle,
     }),
-    [user, token, isLoading, login, logout, restoreSession, signInWithGoogle]
+    [
+      user,
+      token,
+      isLoading,
+      displayPictureUrl,
+      setProfilePhotoUri,
+      applyServerUser,
+      login,
+      logout,
+      restoreSession,
+      signInWithGoogle,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
