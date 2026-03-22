@@ -1,7 +1,17 @@
 import { apiService } from '@core/services/api.service';
 import { authService } from '../auth.service';
 
-jest.mock('@core/services/api.service');
+jest.mock('@core/services/api.service', () => ({
+  apiService: {
+    post: jest.fn(),
+    get: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+    postFormData: jest.fn(),
+    setBaseUrl: jest.fn(),
+    getBaseUrl: jest.fn(() => 'https://api.test'),
+  },
+}));
 
 const mockApiService = apiService as jest.Mocked<typeof apiService>;
 
@@ -253,6 +263,100 @@ describe('AuthService', () => {
   describe('logout', () => {
     it('should not throw when logging out', () => {
       expect(() => authService.logout()).not.toThrow();
+    });
+  });
+
+  describe('uploadProfilePicture', () => {
+    it('should post multipart and map profile payload to session user', async () => {
+      mockApiService.postFormData.mockResolvedValueOnce({
+        success: true,
+        data: {
+          id: 'u99',
+          name: 'Photo User',
+          email: 'photo@example.com',
+          pictureUrl: 'https://cdn.example/p.png',
+        },
+      });
+
+      const result = await authService.uploadProfilePicture(
+        'file:///local/avatar.jpg',
+        'tok-abc',
+        'image/jpeg',
+        'avatar.jpg'
+      );
+
+      expect(mockApiService.postFormData).toHaveBeenCalledWith(
+        '/api/profile/picture',
+        expect.any(FormData),
+        { 'x-access-token': 'tok-abc' }
+      );
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        id: 'u99',
+        name: 'Photo User',
+        email: 'photo@example.com',
+        pictureUrl: 'https://cdn.example/p.png',
+      });
+    });
+
+    it('should return error when upload fails', async () => {
+      mockApiService.postFormData.mockResolvedValueOnce({
+        success: false,
+        error: { message: 'Too large', status: 413 },
+      });
+
+      const result = await authService.uploadProfilePicture(
+        'file:///x',
+        't',
+        'image/png',
+        'x.png'
+      );
+
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toBe('Too large');
+      expect(result.error?.status).toBe(413);
+    });
+  });
+
+  describe('deleteProfilePicture', () => {
+    it('should delete on server and map response user', async () => {
+      mockApiService.delete.mockResolvedValueOnce({
+        success: true,
+        data: {
+          id: 'u1',
+          name: 'User',
+          email: 'u@u.com',
+          pictureUrl: null,
+        },
+      });
+
+      const result = await authService.deleteProfilePicture('token-del');
+
+      expect(mockApiService.delete).toHaveBeenCalledWith(
+        '/api/profile/picture',
+        {
+          headers: { 'x-access-token': 'token-del' },
+        }
+      );
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        id: 'u1',
+        name: 'User',
+        email: 'u@u.com',
+        pictureUrl: null,
+      });
+    });
+
+    it('should return error when delete fails', async () => {
+      mockApiService.delete.mockResolvedValueOnce({
+        success: false,
+        error: { message: 'Forbidden', status: 403 },
+      });
+
+      const result = await authService.deleteProfilePicture('bad');
+
+      expect(result.success).toBe(false);
+      expect(result.error?.status).toBe(403);
     });
   });
 });

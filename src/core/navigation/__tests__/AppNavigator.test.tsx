@@ -1,7 +1,9 @@
-import { render } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import React from 'react';
 import { AppNavigator } from '../AppNavigator';
 import { ThemeProvider } from '@shared/theme';
+
+const mockTabNavigate = jest.fn();
 
 // Mock AuthContext
 jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
@@ -60,7 +62,29 @@ jest.mock('@react-navigation/bottom-tabs', () => {
   const React = require('react');
   return {
     createBottomTabNavigator: () => ({
-      Navigator: ({ children }: { children: unknown }) => children,
+      Navigator: ({
+        children,
+        screenOptions,
+      }: {
+        children: unknown;
+        screenOptions?: (args: {
+          route: { name: string };
+          navigation: { navigate: (...a: unknown[]) => void };
+        }) => Record<string, unknown>;
+      }) => {
+        const opts =
+          typeof screenOptions === 'function'
+            ? screenOptions({
+                route: { name: 'HomeTab' },
+                navigation: { navigate: mockTabNavigate },
+              })
+            : {};
+        const header =
+          opts && typeof opts.header === 'function'
+            ? (opts.header as () => React.ReactElement)()
+            : null;
+        return React.createElement(React.Fragment, null, header, children);
+      },
       Screen: ({ component: Component }: { component: React.ComponentType }) =>
         React.createElement(Component),
     }),
@@ -140,11 +164,17 @@ jest.mock('@shared/components/Header', () => {
   const React = require('react');
   const RN = require('react-native');
   return {
-    Header: () =>
+    Header: ({
+      onProfilePress,
+      userName,
+    }: {
+      onProfilePress?: () => void;
+      userName?: string;
+    }) =>
       React.createElement(
-        RN.View,
-        { testID: 'header' },
-        React.createElement(RN.Text, null, 'Header')
+        RN.Pressable,
+        { testID: 'header-profile', onPress: onProfilePress },
+        React.createElement(RN.Text, null, userName ?? 'Header')
       ),
   };
 });
@@ -172,6 +202,7 @@ jest.mock('@expo/vector-icons', () => {
 describe('AppNavigator', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockTabNavigate.mockClear();
   });
 
   const renderWithProviders = (component: React.ReactElement) => {
@@ -205,8 +236,11 @@ describe('AppNavigator', () => {
     expect(getByText('Nearby Screen')).toBeTruthy();
   });
 
-  // Note: Testing the actual icon selection logic and navigation behavior
-  // would require more complex mocking of React Navigation's internal state
-  // and context. For coverage purposes, we're testing the component renders
-  // without errors and contains the expected screen components.
+  it('header profile press navigates to AccountTab', () => {
+    const { getByTestId } = renderWithProviders(<AppNavigator />);
+
+    fireEvent.press(getByTestId('header-profile'));
+
+    expect(mockTabNavigate).toHaveBeenCalledWith('AccountTab');
+  });
 });
