@@ -115,6 +115,89 @@ describe('ApiService', () => {
     });
   });
 
+  describe('postFormData', () => {
+    it('should return success when multipart POST succeeds', async () => {
+      const payload = { uploaded: true, path: '/a/b.png' };
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => payload,
+      });
+
+      const formData = new FormData();
+      formData.append('file', new Blob(['x'], { type: 'image/png' }), 'p.png');
+
+      const result = await apiService.postFormData('/upload', formData);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual(payload);
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/upload'),
+        expect.objectContaining({
+          method: 'POST',
+          body: formData,
+        })
+      );
+    });
+
+    it('should merge extra headers without setting Content-Type', async () => {
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({}),
+      });
+
+      const formData = new FormData();
+      await apiService.postFormData('/u', formData, {
+        Authorization: 'Bearer t',
+      });
+
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          headers: { Authorization: 'Bearer t' },
+        })
+      );
+    });
+
+    it('should map non-OK multipart response using message or error field', async () => {
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 413,
+        json: async () => ({ error: 'Payload too large' }),
+      });
+
+      const result = await apiService.postFormData('/upload', new FormData());
+
+      expect(result.success).toBe(false);
+      expect(result.error?.status).toBe(413);
+      expect(result.error?.message).toBe('Payload too large');
+    });
+
+    it('should return TIMEOUT when multipart fetch aborts', async () => {
+      (globalThis.fetch as jest.Mock).mockImplementationOnce(() => {
+        const err = new Error('aborted');
+        err.name = 'AbortError';
+        return Promise.reject(err);
+      });
+
+      const result = await apiService.postFormData('/upload', new FormData());
+
+      expect(result.success).toBe(false);
+      expect(result.error?.code).toBe('TIMEOUT');
+    });
+
+    it('should return NETWORK_ERROR on generic multipart failure', async () => {
+      (globalThis.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error('socket closed')
+      );
+
+      const result = await apiService.postFormData('/upload', new FormData());
+
+      expect(result.success).toBe(false);
+      expect(result.error?.code).toBe('NETWORK_ERROR');
+      expect(result.error?.message).toBe('socket closed');
+    });
+  });
+
   describe('setBaseUrl', () => {
     it('should update base URL', () => {
       const newUrl = 'https://new-api.example.com';

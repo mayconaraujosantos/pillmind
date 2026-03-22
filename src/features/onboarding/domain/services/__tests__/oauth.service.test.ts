@@ -213,6 +213,48 @@ describe('OAuthService', () => {
     expect(response.data?.token).toBe('backend-token');
   });
 
+  it('should return INVALID_GOOGLE_AUTH_PAYLOAD when flat response omits user id', async () => {
+    const googleModule = buildGoogleModule();
+    googleModule.signIn.mockResolvedValue(createSignInSuccess());
+
+    const { oauthService, apiServiceMock } = setupOAuthModule(googleModule);
+
+    apiServiceMock.post.mockResolvedValue({
+      success: true,
+      data: {
+        accessToken: 'backend-token',
+        name: 'X',
+        email: 'x@example.com',
+      },
+    });
+
+    const response = await oauthService.signInWithGoogle();
+
+    expect(response.success).toBe(false);
+    expect(response.error?.code).toBe('INVALID_GOOGLE_AUTH_PAYLOAD');
+  });
+
+  it('should return INVALID_GOOGLE_AUTH_PAYLOAD when flat response omits access token', async () => {
+    const googleModule = buildGoogleModule();
+    googleModule.signIn.mockResolvedValue(createSignInSuccess());
+
+    const { oauthService, apiServiceMock } = setupOAuthModule(googleModule);
+
+    apiServiceMock.post.mockResolvedValue({
+      success: true,
+      data: {
+        userId: '7',
+        name: 'Y',
+        email: 'y@example.com',
+      },
+    });
+
+    const response = await oauthService.signInWithGoogle();
+
+    expect(response.success).toBe(false);
+    expect(response.error?.code).toBe('INVALID_GOOGLE_AUTH_PAYLOAD');
+  });
+
   it('should return error when idToken is missing', async () => {
     const googleModule = buildGoogleModule();
     googleModule.signIn.mockResolvedValue({
