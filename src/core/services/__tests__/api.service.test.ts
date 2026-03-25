@@ -7,6 +7,25 @@ globalThis.fetch = jest.fn();
 describe('ApiService', () => {
   const originalCrypto = globalThis.crypto;
 
+  const mockFetchResponse = (
+    ok: boolean,
+    body: unknown,
+    status?: number
+  ): Partial<Response> => {
+    const text =
+      body === undefined || body === null
+        ? ''
+        : typeof body === 'string'
+          ? body
+          : JSON.stringify(body);
+    return {
+      ok,
+      status: status ?? (ok ? 200 : 400),
+      statusText: ok ? 'OK' : 'Error',
+      text: async () => text,
+    };
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     Object.defineProperty(globalThis, 'crypto', {
@@ -27,10 +46,9 @@ describe('ApiService', () => {
   describe('get', () => {
     it('should make a successful GET request', async () => {
       const mockData = { id: '1', name: 'Test' };
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockData,
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(true, mockData)
+      );
 
       const result: ApiResponse<typeof mockData> = await apiService.get(
         '/test'
@@ -47,11 +65,9 @@ describe('ApiService', () => {
     });
 
     it('should handle GET request error', async () => {
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        json: async () => ({ message: 'Not found' }),
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(false, { message: 'Not found' }, 404)
+      );
 
       const result = await apiService.get('/test');
 
@@ -66,10 +82,9 @@ describe('ApiService', () => {
       const mockData = { id: '1', created: true };
       const postData = { name: 'Test' };
 
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockData,
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(true, mockData)
+      );
 
       const result = await apiService.post('/test', postData);
 
@@ -85,11 +100,13 @@ describe('ApiService', () => {
     });
 
     it('should handle POST request error', async () => {
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        json: async () => ({ message: 'Bad request', code: 'BAD_REQUEST' }),
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(
+          false,
+          { message: 'Bad request', code: 'BAD_REQUEST' },
+          400
+        )
+      );
 
       const result = await apiService.post('/test', {});
 
@@ -155,10 +172,9 @@ describe('ApiService', () => {
         configurable: true,
       });
 
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ ok: true }),
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(true, { ok: true })
+      );
 
       const result = await apiService.get('/rid-grv');
 
@@ -177,10 +193,9 @@ describe('ApiService', () => {
           throw new Error('no native module');
         });
 
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ ok: true }),
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(true, { ok: true })
+      );
 
       const result = await apiService.get('/rid-seq');
 
@@ -195,10 +210,9 @@ describe('ApiService', () => {
       const mockData = { id: '1', updated: true };
       const body = { name: 'X' };
 
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockData,
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(true, mockData)
+      );
 
       const result = await apiService.put('/resource/1', body);
 
@@ -216,10 +230,9 @@ describe('ApiService', () => {
 
   describe('delete', () => {
     it('should make a successful DELETE request', async () => {
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ deleted: true }),
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(true, { deleted: true })
+      );
 
       const result = await apiService.delete('/resource/1');
 
@@ -232,15 +245,28 @@ describe('ApiService', () => {
         })
       );
     });
+
+    it('should treat 204 DELETE with empty body as success', async () => {
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+        statusText: 'No Content',
+        text: async () => '',
+      });
+
+      const result = await apiService.delete('/resource/1');
+
+      expect(result.success).toBe(true);
+      expect(result.data).toBeUndefined();
+    });
   });
 
   describe('postFormData', () => {
     it('should return success when multipart POST succeeds', async () => {
       const payload = { uploaded: true, path: '/a/b.png' };
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => payload,
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(true, payload)
+      );
 
       const formData = new FormData();
       formData.append('file', new Blob(['x'], { type: 'image/png' }), 'p.png');
@@ -259,10 +285,9 @@ describe('ApiService', () => {
     });
 
     it('should merge extra headers without setting Content-Type', async () => {
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({}),
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(true, {})
+      );
 
       const formData = new FormData();
       await apiService.postFormData('/u', formData, {
@@ -278,11 +303,9 @@ describe('ApiService', () => {
     });
 
     it('should map non-OK multipart response using message or error field', async () => {
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
-        ok: false,
-        status: 413,
-        json: async () => ({ error: 'Payload too large' }),
-      });
+      (globalThis.fetch as jest.Mock).mockResolvedValueOnce(
+        mockFetchResponse(false, { error: 'Payload too large' }, 413)
+      );
 
       const result = await apiService.postFormData('/upload', new FormData());
 

@@ -2,6 +2,7 @@ import React, {
   createContext,
   useState,
   useEffect,
+  useRef,
   ReactNode,
   useMemo,
   useCallback,
@@ -12,6 +13,7 @@ import { authService } from '../../domain/services/auth.service';
 import { oauthService } from '../../domain/services/oauth.service';
 import { logger } from '@shared/utils/logger';
 import { resolveProfilePictureUrlForDevice } from '@shared/utils/profilePictureUrl';
+import { setMedicineApiAccessTokenGetter } from '@core/services/medicineApiTokenBridge';
 
 export interface AuthContextType {
   user: AuthResponse['user'] | null;
@@ -92,8 +94,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   >(null);
   const [remoteAvatarCacheNonce, setRemoteAvatarCacheNonce] = useState(0);
 
+  /** Atualizado em sync com o token — evita corrida com useEffect após login (AsyncStorage). */
+  const medicineAccessTokenRef = useRef<string | null>(null);
+
   const setSessionState = useCallback(
     (sessionUser: AuthResponse['user'], sessionToken: string) => {
+      medicineAccessTokenRef.current = sessionToken;
       setUser(sessionUser);
       setToken(sessionToken);
     },
@@ -113,11 +119,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   const clearSession = useCallback(async () => {
+    medicineAccessTokenRef.current = null;
     setUser(null);
     setToken(null);
     setLocalProfilePhotoUri(null);
     setRemoteAvatarCacheNonce(0);
     await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+  }, []);
+
+  useEffect(() => {
+    setMedicineApiAccessTokenGetter(() => medicineAccessTokenRef.current);
   }, []);
 
   useEffect(() => {

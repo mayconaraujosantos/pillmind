@@ -80,10 +80,25 @@ class ApiService {
       clearTimeout(timeoutId);
       const duration = Date.now() - startTime;
 
-      const data = await response.json();
+      const rawText = await response.text();
+      let data: unknown;
+      if (rawText.trim().length > 0) {
+        try {
+          data = JSON.parse(rawText) as unknown;
+        } catch {
+          data = { error: rawText };
+        }
+      } else {
+        data = undefined;
+      }
 
       if (!response.ok) {
-        const errorMessage = data?.message || data?.error || 'Request failed';
+        const errBody =
+          data && typeof data === 'object'
+            ? (data as { message?: string; error?: string; code?: string })
+            : {};
+        const errorMessage =
+          errBody.message || errBody.error || 'Request failed';
 
         logger.warn('ApiService', `⚠️ API returned error`, {
           requestId,
@@ -99,22 +114,30 @@ class ApiService {
           error: {
             message: errorMessage,
             status: response.status,
-            code: data?.code,
+            code: errBody.code,
           },
         };
       }
+
+      const dataKeys =
+        data !== undefined &&
+        data !== null &&
+        typeof data === 'object' &&
+        !Array.isArray(data)
+          ? Object.keys(data as object)
+          : [];
 
       logger.info('ApiService', `✅ Request successful`, {
         requestId,
         endpoint,
         status: response.status,
         duration,
-        dataKeys: Object.keys(data),
+        dataKeys,
       });
 
       return {
         success: true,
-        data,
+        data: data as T,
       };
     } catch (error) {
       clearTimeout(timeoutId);
@@ -247,12 +270,25 @@ class ApiService {
       clearTimeout(timeoutId);
       const duration = Date.now() - startTime;
 
-      const data: unknown = await response.json();
+      const rawText = await response.text();
+      let data: unknown;
+      if (rawText.trim().length > 0) {
+        try {
+          data = JSON.parse(rawText) as unknown;
+        } catch {
+          data = { error: rawText };
+        }
+      } else {
+        data = undefined;
+      }
 
       if (!response.ok) {
-        const errBody = data as { message?: string; error?: string };
+        const errBody =
+          data && typeof data === 'object'
+            ? (data as { message?: string; error?: string })
+            : {};
         const errorMessage =
-          errBody?.message || errBody?.error || 'Request failed';
+          errBody.message || errBody.error || 'Request failed';
 
         logger.warn('ApiService', `⚠️ Multipart API error`, {
           requestId,

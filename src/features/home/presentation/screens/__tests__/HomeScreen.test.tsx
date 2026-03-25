@@ -6,8 +6,12 @@ import { ThemeProvider } from '@shared/theme';
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
+    navigate: jest.fn(),
     getParent: () => ({ navigate: jest.fn() }),
   }),
+  useFocusEffect: (cb: () => void) => {
+    cb();
+  },
 }));
 
 // Mock i18n
@@ -66,6 +70,19 @@ jest.mock('@shared/i18n', () => ({
         'home.calendarPrevWeekA11y': 'Previous week',
         'home.calendarNextWeekA11y': 'Next week',
         'home.noFixedAlarmTimes': 'No fixed times',
+        'home.scheduleSectionEyebrow': 'Schedule',
+        'home.todayPlanEyebrow': 'Today',
+        'home.addMedicineShort': 'Add',
+        'home.editMedication': 'Edit',
+        'home.pickAnotherDay': 'Pick another day',
+        'home.deleteMedicationTitle': 'Remove',
+        'home.deleteMedicationMessage': 'Remove {{name}}?',
+        'home.deleteMedication': 'Delete',
+        'home.medicineRowMenuA11y': 'Menu',
+        'home.markDoseCheckboxA11y': 'Mark dose',
+        'home.quickAddDoseTitle': 'Dose',
+        'home.quickAddDoseMessage': 'Soon',
+        'common.cancel': 'Cancel',
       };
       return translations[key] || key;
     },
@@ -90,14 +107,18 @@ jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
   }),
 }));
 
-jest.mock('../../hooks/useHomeData', () => ({
-  useHomeData: jest.fn(() => ({
+jest.mock('../../hooks/useHomeMedicines', () => ({
+  useHomeMedicines: jest.fn(() => ({
     medicines: [],
     loading: false,
     refreshing: false,
     error: null,
     refetch: jest.fn(),
     refresh: jest.fn(),
+    syncMedicines: jest.fn(),
+    createMedicine: jest.fn(),
+    updateMedicine: jest.fn(),
+    deleteMedicine: jest.fn(),
   })),
 }));
 

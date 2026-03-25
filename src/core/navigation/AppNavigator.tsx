@@ -1,10 +1,19 @@
 import React from 'react';
-import { NavigationContainer, Theme as NavigationTheme } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  Theme as NavigationTheme,
+} from '@react-navigation/native';
 import {
   BottomTabBarProps,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
-import { Animated, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  Animated,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
 import { AccountNavigator } from '@features/account/navigation/AccountNavigator';
@@ -23,10 +32,19 @@ const AnimatedBottomTabBar: React.FC<
     inactiveColor: string;
     backgroundColor: string;
   }
-> = ({ state, descriptors, navigation, activeColor, inactiveColor, backgroundColor }) => {
+> = ({
+  state,
+  descriptors,
+  navigation,
+  activeColor,
+  inactiveColor,
+  backgroundColor,
+}) => {
   const translateX = React.useRef(new Animated.Value(0)).current;
   const progressByRoute = React.useRef(
-    state.routes.map((_, index) => new Animated.Value(index === state.index ? 1 : 0))
+    state.routes.map(
+      (_, index) => new Animated.Value(index === state.index ? 1 : 0)
+    )
   ).current;
   const tabCount = state.routes.length;
   const [containerWidth, setContainerWidth] = React.useState(0);
@@ -75,43 +93,43 @@ const AnimatedBottomTabBar: React.FC<
         )}
 
         {state.routes.map((route, index) => {
-        const isFocused = state.index === index;
-        const descriptor = descriptors[route.key];
-        const options = descriptor.options;
-        const rawLabel = options.title ?? route.name;
-        const iconColor = isFocused ? activeColor : inactiveColor;
-        const labelProgress = progressByRoute[index];
-        const labelOpacity = labelProgress.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0.72, 1],
-        });
-        const labelTranslateY = labelProgress.interpolate({
-          inputRange: [0, 1],
-          outputRange: [1, -1],
-        });
-        const labelScale = labelProgress.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0.98, 1.02],
-        });
-
-        const onPress = () => {
-          const event = navigation.emit({
-            type: 'tabPress',
-            target: route.key,
-            canPreventDefault: true,
+          const isFocused = state.index === index;
+          const descriptor = descriptors[route.key];
+          const options = descriptor.options;
+          const rawLabel = options.title ?? route.name;
+          const iconColor = isFocused ? activeColor : inactiveColor;
+          const labelProgress = progressByRoute[index];
+          const labelOpacity = labelProgress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.72, 1],
+          });
+          const labelTranslateY = labelProgress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [1, -1],
+          });
+          const labelScale = labelProgress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.98, 1.02],
           });
 
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name);
-          }
-        };
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
 
-        const onLongPress = () => {
-          navigation.emit({
-            type: 'tabLongPress',
-            target: route.key,
-          });
-        };
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          const onLongPress = () => {
+            navigation.emit({
+              type: 'tabLongPress',
+              target: route.key,
+            });
+          };
 
           return (
             <TouchableOpacity
@@ -138,7 +156,10 @@ const AnimatedBottomTabBar: React.FC<
                     color: iconColor,
                     fontWeight: isFocused ? '700' : '500',
                     opacity: labelOpacity,
-                    transform: [{ translateY: labelTranslateY }, { scale: labelScale }],
+                    transform: [
+                      { translateY: labelTranslateY },
+                      { scale: labelScale },
+                    ],
                   },
                 ]}
                 numberOfLines={1}
@@ -157,7 +178,9 @@ export const AppNavigator: React.FC = () => {
   const { t } = useTranslation();
   const { theme, isDark } = useTheme();
   /** No escuro, alinhar cena/tab bar ao surface (#151515) para não vazar #000 nos cantos arredondados. */
-  const tabCanvasColor = isDark ? theme.colors.surface : theme.colors.background;
+  const tabCanvasColor = isDark
+    ? theme.colors.surface
+    : theme.colors.background;
   const navigationTheme = React.useMemo<NavigationTheme>(
     () => ({
       dark: isDark,

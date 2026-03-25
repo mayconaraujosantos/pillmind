@@ -18,6 +18,7 @@ export type TabParamList = {
 /** Stack dentro da tab Home (ecrãs com header nativo + voltar). */
 export type HomeTabParamList = {
   HomeMain: undefined;
+  MedicineForm: { medicineId?: string };
 };
 
 export type AppointmentsTabParamList = {

@@ -112,6 +112,19 @@ jest.mock('@features/home/presentation/screens/HomeScreen', () => {
   };
 });
 
+jest.mock('@features/home/presentation/screens/MedicineFormScreen', () => {
+  const React = require('react');
+  const RN = require('react-native');
+  return {
+    MedicineFormScreen: () =>
+      React.createElement(
+        RN.View,
+        { testID: 'medicine-form-screen' },
+        React.createElement(RN.Text, null, 'Medicine Form')
+      ),
+  };
+});
+
 jest.mock(
   '@features/appointments/presentation/screens/AppointmentsScreen',
   () => {

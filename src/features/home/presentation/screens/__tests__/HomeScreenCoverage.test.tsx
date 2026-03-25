@@ -7,8 +7,12 @@ import { ThemeProvider } from '@shared/theme';
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({
+    navigate: jest.fn(),
     getParent: () => ({ navigate: jest.fn() }),
   }),
+  useFocusEffect: (cb: () => void) => {
+    cb();
+  },
 }));
 
 // Mock i18n (referência estável de `t` para useMemo no HomeScreen)
@@ -61,6 +65,19 @@ jest.mock('@shared/i18n', () => {
     'home.calendarPrevWeekA11y': 'Previous week',
     'home.calendarNextWeekA11y': 'Next week',
     'home.noFixedAlarmTimes': 'No fixed times',
+    'home.scheduleSectionEyebrow': 'Schedule',
+    'home.todayPlanEyebrow': 'Today',
+    'home.addMedicineShort': 'Add',
+    'home.editMedication': 'Edit',
+    'home.pickAnotherDay': 'Pick another day',
+    'home.deleteMedicationTitle': 'Remove',
+    'home.deleteMedicationMessage': 'Remove {{name}}?',
+    'home.deleteMedication': 'Delete',
+    'home.medicineRowMenuA11y': 'Menu',
+    'home.markDoseCheckboxA11y': 'Mark dose',
+    'home.quickAddDoseTitle': 'Dose',
+    'home.quickAddDoseMessage': 'Soon',
+    'common.cancel': 'Cancel',
   };
 
   const coverageT = (key: string, opts?: Record<string, number | string>) => {
@@ -99,13 +116,13 @@ jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
   }),
 }));
 
-const mockRefetch = jest.fn();
 const mockRefresh = jest.fn();
+const mockSyncMedicines = jest.fn();
+const mockDeleteMedicine = jest.fn();
 
-// Mock useHomeData with additional scenarios
-const mockUseHomeData = jest.fn();
-jest.mock('../../hooks/useHomeData', () => ({
-  useHomeData: () => mockUseHomeData(),
+const mockUseHomeMedicines = jest.fn();
+jest.mock('../../hooks/useHomeMedicines', () => ({
+  useHomeMedicines: () => mockUseHomeMedicines(),
 }));
 
 const renderWithTheme = (component: React.ReactElement) => {
@@ -114,9 +131,22 @@ const renderWithTheme = (component: React.ReactElement) => {
 
 describe('HomeScreen - Coverage Tests', () => {
   beforeEach(() => {
-    mockRefetch.mockClear();
     mockRefresh.mockClear();
-    mockUseHomeData.mockReset();
+    mockSyncMedicines.mockClear();
+    mockDeleteMedicine.mockClear();
+    mockUseHomeMedicines.mockReset();
+    mockUseHomeMedicines.mockReturnValue({
+      medicines: [],
+      loading: false,
+      refreshing: false,
+      error: null,
+      refetch: jest.fn(),
+      refresh: mockRefresh,
+      syncMedicines: mockSyncMedicines,
+      createMedicine: jest.fn(),
+      updateMedicine: jest.fn(),
+      deleteMedicine: mockDeleteMedicine,
+    });
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue('automatic');
     jest.spyOn(Date.prototype, 'getHours').mockReturnValue(10);
     jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
@@ -127,13 +157,17 @@ describe('HomeScreen - Coverage Tests', () => {
   });
 
   it('should surface API error via alert', async () => {
-    mockUseHomeData.mockImplementation(() => ({
+    mockUseHomeMedicines.mockImplementation(() => ({
       medicines: [],
       loading: false,
       refreshing: false,
       error: 'Network error',
-      refetch: mockRefetch,
+      refetch: jest.fn(),
       refresh: mockRefresh,
+      syncMedicines: mockSyncMedicines,
+      createMedicine: jest.fn(),
+      updateMedicine: jest.fn(),
+      deleteMedicine: mockDeleteMedicine,
     }));
 
     renderWithTheme(<HomeScreen />);
@@ -161,13 +195,17 @@ describe('HomeScreen - Coverage Tests', () => {
       startDate: new Date('2024-01-01'),
     }));
 
-    mockUseHomeData.mockReturnValue({
+    mockUseHomeMedicines.mockReturnValue({
       medicines,
       loading: false,
       refreshing: false,
       error: null,
-      refetch: mockRefetch,
+      refetch: jest.fn(),
       refresh: mockRefresh,
+      syncMedicines: mockSyncMedicines,
+      createMedicine: jest.fn(),
+      updateMedicine: jest.fn(),
+      deleteMedicine: mockDeleteMedicine,
     });
 
     const { getByText } = renderWithTheme(<HomeScreen />);
@@ -186,13 +224,17 @@ describe('HomeScreen - Coverage Tests', () => {
   });
 
   it('should render in loading state', () => {
-    mockUseHomeData.mockReturnValue({
+    mockUseHomeMedicines.mockReturnValue({
       medicines: [],
       loading: true,
       refreshing: false,
       error: null,
-      refetch: mockRefetch,
+      refetch: jest.fn(),
       refresh: mockRefresh,
+      syncMedicines: mockSyncMedicines,
+      createMedicine: jest.fn(),
+      updateMedicine: jest.fn(),
+      deleteMedicine: mockDeleteMedicine,
     });
 
     // Should not throw an error during rendering in loading state
@@ -202,13 +244,17 @@ describe('HomeScreen - Coverage Tests', () => {
   });
 
   it('should render with refreshing state', async () => {
-    mockUseHomeData.mockReturnValue({
+    mockUseHomeMedicines.mockReturnValue({
       medicines: [],
       loading: false,
       refreshing: true,
       error: null,
-      refetch: mockRefetch,
+      refetch: jest.fn(),
       refresh: mockRefresh,
+      syncMedicines: mockSyncMedicines,
+      createMedicine: jest.fn(),
+      updateMedicine: jest.fn(),
+      deleteMedicine: mockDeleteMedicine,
     });
 
     const { getByText } = renderWithTheme(<HomeScreen />);
