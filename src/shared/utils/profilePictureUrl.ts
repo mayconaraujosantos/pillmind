@@ -2,9 +2,22 @@ import { config } from '@core/config';
 
 const LOOPBACK_HOSTS = new Set(['127.0.0.1', 'localhost', '[::1]']);
 
+/** Hostnames que o telefone não resolve ou não alcança; reescrevemos para o host da API/LAN. */
+const UNREACHABLE_MINIO_HOSTNAMES = new Set(['minio', 'host.docker.internal']);
+
+function needsMinioHostRewrite(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  if (LOOPBACK_HOSTS.has(h)) {
+    return true;
+  }
+  return UNREACHABLE_MINIO_HOSTNAMES.has(h);
+}
+
 /**
- * MinIO costuma devolver URL com 127.0.0.1 (MINIO_PUBLIC_BASE_URL no PC).
- * No celular físico isso não alcança o MinIO — troca o host pelo da API/LAN.
+ * MinIO costuma devolver URL com 127.0.0.1 ou hostname Docker (minio).
+ * No celular isso não alcança o MinIO — troca o host pelo da API/LAN.
+ * Usa o protocolo da própria URL da imagem (http do MinIO), não o da API,
+ * para não gerar https://IP:9000 quando a API é HTTPS e o bucket é só HTTP.
  */
 export function resolveProfilePictureUrlForDevice(
   url: string | undefined | null
@@ -19,7 +32,7 @@ export function resolveProfilePictureUrlForDevice(
 
   try {
     const parsed = new URL(trimmed);
-    if (!LOOPBACK_HOSTS.has(parsed.hostname)) {
+    if (!needsMinioHostRewrite(parsed.hostname)) {
       return trimmed;
     }
 
@@ -37,11 +50,14 @@ export function resolveProfilePictureUrlForDevice(
     }
 
     const api = new URL(config.api.baseUrl);
-    const port = config.media.minioInferredPort;
+    const portPart = parsed.port
+      ? parseInt(parsed.port, 10)
+      : config.media.minioInferredPort;
+    const proto = parsed.protocol || 'http:';
     const origin =
-      port === 80 || port === 443
-        ? `${api.protocol}//${api.hostname}`
-        : `${api.protocol}//${api.hostname}:${port}`;
+      portPart === 80 || portPart === 443
+        ? `${proto}//${api.hostname}`
+        : `${proto}//${api.hostname}:${portPart}`;
     return `${origin}${parsed.pathname}${parsed.search}`;
   } catch {
     return trimmed;

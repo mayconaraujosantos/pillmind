@@ -39,6 +39,19 @@ jest.mock('@shared/i18n', () => ({
       const translations: Record<string, string> = {
         'home.todayLabel': 'Today',
         'home.dateLabel': 'Date',
+        'home.quickStatScheduled': 'Scheduled today',
+        'home.quickStatNextDose': 'Next dose',
+        'home.quickStatAdherence': 'Adherence',
+        'home.quickStatNoNextDose': 'No time',
+        'home.quickStatPastDay': '—',
+        'home.viewModeToday': 'Today',
+        'home.viewModeWeek': 'Week',
+        'home.viewModeMonth': 'Month',
+        'home.calendarPrevWeekA11y': 'Previous week',
+        'home.calendarNextWeekA11y': 'Next week',
+        'home.cardStatMenuA11y': 'Menu',
+        'home.statCardMenuTitle': 'Soon',
+        'home.statCardMenuMessage': 'Later',
       };
       return translations[key] || key;
     },
@@ -100,12 +113,18 @@ describe('MedicineReminderCalendar', () => {
         onDateChange={mockOnDateChange}
         viewMode="today"
         onViewModeChange={mockOnViewModeChange}
+        quickStats={{
+          scheduled: 3,
+          nextDoseLabel: '02:00h',
+          adherencePct: 80,
+        }}
       />,
       { wrapper: Wrapper }
     );
 
     // Verifica se o dia atual aparece (número do dia)
     expect(getByText('5')).toBeTruthy();
+    expect(getByText('80%')).toBeTruthy();
   });
 
   it('renders view mode tabs', () => {
@@ -147,7 +166,7 @@ describe('MedicineReminderCalendar', () => {
     expect(mockOnViewModeChange).toHaveBeenCalledWith('week');
   });
 
-  it('calls onDateChange when navigating weeks', () => {
+  it('calls onDateChange when another day in the strip is pressed', () => {
     const mockOnDateChange = jest.fn();
     const mockOnViewModeChange = jest.fn();
     const today = new Date('2025-02-05T12:00:00.000Z');
@@ -162,20 +181,22 @@ describe('MedicineReminderCalendar', () => {
       { wrapper: Wrapper }
     );
 
-    fireEvent.press(getByTestId('icon-chevron-back'));
-    fireEvent.press(getByTestId('icon-chevron-forward'));
+    fireEvent.press(getByTestId('calendar-day-2025-02-04'));
 
-    expect(mockOnDateChange).toHaveBeenCalledTimes(2);
+    expect(mockOnDateChange).toHaveBeenCalledTimes(1);
+    expect(mockOnDateChange.mock.calls[0][0].toISOString().split('T')[0]).toBe(
+      '2025-02-04'
+    );
   });
 
-  it('applies theme colors to today and default days', () => {
+  it('applies theme primary to selected pill and white to unselected', () => {
     const mockOnDateChange = jest.fn();
     const mockOnViewModeChange = jest.fn();
-    const today = new Date('2025-02-05T12:00:00.000Z');
+    const selected = new Date('2025-02-04T12:00:00.000Z');
 
     const { getByTestId } = render(
       <MedicineReminderCalendar
-        selectedDate={today}
+        selectedDate={selected}
         onDateChange={mockOnDateChange}
         viewMode="week"
         onViewModeChange={mockOnViewModeChange}
@@ -183,10 +204,10 @@ describe('MedicineReminderCalendar', () => {
       { wrapper: Wrapper }
     );
 
-    const todayItem = getByTestId('calendar-day-2025-02-05');
-    expect(getBackgroundColor(todayItem)).toBe('#000');
+    const selectedPill = getByTestId('calendar-day-2025-02-04');
+    expect(getBackgroundColor(selectedPill)).toBe('#000');
 
-    const nonTodayItem = getByTestId('calendar-day-2025-02-03');
-    expect(getBackgroundColor(nonTodayItem)).toBe('#f5f5f5');
+    const idleItem = getByTestId('calendar-day-2025-02-03');
+    expect(getBackgroundColor(idleItem)).toBe('#FFFFFF');
   });
 });

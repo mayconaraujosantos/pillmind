@@ -17,7 +17,7 @@ export const SimpleInfoScreen: React.FC<SimpleInfoScreenProps> = ({
   const { theme } = useTheme();
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper tabContentCanvas>
       <View style={styles.container}>
         <Text style={[styles.title, { color: theme.colors.text }]}>
           {t(titleKey)}

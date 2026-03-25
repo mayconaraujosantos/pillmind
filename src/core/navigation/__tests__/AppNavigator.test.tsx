@@ -72,19 +72,26 @@ jest.mock('@react-navigation/bottom-tabs', () => {
           navigation: { navigate: (...a: unknown[]) => void };
         }) => Record<string, unknown>;
       }) => {
-        const opts =
-          typeof screenOptions === 'function'
-            ? screenOptions({
-                route: { name: 'HomeTab' },
-                navigation: { navigate: mockTabNavigate },
-              })
-            : {};
-        const header =
-          opts && typeof opts.header === 'function'
-            ? (opts.header as () => React.ReactElement)()
-            : null;
-        return React.createElement(React.Fragment, null, header, children);
+        if (typeof screenOptions === 'function') {
+          screenOptions({
+            route: { name: 'HomeTab' },
+            navigation: { navigate: mockTabNavigate },
+          });
+        }
+        return React.createElement(React.Fragment, null, children);
       },
+      Screen: ({ component: Component }: { component: React.ComponentType }) =>
+        React.createElement(Component),
+    }),
+  };
+});
+
+jest.mock('@react-navigation/native-stack', () => {
+  const React = require('react');
+  return {
+    createNativeStackNavigator: () => ({
+      Navigator: ({ children }: { children: React.ReactNode }) =>
+        React.createElement(React.Fragment, null, children),
       Screen: ({ component: Component }: { component: React.ComponentType }) =>
         React.createElement(Component),
     }),
@@ -121,11 +128,11 @@ jest.mock(
   }
 );
 
-jest.mock('@features/account/presentation/screens/AccountScreen', () => {
+jest.mock('@features/account/navigation/AccountNavigator', () => {
   const React = require('react');
   const RN = require('react-native');
   return {
-    AccountScreen: () =>
+    AccountNavigator: () =>
       React.createElement(
         RN.View,
         { testID: 'account-screen' },
@@ -156,25 +163,6 @@ jest.mock('@features/nearby/presentation/screens/NearbyScreen', () => {
         RN.View,
         { testID: 'nearby-screen' },
         React.createElement(RN.Text, null, 'Nearby Screen')
-      ),
-  };
-});
-
-jest.mock('@shared/components/Header', () => {
-  const React = require('react');
-  const RN = require('react-native');
-  return {
-    Header: ({
-      onProfilePress,
-      userName,
-    }: {
-      onProfilePress?: () => void;
-      userName?: string;
-    }) =>
-      React.createElement(
-        RN.Pressable,
-        { testID: 'header-profile', onPress: onProfilePress },
-        React.createElement(RN.Text, null, userName ?? 'Header')
       ),
   };
 });
@@ -234,13 +222,5 @@ describe('AppNavigator', () => {
     expect(getByText('Account Screen')).toBeTruthy();
     expect(getByText('Parental Screen')).toBeTruthy();
     expect(getByText('Nearby Screen')).toBeTruthy();
-  });
-
-  it('header profile press navigates to AccountTab', () => {
-    const { getByTestId } = renderWithProviders(<AppNavigator />);
-
-    fireEvent.press(getByTestId('header-profile'));
-
-    expect(mockTabNavigate).toHaveBeenCalledWith('AccountTab');
   });
 });

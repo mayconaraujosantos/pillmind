@@ -92,6 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
                 key={userAvatar}
                 source={{ uri: userAvatar }}
                 style={styles.avatarImage}
+                resizeMode="cover"
                 onError={(e) => {
                   logger.warn('Header', 'Avatar image failed to load', {
                     uri: userAvatar,

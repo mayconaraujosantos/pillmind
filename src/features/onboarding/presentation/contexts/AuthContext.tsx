@@ -23,8 +23,9 @@ export interface AuthContextType {
   setProfilePhotoUri: (uri: string | null) => Promise<void>;
   /**
    * Após upload/remoção no backend: persiste usuário.
-   * Use {@code preferDisplayWithLocalUri} após escolher foto no app para exibir o ficheiro local
-   * enquanto a URL remota (MinIO/LAN) pode falhar no {@code Image}.
+   * {@code preferDisplayWithLocalUri}: guarda URI do picker só quando o servidor ainda não tem
+   * {@code pictureUrl} (preview antes da URL remota existir). Com URL remota definida, ignora-se
+   * o caminho local para não reaparecer avatar vazio após reinício (ficheiros temporários).
    */
   applyServerUser: (
     sessionUser: AuthResponse['user'],
@@ -124,9 +125,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       setLocalProfilePhotoUri(null);
       return;
     }
+    const hasRemotePicture =
+      typeof user.pictureUrl === 'string' && user.pictureUrl.trim().length > 0;
+
     let cancelled = false;
     (async () => {
       try {
+        if (hasRemotePicture) {
+          await AsyncStorage.removeItem(profilePhotoStorageKey(user.id));
+          if (!cancelled) {
+            setLocalProfilePhotoUri(null);
+          }
+          return;
+        }
         const uri = await AsyncStorage.getItem(profilePhotoStorageKey(user.id));
         if (!cancelled) {
           setLocalProfilePhotoUri(uri);
@@ -140,7 +151,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     return () => {
       cancelled = true;
     };
-  }, [user?.id]);
+  }, [user?.id, user?.pictureUrl]);
 
   const setProfilePhotoUri = useCallback(
     async (uri: string | null) => {
@@ -160,7 +171,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   const displayPictureUrl = useMemo(() => {
-    const remoteRaw = user?.pictureUrl || undefined;
+    const raw = user?.pictureUrl;
+    const remoteRaw =
+      typeof raw === 'string' && raw.trim().length > 0 ? raw.trim() : undefined;
     const resolvedRemote =
       typeof remoteRaw === 'string' && /^https?:\/\//i.test(remoteRaw)
         ? resolveProfilePictureUrlForDevice(remoteRaw)
@@ -169,10 +182,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       resolvedRemote,
       remoteAvatarCacheNonce
     );
+    const remoteNonEmpty =
+      typeof bustedRemote === 'string' && bustedRemote.trim().length > 0;
+    if (remoteNonEmpty) {
+      return bustedRemote;
+    }
     if (localProfilePhotoUri) {
       return localProfilePhotoUri;
     }
-    return bustedRemote;
+    return undefined;
   }, [localProfilePhotoUri, remoteAvatarCacheNonce, user?.pictureUrl]);
 
   const applyServerUser = useCallback(
@@ -185,7 +203,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       }
       await persistSession(sessionUser, token);
       const key = profilePhotoStorageKey(sessionUser.id);
-      if (options?.preferDisplayWithLocalUri) {
+      const hasRemotePicture =
+        typeof sessionUser.pictureUrl === 'string' &&
+        sessionUser.pictureUrl.trim().length > 0;
+      if (options?.preferDisplayWithLocalUri && !hasRemotePicture) {
         await AsyncStorage.setItem(key, options.preferDisplayWithLocalUri);
         setLocalProfilePhotoUri(options.preferDisplayWithLocalUri);
       } else {

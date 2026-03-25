@@ -105,6 +105,9 @@ describe('AuthService', () => {
           name: 'Backend User',
           email: 'backend@example.com',
           pictureUrl: null,
+          dateOfBirth: null,
+          gender: null,
+          emailVerified: false,
         },
         token: 'backend-token',
       });
@@ -206,6 +209,9 @@ describe('AuthService', () => {
           name: 'Backend SignIn',
           email: 'signin@example.com',
           pictureUrl: 'https://example.com/avatar.png',
+          dateOfBirth: null,
+          gender: null,
+          emailVerified: false,
         },
         token: 'backend-token',
       });
@@ -237,6 +243,9 @@ describe('AuthService', () => {
         name: 'Profile User',
         email: 'profile@example.com',
         pictureUrl: null,
+        dateOfBirth: null,
+        gender: null,
+        emailVerified: false,
       });
     });
 
@@ -257,6 +266,51 @@ describe('AuthService', () => {
       expect(result.success).toBe(false);
       expect(result.error?.message).toBe('Unauthorized');
       expect(result.error?.status).toBe(401);
+    });
+  });
+
+  describe('updateProfile', () => {
+    it('should put profile and map response', async () => {
+      mockApiService.put.mockResolvedValueOnce({
+        success: true,
+        data: {
+          id: 'u1',
+          name: 'Updated',
+          email: 'new@example.com',
+          pictureUrl: null,
+          dateOfBirth: '1990-01-15',
+          gender: 'MALE',
+          emailVerified: true,
+        },
+      });
+
+      const result = await authService.updateProfile('tok-put', {
+        name: 'Updated',
+        email: 'new@example.com',
+        dateOfBirth: '1990-01-15',
+        gender: 'MALE',
+      });
+
+      expect(mockApiService.put).toHaveBeenCalledWith(
+        '/api/profile',
+        {
+          name: 'Updated',
+          email: 'new@example.com',
+          dateOfBirth: '1990-01-15',
+          gender: 'MALE',
+        },
+        { headers: { 'x-access-token': 'tok-put' } }
+      );
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({
+        id: 'u1',
+        name: 'Updated',
+        email: 'new@example.com',
+        pictureUrl: null,
+        dateOfBirth: '1990-01-15',
+        gender: 'MALE',
+        emailVerified: true,
+      });
     });
   });
 
@@ -296,6 +350,9 @@ describe('AuthService', () => {
         name: 'Photo User',
         email: 'photo@example.com',
         pictureUrl: 'https://cdn.example/p.png',
+        dateOfBirth: null,
+        gender: null,
+        emailVerified: false,
       });
     });
 
@@ -368,6 +425,9 @@ describe('AuthService', () => {
         name: 'User',
         email: 'u@u.com',
         pictureUrl: null,
+        dateOfBirth: null,
+        gender: null,
+        emailVerified: false,
       });
     });
 

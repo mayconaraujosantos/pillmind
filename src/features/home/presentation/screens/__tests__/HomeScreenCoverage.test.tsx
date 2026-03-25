@@ -1,26 +1,85 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { HomeScreen } from '../HomeScreen';
 import { ThemeProvider } from '@shared/theme';
 
-// Mock i18n
-jest.mock('@shared/i18n', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
-      const translations: Record<string, string> = {
-        'home.noMedicationsScheduled': 'No medications scheduled',
-        'home.addFirstMedication': 'Add your first medication to get started',
-        'home.addMedication': 'Add Medication',
-        'home.viewAll': 'View All',
-        'home.viewLess': 'View Less',
-        'home.todayLabel': 'Today',
-        'home.dateLabel': 'Date',
-      };
-      return translations[key] || key;
-    },
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({
+    getParent: () => ({ navigate: jest.fn() }),
   }),
 }));
+
+// Mock i18n (referência estável de `t` para useMemo no HomeScreen)
+jest.mock('@shared/i18n', () => {
+  const coverageTranslations: Record<string, string> = {
+    'common.error': 'Error',
+    'common.retry': 'Retry',
+    'common.ok': 'OK',
+    'home.noMedicationsScheduled': 'No medications scheduled',
+    'home.addFirstMedication': 'Add your first medication to get started',
+    'home.addMedication': 'Add Medication',
+    'home.viewAll': 'View All',
+    'home.viewLess': 'View Less',
+    'home.todayLabel': 'Today',
+    'home.dateLabel': 'Date',
+    'home.greetingHi': 'Hello',
+    'home.greetingMorning': 'Good morning',
+    'home.greetingAfternoon': 'Good afternoon',
+    'home.greetingEvening': 'Good evening',
+    'home.heroSubtitle': 'Your overview',
+    'home.notificationBadgeA11y': 'Badge',
+    'home.yourMedications': 'Your Medications',
+    'home.loadingMedications': 'Loading…',
+    'home.refreshingMedications': 'Refreshing…',
+    'account.user': 'User',
+    'account.notificationsComingSoon': 'Soon',
+    'home.notificationsA11y': 'Notifications',
+    'home.openProfileA11y': 'Profile',
+    'home.searchPlaceholder': 'Search reminder',
+    'home.searchPlaceholderDots': 'Search...',
+    'home.quickStatScheduled': 'Scheduled today',
+    'home.quickStatNextDose': 'Next dose',
+    'home.quickStatAdherence': 'Adherence',
+    'home.quickStatNoNextDose': 'No time',
+    'home.quickStatPastDay': '—',
+    'home.hydrationLikeTitle': 'Reminder consistency',
+    'home.thisWeekLabel': 'This week',
+    'home.markAsTaken': 'Mark next as taken',
+    'home.dosesShort': 'Doses',
+    'home.markDoseCta': 'Log dose',
+    'home.addDoseQuickA11y': 'Quick add',
+    'home.cardStatMenuA11y': 'Menu',
+    'home.statCardMenuTitle': 'Soon',
+    'home.statCardMenuMessage': 'Later',
+    'home.dailyTargetTitle': 'Daily target',
+    'home.dailyTargetSubtitle': 'Track doses',
+    'home.viewModeToday': 'Today',
+    'home.viewModeWeek': 'Week',
+    'home.viewModeMonth': 'Month',
+    'home.calendarPrevWeekA11y': 'Previous week',
+    'home.calendarNextWeekA11y': 'Next week',
+    'home.noFixedAlarmTimes': 'No fixed times',
+  };
+
+  const coverageT = (key: string, opts?: Record<string, number | string>) => {
+    if (key === 'home.dailyTargetDoseLine') {
+      const taken = opts?.taken ?? 0;
+      const total = opts?.total ?? 1;
+      return `${taken} of ${total} doses today`;
+    }
+    return coverageTranslations[key] || key;
+  };
+
+  return {
+    useTranslation: () => ({
+      i18n: { language: 'en' },
+      ready: true,
+      t: coverageT,
+    }),
+  };
+});
 
 jest.mock('@features/onboarding', () => ({
   useOnboardingStorage: () => ({
@@ -32,7 +91,8 @@ jest.mock('@features/onboarding/presentation/contexts/AuthContext', () => ({
   useAuthContext: () => ({
     isAuthenticated: true,
     isLoading: false,
-    user: { id: '1', email: 'test@example.com' },
+    user: { id: '1', name: 'Test User', email: 'test@example.com' },
+    displayPictureUrl: undefined,
     token: 'token',
     login: jest.fn(),
     logout: jest.fn(),
@@ -54,25 +114,40 @@ const renderWithTheme = (component: React.ReactElement) => {
 
 describe('HomeScreen - Coverage Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockRefetch.mockClear();
+    mockRefresh.mockClear();
+    mockUseHomeData.mockReset();
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue('automatic');
+    jest.spyOn(Date.prototype, 'getHours').mockReturnValue(10);
+    jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
   });
 
-  it('should render with error state', async () => {
-    mockUseHomeData.mockReturnValue({
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should surface API error via alert', async () => {
+    mockUseHomeData.mockImplementation(() => ({
       medicines: [],
       loading: false,
       refreshing: false,
       error: 'Network error',
       refetch: mockRefetch,
       refresh: mockRefresh,
-    });
+    }));
 
-    const { getByText } = renderWithTheme(<HomeScreen />);
+    renderWithTheme(<HomeScreen />);
 
-    await waitFor(() => {
-      expect(getByText('No medications scheduled')).toBeTruthy();
-    });
+    await waitFor(
+      () => {
+        expect(Alert.alert).toHaveBeenCalledWith(
+          'Error',
+          'Network error',
+          expect.any(Array)
+        );
+      },
+      { timeout: 5000 }
+    );
   });
 
   it('should handle medicines list with view toggle', async () => {
@@ -81,7 +156,9 @@ describe('HomeScreen - Coverage Tests', () => {
       id: `med-${i}`,
       name: `Medicine ${i}`,
       dosage: '1mg',
-      schedule: [],
+      frequency: 'once-a-day',
+      times: [] as string[],
+      startDate: new Date('2024-01-01'),
     }));
 
     mockUseHomeData.mockReturnValue({

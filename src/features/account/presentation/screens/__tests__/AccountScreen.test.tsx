@@ -1,10 +1,18 @@
 import React from 'react';
-import { render, fireEvent, act, waitFor } from '@testing-library/react-native';
-import { Alert } from 'react-native';
+import { render, fireEvent, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AccountScreen } from '../AccountScreen';
 import { ThemeProvider } from '@shared/theme';
 import { AuthProvider } from '@features/onboarding/presentation/contexts/AuthContext';
+
+const mockNavigate = jest.fn();
+
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({
+    navigate: mockNavigate,
+    goBack: jest.fn(),
+  }),
+}));
 
 jest.mock('expo-image-picker', () => ({
   requestMediaLibraryPermissionsAsync: jest.fn(() =>
@@ -70,32 +78,25 @@ jest.mock('@features/onboarding/presentation/hooks/useAuth', () => ({
 }));
 
 jest.mock('@shared/i18n', () => {
-  const translations = {
-    'account.title': 'Profile',
+  const translations: Record<string, string> = {
     'account.user': 'User',
     'account.email': 'usuario@pillmind.com',
+    'account.editProfile': 'Edit profile',
     'account.appearance': 'Appearance',
     'account.settings': 'Settings',
     'account.notifications': 'Notifications',
     'account.privacy': 'Privacy',
     'account.about': 'About',
     'account.debugTheme': '🐛 Debug: View theme detection',
+    'account.addAnotherAccount': 'Add another account',
+    'account.addAccountComingSoon': 'Coming soon',
     'common.logout': 'Logout',
     'common.cancel': 'Cancel',
     'common.error': 'Error',
-    'account.changePhoto': 'Change photo',
-    'account.changePhotoTitle': 'Profile photo',
-    'account.chooseFromLibrary': 'Choose from library',
-    'account.takePhoto': 'Take photo',
-    'account.removePhoto': 'Remove photo',
-    'account.photoPermissionDenied': 'Permission denied',
-    'account.photoPickerError': 'Picker error',
-    'account.uploadingPhoto': 'Uploading…',
-    'account.uploadPhotoFailed': 'Upload failed',
   };
   return {
     useTranslation: () => ({
-      t: (key: keyof typeof translations) => translations[key] || key,
+      t: (key: string) => translations[key] || key,
       i18n: { language: 'en' },
     }),
   };
@@ -107,13 +108,6 @@ const renderWithLocalProviders = (component: React.ReactElement) => {
       <AuthProvider>{component}</AuthProvider>
     </ThemeProvider>
   );
-};
-
-const mockedAuthService = jest.requireMock(
-  '@features/onboarding/domain/services/auth.service'
-).authService as {
-  uploadProfilePicture: jest.Mock;
-  deleteProfilePicture: jest.Mock;
 };
 
 describe('AccountScreen', () => {
@@ -136,44 +130,33 @@ describe('AccountScreen', () => {
     });
   });
 
-  it('should render user profile section', async () => {
-    const { findByText, getByText } = renderWithLocalProviders(
+  it('should render profile row with user and email', async () => {
+    const { findByTestId, getByText } = renderWithLocalProviders(
       <AccountScreen />
     );
 
-    // Aguardar o AuthContext carregar e o componente renderizar
-    const profileTitle = await findByText('Profile', {}, { timeout: 3000 });
-
-    expect(profileTitle).toBeTruthy();
+    await findByTestId('account-profile-row', {}, { timeout: 3000 });
     expect(getByText('User')).toBeTruthy();
     expect(getByText('usuario@pillmind.com')).toBeTruthy();
   });
 
   it('should render theme selector section', async () => {
-    const { getAllByText, findByText, getByTestId } = renderWithLocalProviders(
+    const { findByTestId, getByTestId } = renderWithLocalProviders(
       <AccountScreen />
     );
 
-    // Aguardar renderização
-    await findByText('Profile', {}, { timeout: 3000 });
-
-    // Há dois elementos "Appearance": título da seção e título do ThemeSelector
-    // O ThemeSelector usa "Aparência" hardcoded, mas o AccountScreen usa t('account.appearance') que é "Appearance"
-    expect(getAllByText('Appearance').length).toBeGreaterThan(0);
-
-    // O ThemeSelector agora usa i18n, então vamos verificar se os testIDs estão presentes
+    await findByTestId('account-profile-row', {}, { timeout: 3000 });
     expect(getByTestId('theme-option-automatic')).toBeTruthy();
     expect(getByTestId('theme-option-light')).toBeTruthy();
     expect(getByTestId('theme-option-dark')).toBeTruthy();
   });
 
   it('should render settings options', async () => {
-    const { getByText, findByText } = renderWithLocalProviders(
+    const { getByText, findByTestId } = renderWithLocalProviders(
       <AccountScreen />
     );
 
-    // Aguardar renderização
-    await findByText('Profile', {}, { timeout: 3000 });
+    await findByTestId('account-profile-row', {}, { timeout: 3000 });
 
     expect(getByText('Settings')).toBeTruthy();
     expect(getByText('Notifications')).toBeTruthy();
@@ -182,10 +165,11 @@ describe('AccountScreen', () => {
   });
 
   it('should render logout button', async () => {
-    const { findByText } = renderWithLocalProviders(<AccountScreen />);
+    const { findByText, findByTestId } = renderWithLocalProviders(
+      <AccountScreen />
+    );
 
-    // Aguardar renderização
-    await findByText('Profile', {}, { timeout: 3000 });
+    await findByTestId('account-profile-row', {}, { timeout: 3000 });
 
     const logoutButton = await findByText('Logout', {}, { timeout: 3000 });
     expect(logoutButton).toBeTruthy();
@@ -196,10 +180,11 @@ describe('AccountScreen', () => {
     const alertMock = jest.fn();
     globalThis.alert = alertMock;
 
-    const { findByText } = renderWithLocalProviders(<AccountScreen />);
+    const { findByText, findByTestId } = renderWithLocalProviders(
+      <AccountScreen />
+    );
 
-    // Aguardar renderização
-    await findByText('Profile', {}, { timeout: 3000 });
+    await findByTestId('account-profile-row', {}, { timeout: 3000 });
 
     const debugButton = await findByText(
       '🐛 Debug: View theme detection',
@@ -216,51 +201,15 @@ describe('AccountScreen', () => {
     globalThis.alert = originalAlert ?? (() => undefined);
   });
 
-  it('picker → upload chama API e persiste URI local para exibição (preferDisplayWithLocalUri)', async () => {
-    const pickedUri = 'file:///cache/profile-pick.jpg';
-    const expoImagePicker = jest.requireMock('expo-image-picker') as {
-      launchImageLibraryAsync: jest.Mock;
-    };
-    expoImagePicker.launchImageLibraryAsync.mockResolvedValueOnce({
-      canceled: false,
-      assets: [{ uri: pickedUri, mimeType: 'image/jpeg' }],
-    });
+  it('navigates to EditProfile when profile row is pressed', async () => {
+    const { findByTestId } = renderWithLocalProviders(<AccountScreen />);
 
-    const alertSpy = jest
-      .spyOn(Alert, 'alert')
-      .mockImplementation((_title, _message, buttons) => {
-        const choose = buttons?.find((b) => b.text === 'Choose from library');
-        if (choose && typeof choose.onPress === 'function') {
-          choose.onPress();
-        }
-      });
-
-    const { findByText, findByTestId } = renderWithLocalProviders(
-      <AccountScreen />
-    );
-
-    await findByText('Profile', {}, { timeout: 3000 });
+    await findByTestId('account-profile-row', {}, { timeout: 3000 });
 
     await act(async () => {
-      fireEvent.press(await findByTestId('account-change-photo-button'));
+      fireEvent.press(await findByTestId('account-profile-row'));
     });
 
-    await waitFor(() => {
-      expect(mockedAuthService.uploadProfilePicture).toHaveBeenCalledWith(
-        pickedUri,
-        'test-token',
-        'image/jpeg',
-        'profile.jpg'
-      );
-    });
-
-    await waitFor(() => {
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-        '@pillmind_profile_photo_1',
-        pickedUri
-      );
-    });
-
-    alertSpy.mockRestore();
+    expect(mockNavigate).toHaveBeenCalledWith('EditProfile');
   });
 });

@@ -1,6 +1,13 @@
 import React from 'react';
 import { Alert, Appearance } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+  }),
+}));
+
 import { AccountScreen } from '../AccountScreen';
 
 const mockLogout = jest.fn();
@@ -82,8 +89,9 @@ describe('AccountScreen logout', () => {
     });
   });
 
-  it('shows alert when logout fails', async () => {
-    mockLogout.mockReturnValue({ success: false, error: 'fail' });
+  it('shows alert when authContext.logout throws', async () => {
+    mockLogout.mockReturnValue({ success: true });
+    mockAuthLogout.mockRejectedValueOnce(new Error('logout failed'));
 
     const { getByText } = render(<AccountScreen />);
 
@@ -100,7 +108,7 @@ describe('AccountScreen logout', () => {
 
     expect(Alert.alert).toHaveBeenCalledWith(
       'common.error',
-      'account.logoutFailed'
+      'account.logoutError'
     );
   });
 });

@@ -34,4 +34,10 @@ export const config = {
   development: {
     logLevel: process.env.EXPO_PUBLIC_LOG_LEVEL || 'info',
   },
+  /** Links legais (opcional). Usados em Perfil → Privacidade / Sobre. */
+  legal: {
+    privacyPolicyUrl: process.env.EXPO_PUBLIC_PRIVACY_POLICY_URL?.trim() || '',
+    termsUrl: process.env.EXPO_PUBLIC_TERMS_URL?.trim() || '',
+    websiteUrl: process.env.EXPO_PUBLIC_WEBSITE_URL?.trim() || '',
+  },
 };

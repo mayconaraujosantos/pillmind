@@ -238,6 +238,9 @@ class OAuthService {
             name: flat.name,
             email: flat.email,
             pictureUrl,
+            dateOfBirth: null,
+            gender: null,
+            emailVerified: false,
           },
           token: flat.accessToken,
         };

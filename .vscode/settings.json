@@ -45,7 +45,7 @@
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "never",
-    "source.organizeImports": true
+    "source.organizeImports": "explicit"
   },
   "explorer.sortOrder": "type",
   "explorer.compactFolders": false,
@@ -91,5 +91,6 @@
   "files.autoSave": "afterDelay",
   "files.hotExit": "onExitAndWindowClose",
   "java.compile.nullAnalysis.mode": "automatic",
-  "sonarlint.pathToNodeExecutable": "C:\\nvm4w\\nodejs\\node.exe"
+  "sonarlint.pathToNodeExecutable": "C:\\nvm4w\\nodejs\\node.exe",
+  "editor.fontSize": 16
 }

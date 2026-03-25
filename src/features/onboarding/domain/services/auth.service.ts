@@ -2,6 +2,7 @@ import { ApiResponse, apiService } from '@core/services/api.service';
 import { logger } from '@shared/utils/logger';
 import {
   AuthResponse,
+  ProfileGender,
   SignInRequest,
   SignUpRequest,
 } from '../models/auth.model';
@@ -20,9 +21,28 @@ type BackendProfilePayload = {
   name: string;
   email: string;
   pictureUrl?: string | null;
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  emailVerified?: boolean;
 };
 
 class AuthService {
+  private normalizeGender(raw: unknown): ProfileGender | null {
+    if (raw == null || raw === '') {
+      return null;
+    }
+    const s = String(raw).toUpperCase();
+    if (
+      s === 'MALE' ||
+      s === 'FEMALE' ||
+      s === 'OTHER' ||
+      s === 'PREFER_NOT_TO_SAY'
+    ) {
+      return s as ProfileGender;
+    }
+    return null;
+  }
+
   /**
    * Aceita camelCase ou snake_case (ex.: picture_url) por compatibilidade com serialização JSON.
    */
@@ -48,7 +68,29 @@ class AuthService {
         : typeof pic === 'string'
         ? pic
         : String(pic);
-    return { id, name, email, pictureUrl };
+
+    const dobRaw = r.dateOfBirth ?? r.date_of_birth;
+    const dateOfBirth =
+      dobRaw == null || dobRaw === ''
+        ? null
+        : typeof dobRaw === 'string'
+        ? dobRaw
+        : String(dobRaw);
+
+    const genderNorm = this.normalizeGender(r.gender);
+
+    const ev = r.emailVerified ?? r.email_verified;
+    const emailVerified = ev === true || ev === 'true';
+
+    return {
+      id,
+      name,
+      email,
+      pictureUrl,
+      dateOfBirth,
+      gender: genderNorm,
+      emailVerified,
+    };
   }
 
   private mapToSessionUser(data: BackendProfilePayload): AuthResponse['user'] {
@@ -57,6 +99,9 @@ class AuthService {
       name: data.name,
       email: data.email,
       pictureUrl: data.pictureUrl ?? null,
+      dateOfBirth: data.dateOfBirth ?? null,
+      gender: this.normalizeGender(data.gender),
+      emailVerified: Boolean(data.emailVerified),
     };
   }
 
@@ -82,6 +127,9 @@ class AuthService {
         name: backend.name,
         email: backend.email,
         pictureUrl: pic == null || pic === '' ? null : String(pic),
+        dateOfBirth: null,
+        gender: null,
+        emailVerified: false,
       },
       token: backend.accessToken,
     };
@@ -149,18 +197,14 @@ class AuthService {
       hasToken: !!token,
     });
 
-    type BackendProfile = {
-      id: string;
-      name: string;
-      email: string;
-      pictureUrl?: string | null;
-    };
-
-    const response = await apiService.get<BackendProfile>('/api/profile', {
-      headers: {
-        'x-access-token': token,
-      },
-    });
+    const response = await apiService.get<BackendProfilePayload>(
+      '/api/profile',
+      {
+        headers: {
+          'x-access-token': token,
+        },
+      }
+    );
 
     if (response.success && response.data) {
       const coerced = this.coerceProfilePayload(response.data);
@@ -183,6 +227,70 @@ class AuthService {
     logger.warn('AuthService', '⚠️ Load profile failed', {
       error: response.error?.message,
       code: response.error?.code,
+      status: response.error?.status,
+    });
+
+    return response as ApiResponse<AuthResponse['user']>;
+  }
+
+  /**
+   * Atualiza perfil ({@code PUT /api/profile}). Envia sempre {@code name} e {@code email}
+   * para satisfazer a validação do backend; opcionais só se preenchidos.
+   */
+  async updateProfile(
+    token: string,
+    payload: {
+      name: string;
+      email: string;
+      dateOfBirth?: string | null;
+      gender?: ProfileGender | null;
+    }
+  ): Promise<ApiResponse<AuthResponse['user']>> {
+    logger.info('AuthService', '✏️ Update profile started');
+
+    const body: Record<string, unknown> = {
+      name: payload.name.trim(),
+      email: payload.email.trim(),
+    };
+    const dob = payload.dateOfBirth?.trim();
+    if (dob) {
+      body.dateOfBirth = dob;
+    }
+    if (payload.gender) {
+      body.gender = payload.gender;
+    }
+
+    const response = await apiService.put<BackendProfilePayload>(
+      '/api/profile',
+      body,
+      {
+        headers: {
+          'x-access-token': token,
+        },
+      }
+    );
+
+    if (response.success && response.data) {
+      const coerced = this.coerceProfilePayload(response.data);
+      if (!coerced) {
+        logger.warn('AuthService', '⚠️ Update profile OK mas payload inválido');
+        return {
+          success: false,
+          error: {
+            message: 'Invalid profile response',
+            code: 'INVALID_PAYLOAD',
+          },
+        };
+      }
+      logger.info('AuthService', '✅ Profile updated');
+      return {
+        ...response,
+        data: this.mapToSessionUser(coerced),
+      };
+    }
+
+    logger.warn('AuthService', '⚠️ Update profile failed', {
+      error: response.error?.message,
       status: response.error?.status,
     });
 

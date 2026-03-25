@@ -28,6 +28,15 @@ describe('config', () => {
     });
   });
 
+  describe('legal configuration', () => {
+    it('should expose optional URL strings', () => {
+      expect(config.legal).toBeDefined();
+      expect(typeof config.legal.privacyPolicyUrl).toBe('string');
+      expect(typeof config.legal.termsUrl).toBe('string');
+      expect(typeof config.legal.websiteUrl).toBe('string');
+    });
+  });
+
   describe('app configuration', () => {
     it('should have name and version', () => {
       expect(config.app.name).toBe('PillMind');

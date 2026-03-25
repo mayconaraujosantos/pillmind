@@ -43,4 +43,20 @@ describe('resolveProfilePictureUrlForDevice', () => {
       )
     ).toBe('http://192.168.1.7:9000/pillmind/a.png?v=1');
   });
+
+  it('rewrites docker service hostname minio', () => {
+    expect(
+      resolveProfilePictureUrlForDevice(
+        'http://minio:9000/pillmind/profiles/u1/abc.jpg'
+      )
+    ).toBe('http://192.168.1.7:9000/pillmind/profiles/u1/abc.jpg');
+  });
+
+  it('trims whitespace before parsing', () => {
+    expect(
+      resolveProfilePictureUrlForDevice(
+        '  http://127.0.0.1:9000/pillmind/x.png  '
+      )
+    ).toBe('http://192.168.1.7:9000/pillmind/x.png');
+  });
 });

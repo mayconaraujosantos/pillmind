@@ -450,7 +450,7 @@ describe('AuthContext', () => {
     });
   });
 
-  it('applyServerUser preferDisplayWithLocalUri shows local file over remote URL', async () => {
+  it('applyServerUser with preferDisplayWithLocalUri uses remote URL when server has pictureUrl', async () => {
     const { result } = renderHook(() => useAuthContext(), { wrapper });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -482,8 +482,44 @@ describe('AuthContext', () => {
     });
 
     await waitFor(() => {
+      expect(result.current.displayPictureUrl).toBe(
+        'https://minio/bucket/server.png'
+      );
+    });
+    expect(AsyncStorage.setItem).not.toHaveBeenCalledWith(
+      '@pillmind_profile_photo_11',
+      localUri
+    );
+  });
+
+  it('applyServerUser with preferDisplayWithLocalUri persists local path when server has no pictureUrl', async () => {
+    const { result } = renderHook(() => useAuthContext(), { wrapper });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.login({
+        user: { id: '12', name: 'Twelve', email: '12@12.com' },
+        token: 't12',
+      });
+    });
+
+    const localUri = 'file:///cache/pending.jpg';
+
+    await act(async () => {
+      await result.current.applyServerUser(
+        { id: '12', name: 'Twelve', email: '12@12.com' },
+        { preferDisplayWithLocalUri: localUri }
+      );
+    });
+
+    await waitFor(() => {
       expect(result.current.displayPictureUrl).toBe(localUri);
     });
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      '@pillmind_profile_photo_12',
+      localUri
+    );
   });
 
   it('returns error when signInWithGoogle throws', async () => {

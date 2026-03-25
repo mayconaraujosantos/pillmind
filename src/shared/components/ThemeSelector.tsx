@@ -9,9 +9,19 @@ import {
 import { useTheme, ThemeMode } from '@shared/theme';
 import { useTranslation } from '@shared/i18n';
 
-export const ThemeSelector: React.FC = () => {
+type ThemeSelectorProps = {
+  /** Opções com fundo inseto (útil dentro de cartões {@code surface}). */
+  nestedInCard?: boolean;
+};
+
+export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
+  nestedInCard = false,
+}) => {
   const { theme, themeMode, setThemeMode } = useTheme();
   const { t } = useTranslation();
+  const optionBg = nestedInCard
+    ? theme.colors.background
+    : theme.colors.surface;
 
   const THEME_OPTIONS: Array<{
     value: ThemeMode;
@@ -36,67 +46,126 @@ export const ThemeSelector: React.FC = () => {
   ];
 
   return (
-    <View style={styles.container}>
-      <Text
-        style={[styles.title, { color: theme.colors.text }]}
-        testID="theme-selector-title"
-      >
-        {t('account.appearance')}
-      </Text>
+    <View style={[styles.container, nestedInCard && styles.containerNested]}>
+      {!nestedInCard ? (
+        <Text
+          style={[styles.title, { color: theme.colors.text }]}
+          testID="theme-selector-title"
+        >
+          {t('account.appearance')}
+        </Text>
+      ) : null}
 
-      <ScrollView style={styles.optionsContainer}>
-        {THEME_OPTIONS.map((option) => (
-          <TouchableOpacity
-            key={option.value}
-            style={[
-              styles.option,
-              {
-                backgroundColor: theme.colors.surface,
-                borderColor: theme.colors.border,
-              },
-              themeMode === option.value && {
-                borderColor: theme.colors.primary,
-                borderWidth: 2,
-              },
-            ]}
-            onPress={() => setThemeMode(option.value)}
-            activeOpacity={0.7}
-            testID={`theme-option-${option.value}`}
-          >
-            <View style={styles.optionContent}>
-              <Text
-                style={[
-                  styles.optionLabel,
-                  { color: theme.colors.text },
-                  themeMode === option.value && styles.optionLabelSelected,
-                ]}
-              >
-                {option.label}
-              </Text>
-              <Text
-                style={[
-                  styles.optionDescription,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                {option.description}
-              </Text>
-            </View>
-
-            {themeMode === option.value && (
-              <View
-                style={[
-                  styles.checkmark,
-                  { backgroundColor: theme.colors.primary },
-                ]}
-                testID={`theme-checkmark-${option.value}`}
-              >
-                <Text style={styles.checkmarkText}>✓</Text>
+      {nestedInCard ? (
+        <View style={styles.optionsContainer}>
+          {THEME_OPTIONS.map((option) => (
+            <TouchableOpacity
+              key={option.value}
+              style={[
+                styles.option,
+                styles.optionNested,
+                {
+                  backgroundColor: optionBg,
+                  borderColor: theme.colors.border,
+                },
+                themeMode === option.value && {
+                  borderColor: theme.colors.primary,
+                  borderWidth: 2,
+                },
+              ]}
+              onPress={() => setThemeMode(option.value)}
+              activeOpacity={0.7}
+              testID={`theme-option-${option.value}`}
+            >
+              <View style={styles.optionContent}>
+                <Text
+                  style={[
+                    styles.optionLabel,
+                    { color: theme.colors.text },
+                    themeMode === option.value && styles.optionLabelSelected,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+                <Text
+                  style={[
+                    styles.optionDescription,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {option.description}
+                </Text>
               </View>
-            )}
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+
+              {themeMode === option.value && (
+                <View
+                  style={[
+                    styles.checkmark,
+                    { backgroundColor: theme.colors.primary },
+                  ]}
+                  testID={`theme-checkmark-${option.value}`}
+                >
+                  <Text style={styles.checkmarkText}>✓</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+      ) : (
+        <ScrollView style={styles.optionsContainer}>
+          {THEME_OPTIONS.map((option) => (
+            <TouchableOpacity
+              key={option.value}
+              style={[
+                styles.option,
+                {
+                  backgroundColor: optionBg,
+                  borderColor: theme.colors.border,
+                },
+                themeMode === option.value && {
+                  borderColor: theme.colors.primary,
+                  borderWidth: 2,
+                },
+              ]}
+              onPress={() => setThemeMode(option.value)}
+              activeOpacity={0.7}
+              testID={`theme-option-${option.value}`}
+            >
+              <View style={styles.optionContent}>
+                <Text
+                  style={[
+                    styles.optionLabel,
+                    { color: theme.colors.text },
+                    themeMode === option.value && styles.optionLabelSelected,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+                <Text
+                  style={[
+                    styles.optionDescription,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {option.description}
+                </Text>
+              </View>
+
+              {themeMode === option.value && (
+                <View
+                  style={[
+                    styles.checkmark,
+                    { backgroundColor: theme.colors.primary },
+                  ]}
+                  testID={`theme-checkmark-${option.value}`}
+                >
+                  <Text style={styles.checkmarkText}>✓</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
     </View>
   );
 };
@@ -104,6 +173,9 @@ export const ThemeSelector: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  containerNested: {
+    flexGrow: 0,
   },
   title: {
     fontSize: 24,
@@ -121,6 +193,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     marginBottom: 12,
+  },
+  optionNested: {
+    marginBottom: 10,
+    borderRadius: 14,
+    paddingVertical: 14,
   },
   optionContent: {
     flex: 1,

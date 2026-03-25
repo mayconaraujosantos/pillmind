@@ -14,3 +14,20 @@ export type TabParamList = {
   ParentalTab: undefined;
   NearbyTab: undefined;
 };
+
+/** Stack dentro da tab Home (ecrãs com header nativo + voltar). */
+export type HomeTabParamList = {
+  HomeMain: undefined;
+};
+
+export type AppointmentsTabParamList = {
+  AppointmentsMain: undefined;
+};
+
+export type ParentalTabParamList = {
+  ParentalMain: undefined;
+};
+
+export type NearbyTabParamList = {
+  NearbyMain: undefined;
+};

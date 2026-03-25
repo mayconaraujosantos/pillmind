@@ -9,49 +9,79 @@ import {
   Alert,
   ActivityIndicator,
   Image,
-  type AlertButton,
+  Platform,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeSelector } from '@shared/components';
 import { useTheme } from '@shared/theme';
 import { useTranslation } from '@shared/i18n';
 import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
 import { useAuth } from '@features/onboarding/presentation/hooks/useAuth';
-import { authService } from '@features/onboarding/domain/services/auth.service';
 import { logger } from '@shared/utils/logger';
-
-const pickerOptions: ImagePicker.ImagePickerOptions = {
-  mediaTypes: ['images'],
-  allowsEditing: true,
-  aspect: [1, 1],
-  quality: 0.85,
-};
+import type { AccountStackParamList } from '@features/account/navigation/types';
 
 export const AccountScreen: React.FC = () => {
   const { theme, isDark, themeMode } = useTheme();
   const { t } = useTranslation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<AccountStackParamList>>();
   const authContext = useAuthContext();
   const { logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = React.useState(false);
 
   const displayPictureUrl = authContext.displayPictureUrl;
 
-  const settingsOptions = [
+  const settingsOptions: {
+    key: string;
+    label: string;
+    icon: React.ComponentProps<typeof Ionicons>['name'];
+    onPress: () => void;
+  }[] = [
     {
       key: 'notifications',
       label: t('account.notifications'),
+      icon: 'notifications-outline',
+      onPress: () => navigation.navigate('NotificationsSettings'),
     },
     {
       key: 'privacy',
       label: t('account.privacy'),
+      icon: 'shield-checkmark-outline',
+      onPress: () => navigation.navigate('Privacy'),
     },
     {
       key: 'about',
       label: t('account.about'),
+      icon: 'information-circle-outline',
+      onPress: () => navigation.navigate('About'),
     },
   ];
+
+  const pageBackground = isDark ? theme.colors.background : '#F8F8F8';
+
+  const cardStyle = React.useMemo(
+    () => ({
+      backgroundColor: isDark ? theme.colors.surface : '#FFFFFF',
+      borderRadius: 22,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: isDark ? 0.25 : 0.04,
+          shadowRadius: 10,
+        },
+        android: {
+          elevation: 1,
+        },
+        default: {},
+      }),
+    }),
+    [isDark, theme.colors.surface]
+  );
 
   const handleDebugTheme = () => {
     const systemTheme = Appearance.getColorScheme();
@@ -62,163 +92,14 @@ export const AccountScreen: React.FC = () => {
     alert(`Sistema: ${systemTheme}\nModo: ${themeMode}\nisDark: ${isDark}`);
   };
 
-  const uploadPickedAsset = React.useCallback(
-    async (asset: ImagePicker.ImagePickerAsset) => {
-      const uri = asset.uri;
-      const mimeType = asset.mimeType ?? 'image/jpeg';
-      let ext = 'jpg';
-      if (mimeType === 'image/png') {
-        ext = 'png';
-      } else if (mimeType === 'image/webp') {
-        ext = 'webp';
-      }
-      const token = authContext.token;
-      if (!token) {
-        return;
-      }
-      setUploadingPhoto(true);
-      await authContext.setProfilePhotoUri(uri);
-      try {
-        const res = await authService.uploadProfilePicture(
-          uri,
-          token,
-          mimeType,
-          `profile.${ext}`
-        );
-        if (res.success && res.data) {
-          await authContext.applyServerUser(res.data, {
-            preferDisplayWithLocalUri: uri,
-          });
-        } else {
-          await authContext.setProfilePhotoUri(null);
-          Alert.alert(
-            t('common.error'),
-            res.error?.message || t('account.uploadPhotoFailed')
-          );
-        }
-      } catch (err) {
-        await authContext.setProfilePhotoUri(null);
-        logger.error(
-          'AccountScreen',
-          'Profile picture upload threw',
-          { error: err instanceof Error ? err.message : String(err) },
-          err instanceof Error ? err : undefined
-        );
-        Alert.alert(t('common.error'), t('account.uploadPhotoFailed'));
-      } finally {
-        setUploadingPhoto(false);
-      }
-    },
-    [authContext, t]
-  );
+  const handleAddAccountPress = () => {
+    Alert.alert(
+      t('account.addAnotherAccount'),
+      t('account.addAccountComingSoon')
+    );
+  };
 
-  const pickFromLibrary = React.useCallback(async () => {
-    if (!authContext.user?.id) {
-      return;
-    }
-    try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(t('common.error'), t('account.photoPermissionDenied'));
-        return;
-      }
-      const result = await ImagePicker.launchImageLibraryAsync(pickerOptions);
-      if (!result.canceled && result.assets[0]) {
-        await uploadPickedAsset(result.assets[0]);
-      }
-    } catch (err) {
-      logger.error(
-        'AccountScreen',
-        'Photo library error',
-        { error: err instanceof Error ? err.message : String(err) },
-        err instanceof Error ? err : undefined
-      );
-      Alert.alert(t('common.error'), t('account.photoPickerError'));
-    }
-  }, [authContext.user?.id, t, uploadPickedAsset]);
-
-  const takePhoto = React.useCallback(async () => {
-    if (!authContext.user?.id) {
-      return;
-    }
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(t('common.error'), t('account.photoPermissionDenied'));
-        return;
-      }
-      const result = await ImagePicker.launchCameraAsync(pickerOptions);
-      if (!result.canceled && result.assets[0]) {
-        await uploadPickedAsset(result.assets[0]);
-      }
-    } catch (err) {
-      logger.error(
-        'AccountScreen',
-        'Camera error',
-        { error: err instanceof Error ? err.message : String(err) },
-        err instanceof Error ? err : undefined
-      );
-      Alert.alert(t('common.error'), t('account.photoPickerError'));
-    }
-  }, [authContext.user?.id, t, uploadPickedAsset]);
-
-  const removePhoto = React.useCallback(async () => {
-    const hasServerPicture =
-      typeof authContext.user?.pictureUrl === 'string' &&
-      authContext.user.pictureUrl.length > 0;
-    if (hasServerPicture && authContext.token) {
-      setUploadingPhoto(true);
-      try {
-        const res = await authService.deleteProfilePicture(authContext.token);
-        if (res.success && res.data) {
-          await authContext.applyServerUser(res.data);
-        } else {
-          Alert.alert(
-            t('common.error'),
-            res.error?.message || t('account.uploadPhotoFailed')
-          );
-        }
-      } finally {
-        setUploadingPhoto(false);
-      }
-    } else {
-      await authContext.setProfilePhotoUri(null);
-    }
-  }, [authContext, t]);
-
-  const openPhotoOptions = React.useCallback(() => {
-    if (!authContext.user?.id) {
-      return;
-    }
-    const buttons: AlertButton[] = [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('account.chooseFromLibrary'),
-        onPress: () => {
-          void pickFromLibrary();
-        },
-      },
-      {
-        text: t('account.takePhoto'),
-        onPress: () => {
-          void takePhoto();
-        },
-      },
-    ];
-    if (displayPictureUrl) {
-      buttons.push({
-        text: t('account.removePhoto'),
-        style: 'destructive',
-        onPress: () => {
-          void removePhoto();
-        },
-      });
-    }
-    Alert.alert(t('account.changePhotoTitle'), undefined, buttons);
-  }, [displayPictureUrl, pickFromLibrary, takePhoto, removePhoto, t]);
-
-  const handleLogout = async () => {
+  const handleLogout = () => {
     logger.info('AccountScreen', '📤 Logout button pressed');
     Alert.alert(
       t('common.logout'),
@@ -231,38 +112,32 @@ export const AccountScreen: React.FC = () => {
         },
         {
           text: t('common.logout') || 'Logout',
-          onPress: async () => {
-            setIsLoggingOut(true);
-            try {
-              logger.info('AccountScreen', '🚪 Initiating logout');
-              const result = logout();
-              if (result.success) {
+          onPress: () => {
+            void (async () => {
+              setIsLoggingOut(true);
+              try {
+                logger.info('AccountScreen', '🚪 Initiating logout');
+                logout();
                 await authContext.logout();
                 logger.info(
                   'AccountScreen',
                   '✅ Logout completed - navigating to login'
                 );
-              } else {
-                logger.warn('AccountScreen', '⚠️ Logout failed', result.error);
+              } catch (err) {
+                logger.error(
+                  'AccountScreen',
+                  '❌ Logout error',
+                  { error: err instanceof Error ? err.message : String(err) },
+                  err instanceof Error ? err : undefined
+                );
                 Alert.alert(
                   t('common.error') || 'Error',
-                  t('account.logoutFailed') || 'Failed to logout'
+                  t('account.logoutError') || 'An error occurred during logout'
                 );
+              } finally {
+                setIsLoggingOut(false);
               }
-            } catch (err) {
-              logger.error(
-                'AccountScreen',
-                '❌ Logout error',
-                { error: err instanceof Error ? err.message : String(err) },
-                err instanceof Error ? err : undefined
-              );
-              Alert.alert(
-                t('common.error') || 'Error',
-                t('account.logoutError') || 'An error occurred during logout'
-              );
-            } finally {
-              setIsLoggingOut(false);
-            }
+            })();
           },
           style: 'destructive',
         },
@@ -274,151 +149,248 @@ export const AccountScreen: React.FC = () => {
     authContext.user?.name?.trim()?.charAt(0) || t('account.user').charAt(0)
   ).toUpperCase();
 
-  return (
-    <View
-      style={[styles.wrapper, { backgroundColor: theme.colors.background }]}
-    >
-      <Text style={[styles.screenTitle, { color: theme.colors.text }]}>
-        {t('account.title')}
-      </Text>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <View
-          style={[styles.section, { backgroundColor: theme.colors.surface }]}
-        >
-          <View style={styles.avatarBlock}>
-            <TouchableOpacity
-              style={styles.avatarTouchable}
-              onPress={openPhotoOptions}
-              activeOpacity={0.85}
-              disabled={!authContext.user?.id || uploadingPhoto}
-              testID="account-change-photo-button"
-              accessibilityRole="button"
-              accessibilityLabel={t('account.changePhoto')}
-            >
-              <View
-                style={[
-                  styles.avatar,
-                  { backgroundColor: theme.colors.primary },
-                ]}
-              >
-                {displayPictureUrl ? (
-                  <Image
-                    key={displayPictureUrl}
-                    source={{ uri: displayPictureUrl }}
-                    style={styles.avatarImage}
-                    resizeMode="cover"
-                    accessibilityIgnoresInvertColors
-                    onError={(e) => {
-                      logger.warn(
-                        'AccountScreen',
-                        'Profile image failed to load',
-                        {
-                          uri: displayPictureUrl,
-                          error: e.nativeEvent?.error,
-                        }
-                      );
-                    }}
-                  />
-                ) : (
-                  <Text style={styles.avatarText}>{initial}</Text>
-                )}
-              </View>
-              <View
-                style={[
-                  styles.avatarEditBadge,
-                  { backgroundColor: theme.colors.primary },
-                ]}
-              >
-                {uploadingPhoto ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <Ionicons name="camera" size={16} color="#FFFFFF" />
-                )}
-              </View>
-            </TouchableOpacity>
-            <Text
-              style={[styles.changePhotoHint, { color: theme.colors.primary }]}
-            >
-              {uploadingPhoto
-                ? t('account.uploadingPhoto')
-                : t('account.changePhoto')}
-            </Text>
-          </View>
-          <Text style={[styles.userName, { color: theme.colors.text }]}>
-            {authContext.user?.name || t('account.user') || 'User'}
-          </Text>
-          <Text
-            style={[styles.userEmail, { color: theme.colors.textSecondary }]}
-          >
-            {authContext.user?.email ||
-              t('account.email') ||
-              'email@example.com'}
-          </Text>
-        </View>
+  const rowDivider = {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+  };
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            {t('account.appearance')}
-          </Text>
-          <ThemeSelector />
+  return (
+    <View style={[styles.wrapper, { backgroundColor: pageBackground }]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={[styles.card, cardStyle]}>
+          <TouchableOpacity
+            style={styles.accountRow}
+            onPress={() => navigation.navigate('EditProfile')}
+            activeOpacity={0.65}
+            disabled={!authContext.user?.id}
+            testID="account-profile-row"
+            accessibilityRole="button"
+            accessibilityLabel={t('account.editProfile')}
+          >
+            <View
+              style={[
+                styles.avatarSmall,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            >
+              {displayPictureUrl ? (
+                <Image
+                  key={displayPictureUrl}
+                  source={{ uri: displayPictureUrl }}
+                  style={styles.avatarSmallImage}
+                  resizeMode="cover"
+                  accessibilityIgnoresInvertColors
+                  onError={(e) => {
+                    logger.warn(
+                      'AccountScreen',
+                      'Profile image failed to load',
+                      {
+                        uri: displayPictureUrl,
+                        error: e.nativeEvent?.error,
+                      }
+                    );
+                  }}
+                />
+              ) : (
+                <Text style={styles.avatarSmallText}>{initial}</Text>
+              )}
+            </View>
+            <View style={styles.accountRowMain}>
+              <Text
+                style={[styles.accountName, { color: theme.colors.text }]}
+                numberOfLines={1}
+              >
+                {authContext.user?.name || t('account.user')}
+              </Text>
+              <Text
+                style={[
+                  styles.accountEmail,
+                  { color: theme.colors.textSecondary },
+                ]}
+                numberOfLines={1}
+              >
+                {authContext.user?.email || t('account.email')}
+              </Text>
+              {authContext.user?.emailVerified ? (
+                <View style={styles.verifiedInline}>
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={14}
+                    color={theme.colors.primary}
+                  />
+                  <Text
+                    style={[
+                      styles.verifiedInlineText,
+                      { color: theme.colors.primary },
+                    ]}
+                  >
+                    {t('account.emailVerifiedBadge')}
+                  </Text>
+                </View>
+              ) : null}
+              {authContext.user?.dateOfBirth ? (
+                <Text
+                  style={[
+                    styles.metaSmall,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {t('account.dateOfBirth')}: {authContext.user.dateOfBirth}
+                </Text>
+              ) : null}
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.colors.textSecondary}
+            />
+          </TouchableOpacity>
+
+          <View style={rowDivider} />
 
           <TouchableOpacity
-            style={[
-              styles.debugButton,
-              {
-                backgroundColor: theme.colors.info,
-                marginTop: 16,
-              },
-            ]}
-            onPress={handleDebugTheme}
+            style={styles.addAccountRow}
+            onPress={handleAddAccountPress}
+            activeOpacity={0.65}
+            accessibilityRole="button"
+            accessibilityLabel={t('account.addAnotherAccount')}
           >
-            <Text style={styles.debugButtonText}>
-              {t('account.debugTheme')}
+            <View
+              style={[
+                styles.addAccountIcon,
+                {
+                  backgroundColor: isDark
+                    ? 'rgba(255,255,255,0.08)'
+                    : 'rgba(0,0,0,0.06)',
+                },
+              ]}
+            >
+              <Ionicons
+                name="add"
+                size={22}
+                color={theme.colors.textSecondary}
+              />
+            </View>
+            <Text
+              style={[styles.addAccountLabel, { color: theme.colors.text }]}
+            >
+              {t('account.addAnotherAccount')}
             </Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            {t('account.settings')}
-          </Text>
-          {settingsOptions.map((option) => (
+        <Text
+          style={[styles.blockLabel, { color: theme.colors.textSecondary }]}
+        >
+          {t('account.appearance')}
+        </Text>
+        <View style={[styles.card, cardStyle, styles.cardPadding]}>
+          <ThemeSelector nestedInCard />
+          {__DEV__ ? (
+            <TouchableOpacity
+              style={[
+                styles.debugButton,
+                { backgroundColor: theme.colors.info, marginTop: 8 },
+              ]}
+              onPress={handleDebugTheme}
+            >
+              <Text style={styles.debugButtonText}>
+                {t('account.debugTheme')}
+              </Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+
+        <Text
+          style={[styles.blockLabel, { color: theme.colors.textSecondary }]}
+        >
+          {t('account.settings')}
+        </Text>
+        <View style={[styles.card, cardStyle, styles.settingsCard]}>
+          {settingsOptions.map((option, index) => (
             <TouchableOpacity
               key={option.key}
               style={[
-                styles.optionItem,
-                {
-                  backgroundColor: theme.colors.surface,
-                  borderBottomColor: theme.colors.border,
+                styles.settingsRow,
+                index > 0 && {
+                  borderTopWidth: StyleSheet.hairlineWidth,
+                  borderTopColor: isDark
+                    ? 'rgba(255,255,255,0.08)'
+                    : 'rgba(0,0,0,0.06)',
                 },
               ]}
-              activeOpacity={0.7}
+              activeOpacity={0.65}
+              onPress={option.onPress}
             >
-              <Text style={[styles.optionText, { color: theme.colors.text }]}>
-                {option.label}
-              </Text>
-              <Text style={styles.optionArrow}>›</Text>
+              <View style={styles.settingsRowLeft}>
+                <View
+                  style={[
+                    styles.settingsIconWrap,
+                    {
+                      backgroundColor: isDark
+                        ? 'rgba(255,255,255,0.06)'
+                        : 'rgba(0,0,0,0.04)',
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={option.icon}
+                    size={22}
+                    color={theme.colors.primary}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.settingsRowLabel,
+                    { color: theme.colors.text },
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={theme.colors.textSecondary}
+              />
             </TouchableOpacity>
           ))}
         </View>
 
-        <View style={styles.section}>
-          <TouchableOpacity
-            style={[
-              styles.logoutButton,
-              { backgroundColor: theme.colors.error },
-            ]}
-            activeOpacity={0.7}
-            onPress={handleLogout}
-            disabled={isLoggingOut}
-          >
-            {isLoggingOut ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.logoutText}>{t('common.logout')}</Text>
-            )}
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={[
+            styles.logoutButton,
+            {
+              borderColor: theme.colors.error,
+              backgroundColor: isDark
+                ? 'rgba(255, 59, 48, 0.12)'
+                : 'rgba(255, 59, 48, 0.08)',
+            },
+          ]}
+          activeOpacity={0.75}
+          onPress={handleLogout}
+          disabled={isLoggingOut}
+        >
+          {isLoggingOut ? (
+            <ActivityIndicator color={theme.colors.error} />
+          ) : (
+            <>
+              <Ionicons
+                name="log-out-outline"
+                size={22}
+                color={theme.colors.error}
+                style={styles.logoutIcon}
+              />
+              <Text style={[styles.logoutText, { color: theme.colors.error }]}>
+                {t('common.logout')}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -428,112 +400,152 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
   },
-  screenTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
-  container: {
+  scroll: {
     flex: 1,
-    padding: 16,
   },
-  section: {
-    marginBottom: 24,
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 40,
   },
-  avatarBlock: {
+  blockLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    marginBottom: 10,
+    marginLeft: 4,
+    marginTop: 4,
+  },
+  card: {
+    marginBottom: 20,
+    overflow: 'hidden',
+  },
+  cardPadding: {
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 18,
+  },
+  settingsCard: {
+    paddingVertical: 4,
+  },
+  accountRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
   },
-  avatarTouchable: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+  avatarSmall: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  avatarImage: {
+  avatarSmallImage: {
     width: '100%',
     height: '100%',
   },
-  avatarText: {
+  avatarSmallText: {
     color: '#FFFFFF',
-    fontSize: 36,
+    fontSize: 22,
     fontWeight: '700',
   },
-  avatarEditBadge: {
-    position: 'absolute',
-    right: 0,
-    bottom: 0,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+  accountRowMain: {
+    flex: 1,
+    marginLeft: 14,
+    marginRight: 8,
+    minWidth: 0,
   },
-  changePhotoHint: {
-    marginTop: 10,
-    fontSize: 14,
+  accountName: {
+    fontSize: 17,
     fontWeight: '600',
   },
-  userName: {
-    fontSize: 24,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  userEmail: {
+  accountEmail: {
     fontSize: 14,
-    textAlign: 'center',
+    marginTop: 2,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 16,
+  verifiedInline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
   },
-  optionItem: {
+  verifiedInlineText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  metaSmall: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  addAccountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+  },
+  addAccountIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addAccountLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 14,
+  },
+  settingsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
-    borderBottomWidth: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
-  optionText: {
-    fontSize: 16,
-    fontWeight: '500',
+  settingsRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
-  optionArrow: {
-    fontSize: 24,
-    color: '#999',
-    fontWeight: '300',
-  },
-  logoutButton: {
-    padding: 16,
+  settingsIconWrap: {
+    width: 44,
+    height: 44,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  settingsRowLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    flex: 1,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    paddingVertical: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+  },
+  logoutIcon: {
+    marginRight: 8,
   },
   logoutText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
   debugButton: {
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     alignItems: 'center',
   },
   debugButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
   },
 });

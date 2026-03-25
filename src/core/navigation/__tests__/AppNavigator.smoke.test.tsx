@@ -28,6 +28,18 @@ jest.mock('@react-navigation/native', () => {
   };
 });
 
+jest.mock('@react-navigation/native-stack', () => {
+  const React = require('react');
+  return {
+    createNativeStackNavigator: () => ({
+      Navigator: ({ children }: { children: React.ReactNode }) =>
+        React.createElement(React.Fragment, null, children),
+      Screen: ({ component: Component }: { component: React.ComponentType }) =>
+        React.createElement(Component),
+    }),
+  };
+});
+
 jest.mock('@react-navigation/bottom-tabs', () => {
   const React = require('react');
   return {
@@ -99,8 +111,8 @@ jest.mock(
   () => ({ AppointmentsScreen: () => null })
 );
 
-jest.mock('@features/account/presentation/screens/AccountScreen', () => ({
-  AccountScreen: () => null,
+jest.mock('@features/account/navigation/AccountNavigator', () => ({
+  AccountNavigator: () => null,
 }));
 
 jest.mock('@features/parental/presentation/screens/ParentalScreen', () => ({
