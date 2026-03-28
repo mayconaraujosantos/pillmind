@@ -1,28 +1,28 @@
-import React from 'react';
-import {
-  NavigationContainer,
-  Theme as NavigationTheme,
-} from '@react-navigation/native';
+import { AccountNavigator } from '@features/account/navigation/AccountNavigator';
 import {
   BottomTabBarProps,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 import {
+  NavigationContainer,
+  Theme as NavigationTheme,
+} from '@react-navigation/native';
+import { useTranslation } from '@shared/i18n';
+import { useTheme } from '@shared/theme';
+import React from 'react';
+import {
   Animated,
   Platform,
   StyleSheet,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
-import { useTranslation } from '@shared/i18n';
-import { useTheme } from '@shared/theme';
-import { AccountNavigator } from '@features/account/navigation/AccountNavigator';
-import { TabBarIcon } from './components/TabBarIcon';
-import { TabParamList } from './types';
-import { HomeTabNavigator } from './HomeTabNavigator';
 import { AppointmentsTabNavigator } from './AppointmentsTabNavigator';
-import { ParentalTabNavigator } from './ParentalTabNavigator';
+import { TabBarIcon } from './components/TabBarIcon';
+import { HomeTabNavigator } from './HomeTabNavigator';
 import { NearbyTabNavigator } from './NearbyTabNavigator';
+import { ParentalTabNavigator } from './ParentalTabNavigator';
+import { TabParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -177,10 +177,10 @@ const AnimatedBottomTabBar: React.FC<
 export const AppNavigator: React.FC = () => {
   const { t } = useTranslation();
   const { theme, isDark } = useTheme();
-  /** No escuro, alinhar cena/tab bar ao surface (#151515) para não vazar #000 nos cantos arredondados. */
-  const tabCanvasColor = isDark
-    ? theme.colors.surface
-    : theme.colors.background;
+  
+  // Usar sempre background para consistência entre temas
+  const tabCanvasColor = theme.colors.background;
+  
   const navigationTheme = React.useMemo<NavigationTheme>(
     () => ({
       dark: isDark,
@@ -203,23 +203,25 @@ export const AppNavigator: React.FC = () => {
   );
 
   return (
-    <NavigationContainer theme={navigationTheme}>
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: theme.colors.primary,
-          tabBarInactiveTintColor: theme.colors.textSecondary,
-          sceneStyle: { backgroundColor: tabCanvasColor },
-        }}
-        tabBar={(props) => (
-          <AnimatedBottomTabBar
-            {...props}
-            activeColor={theme.colors.primary}
-            inactiveColor={theme.colors.textSecondary}
-            backgroundColor={tabCanvasColor}
-          />
-        )}
-      >
+    <View style={{ flex: 1, backgroundColor: tabCanvasColor }}>
+      <NavigationContainer theme={navigationTheme}>
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: theme.colors.primary,
+            tabBarInactiveTintColor: theme.colors.textSecondary,
+            sceneStyle: { backgroundColor: tabCanvasColor },
+          }}
+          tabBar={(props) => (
+            <AnimatedBottomTabBar
+              {...props}
+              activeColor={theme.colors.primary}
+              inactiveColor={theme.colors.textSecondary}
+              backgroundColor={tabCanvasColor}
+            />
+          )}
+          sceneContainerStyle={{ backgroundColor: tabCanvasColor }}
+        >
         <Tab.Screen
           name="HomeTab"
           component={HomeTabNavigator}
@@ -246,7 +248,8 @@ export const AppNavigator: React.FC = () => {
           options={{ title: t('tabs.nearby') }}
         />
       </Tab.Navigator>
-    </NavigationContainer>
+      </NavigationContainer>
+    </View>
   );
 };
 
@@ -258,18 +261,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.06,
     shadowRadius: 12,
-    ...Platform.select({
-      ios: { overflow: 'visible' as const, elevation: 10 },
-      android: { overflow: 'hidden' as const, elevation: 0 },
-      default: { overflow: 'visible' as const, elevation: 10 },
-    }),
+    overflow: 'hidden', // Forçar hidden em todas as plataformas para evitar cantos brancos
+    elevation: 0, // Remover elevation no Android
   },
   tabBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: 10,
-    paddingBottom: 8,
+    paddingBottom: Platform.OS === 'android' ? 12 : 8,
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
     overflow: 'hidden',

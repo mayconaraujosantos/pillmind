@@ -30,7 +30,7 @@ const isGoogleSignInAvailable = (): boolean => {
  * Configuração do Google Sign-In
  * Deve ser chamada no início do app (App.tsx)
  */
-export const configureGoogleSignIn = (webClientId: string) => {
+export const configureGoogleSignIn = (webClientId: string, iosClientId?: string) => {
   if (!isGoogleSignInAvailable()) {
     logger.warn(
       'OAuthService',
@@ -47,6 +47,7 @@ export const configureGoogleSignIn = (webClientId: string) => {
   try {
     googleSignin.configure({
       webClientId,
+      iosClientId,
     });
     logger.info('OAuthService', '✅ Google Sign-In configured successfully');
   } catch (error) {

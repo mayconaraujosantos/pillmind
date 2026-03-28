@@ -19,6 +19,7 @@ export type TabParamList = {
 export type HomeTabParamList = {
   HomeMain: undefined;
   MedicineForm: { medicineId?: string };
+  Schedule: undefined;
 };
 
 export type AppointmentsTabParamList = {

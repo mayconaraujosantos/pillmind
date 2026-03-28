@@ -1,46 +1,42 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Switch,
-  Image,
-  Pressable,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import type { ComponentType } from 'react';
-import type { SvgProps } from 'react-native-svg';
-import { Ionicons } from '@expo/vector-icons';
-import {
-  Medicines,
-  Pill1,
-  Pills2,
-  Syringe,
-} from 'healthicons-react-native/outline-24px';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { HomeTabParamList } from '@core/navigation/types';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import type { RouteProp } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { ScreenWrapper } from '@shared/components';
+import { useSimpleNavLogger } from '@shared/hooks';
 import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
-import type { HomeTabParamList } from '@core/navigation/types';
-import { ScreenWrapper } from '@shared/components';
+import { resolveMedicineImageUrlForDevice } from '@shared/utils/medicineImageUrl';
+import * as ImagePicker from 'expo-image-picker';
+import type { ComponentType } from 'react';
+import React from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+// Removed SvgProps import - using Vector Icons instead
 import {
   createMedicineUseCase,
-  updateMedicineUseCase,
   getMedicineByIdUseCase,
+  updateMedicineUseCase,
   uploadMedicinePicture,
 } from '../../medicineServices';
 import {
+  formatDateInput,
   parseDoseTimesField,
   parseISODateOnly,
-  formatDateInput,
 } from '../utils/medicineFormParse';
 
 const MEDICINE_TYPE_IDS = [
@@ -52,22 +48,44 @@ const MEDICINE_TYPE_IDS = [
 
 type MedicineTypeId = (typeof MEDICINE_TYPE_IDS)[number];
 
-/** [Health Icons](https://github.com/stnrd/healthicons) outline 24px — formas de medicamento. */
-const TYPE_HEALTH_ICONS: Record<MedicineTypeId, ComponentType<SvgProps>> = {
-  capsule: Pills2,
-  tablet: Pill1,
-  injection: Syringe,
-  liquid: Medicines,
+/** Ícones FontAwesome5 específicos para medicamentos! 💊 */
+const TYPE_HEALTH_ICONS: Record<MedicineTypeId, ComponentType<any>> = {
+  // Cápsulas - Ícone perfeito de cápsulas
+  capsule: (props: any) => <FontAwesome5 name="capsules" size={24} color={props.color} />,
+  // Comprimidos - Ícone de pílulas/comprimidos  
+  tablet: (props: any) => <FontAwesome5 name="pills" size={24} color={props.color} />,
+  // Injeções - Ícone de seringa
+  injection: (props: any) => <FontAwesome5 name="syringe" size={24} color={props.color} />,
+  // Líquidos - Ícone de frasco/medicamento líquido
+  liquid: (props: any) => <FontAwesome5 name="prescription-bottle" size={24} color={props.color} />,
 };
 
 export const MedicineFormScreen: React.FC = () => {
-  const route = useRoute<RouteProp<HomeTabParamList, 'MedicineForm'>>();
-  const navigation =
-    useNavigation<NativeStackNavigationProp<HomeTabParamList>>();
-  const { t } = useTranslation();
-  const { theme, isDark } = useTheme();
+  console.log('🏥 MedicineFormScreen: Component starting...');
+  
+  try {
+    // Logging para debug
+    const { logNavEvent, logNavError } = useSimpleNavLogger('MedicineForm');
+    console.log('🏥 MedicineFormScreen: Logger initialized');
+    
+    logNavEvent('Screen Loading Started');
 
-  const medicineId = route.params?.medicineId;
+    const route = useRoute<RouteProp<HomeTabParamList, 'MedicineForm'>>();
+    const navigation =
+      useNavigation<NativeStackNavigationProp<HomeTabParamList>>();
+    
+    console.log('🏥 MedicineFormScreen: Navigation hooks initialized');
+    
+    const { t } = useTranslation();
+    const { theme, isDark } = useTheme();
+
+    console.log('🏥 MedicineFormScreen: Theme and translation initialized');
+
+    const medicineId = route.params?.medicineId;
+    
+    console.log('🏥 MedicineFormScreen: Medicine ID extracted:', medicineId);
+
+    logNavEvent('Medicine ID extracted', { medicineId });
 
   const [bootLoading, setBootLoading] = React.useState(Boolean(medicineId));
   const [saving, setSaving] = React.useState(false);
@@ -101,29 +119,51 @@ export const MedicineFormScreen: React.FC = () => {
   const inputBorder = theme.colors.border;
 
   React.useLayoutEffect(() => {
-    navigation.setOptions({
-      title: medicineId
-        ? t('home.editMedication')
-        : t('home.newMedication'),
-    });
+    logNavEvent('Navigation header setup starting');
+    try {
+      navigation.setOptions({
+        headerTitle: medicineId
+          ? t('home.editMedication')
+          : t('home.newMedication'),
+      });
+      logNavEvent('Navigation header setup completed');
+    } catch (error) {
+      logNavError(error, 'Navigation header setup');
+    }
   }, [navigation, medicineId, t]);
 
   React.useEffect(() => {
+    logNavEvent('Data loading effect started', { medicineId });
+    
     if (!medicineId) {
+      logNavEvent('No medicineId - setting boot loading to false');
       setBootLoading(false);
       return;
     }
+    
     let cancelled = false;
     (async () => {
       try {
+        logNavEvent('Fetching medicine data', { medicineId });
         const m = await getMedicineByIdUseCase.execute(medicineId);
-        if (cancelled) return;
+        
+        logNavEvent('Medicine data fetched', { found: !!m });
+        
+        if (cancelled) {
+          logNavEvent('Request cancelled');
+          return;
+        }
+        
         if (!m) {
+          logNavEvent('Medicine not found', { medicineId });
           Alert.alert(t('common.error'), t('home.medicineNotFound'), [
             { text: t('common.ok'), onPress: () => navigation.goBack() },
           ]);
           return;
         }
+        
+        logNavEvent('Setting medicine data to form');
+        
         setName(m.name);
         setDosage(m.dosage);
         setFrequency(m.frequency);
@@ -144,7 +184,11 @@ export const MedicineFormScreen: React.FC = () => {
         setLocalImageUri(undefined);
         setLocalImageMime(undefined);
         setImageCleared(false);
-      } catch {
+        
+        logNavEvent('Medicine data set successfully');
+      } catch (error) {
+        logNavError(error, 'Loading medicine data');
+        
         if (!cancelled) {
           Alert.alert(t('common.error'), t('home.medicineLoadFailed'), [
             { text: t('common.ok'), onPress: () => navigation.goBack() },
@@ -186,9 +230,10 @@ export const MedicineFormScreen: React.FC = () => {
     setImageCleared(true);
   };
 
-  const displayImageUri =
+  const displayImageUri = resolveMedicineImageUrlForDevice(
     localImageUri ??
-    (!imageCleared ? serverImageUrl : undefined);
+    (!imageCleared ? serverImageUrl : undefined)
+  );
 
   const bumpQuantity = (delta: number) => {
     const n = Math.max(
@@ -199,29 +244,45 @@ export const MedicineFormScreen: React.FC = () => {
   };
 
   const onSave = async () => {
-    const trimmedName = name.trim();
-    const trimmedDosage = dosage.trim();
-    const start = parseISODateOnly(startStr);
-    if (!trimmedName || !trimmedDosage || !start) {
-      Alert.alert(t('common.error'), t('home.medicineFormValidation'));
-      return;
-    }
-    let endDateOut: Date | undefined;
-    if (endStr.trim()) {
-      const ed = parseISODateOnly(endStr);
-      if (!ed) {
-        Alert.alert(t('common.error'), t('home.medicineEndDateInvalid'));
+    logNavEvent('Save function started');
+    
+    try {
+      const trimmedName = name.trim();
+      const trimmedDosage = dosage.trim();
+      const start = parseISODateOnly(startStr);
+      
+      logNavEvent('Save validation', { 
+        hasName: !!trimmedName, 
+        hasDosage: !!trimmedDosage, 
+        hasStart: !!start 
+      });
+      
+      if (!trimmedName || !trimmedDosage || !start) {
+        logNavEvent('Save validation failed');
+        Alert.alert(t('common.error'), t('home.medicineFormValidation'));
         return;
       }
-      endDateOut = ed;
-    }
-    const times = parseDoseTimesField(timesStr);
-    const qty = Math.max(
-      1,
-      parseInt(quantityStr.replace(/\D/g, ''), 10) || 1
-    );
-    setSaving(true);
-    try {
+      
+      let endDateOut: Date | undefined;
+      if (endStr.trim()) {
+        const ed = parseISODateOnly(endStr);
+        if (!ed) {
+          logNavError(new Error('Invalid end date'), 'Date parsing');
+          Alert.alert(t('common.error'), t('home.medicineEndDateInvalid'));
+          return;
+        }
+        endDateOut = ed;
+      }
+      
+      const times = parseDoseTimesField(timesStr);
+      const qty = Math.max(
+        1,
+        parseInt(quantityStr.replace(/\D/g, ''), 10) || 1
+      );
+      
+      logNavEvent('Starting save process', { medicineId });
+      setSaving(true);
+      
       let imageUrl: string | undefined;
       if (localImageUri) {
         imageUrl = await uploadMedicinePicture(
@@ -231,6 +292,7 @@ export const MedicineFormScreen: React.FC = () => {
       } else if (!imageCleared) {
         imageUrl = serverImageUrl;
       }
+      
       const payload = {
         name: trimmedName,
         dosage: trimmedDosage,
@@ -245,15 +307,18 @@ export const MedicineFormScreen: React.FC = () => {
         reminderOnEmpty,
         imageUrl,
       };
+      
       if (medicineId) {
         await updateMedicineUseCase.execute(medicineId, payload);
       } else {
         await createMedicineUseCase.execute(payload);
       }
+      
       navigation.goBack();
     } catch (e) {
       const msg = e instanceof Error ? e.message : t('common.error');
       Alert.alert(t('common.error'), msg);
+      logNavError(e instanceof Error ? e : new Error('Unknown error'), 'Save operation failed');
     } finally {
       setSaving(false);
     }
@@ -327,7 +392,7 @@ export const MedicineFormScreen: React.FC = () => {
                     pressed && { opacity: 0.85 },
                   ]}
                 >
-                  <HealthIcon width={28} height={28} color={iconColor} />
+                  <HealthIcon size={28} color={iconColor} />
                 </Pressable>
               );
             })}
@@ -619,6 +684,22 @@ export const MedicineFormScreen: React.FC = () => {
       </KeyboardAvoidingView>
     </ScreenWrapper>
   );
+  
+  } catch (error) {
+    console.error('🏥 MedicineFormScreen: Critical error:', error);
+    
+    // Fallback UI
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <Text style={{ fontSize: 18, color: 'red', marginBottom: 10 }}>
+          Erro na tela de medicamentos
+        </Text>
+        <Text style={{ fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 20 }}>
+          {error instanceof Error ? error.message : 'Erro desconhecido'}
+        </Text>
+      </View>
+    );
+  }
 };
 
 const styles = StyleSheet.create({

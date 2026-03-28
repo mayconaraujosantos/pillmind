@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Medicine } from '../../domain/entities/Medicine';
-import { GetMedicinesUseCase } from '../../domain/useCases/GetMedicinesUseCase';
-import { CreateMedicineUseCase } from '../../domain/useCases/CreateMedicineUseCase';
-import { UpdateMedicineUseCase } from '../../domain/useCases/UpdateMedicineUseCase';
-import { DeleteMedicineUseCase } from '../../domain/useCases/DeleteMedicineUseCase';
+import { syncMedicineReminderNotifications } from '@core/services/medicineReminderNotifications';
 import { logger } from '@shared/utils/logger';
+import { useCallback, useEffect, useState } from 'react';
+import { Medicine } from '../../domain/entities/Medicine';
+import { CreateMedicineUseCase } from '../../domain/useCases/CreateMedicineUseCase';
+import { DeleteMedicineUseCase } from '../../domain/useCases/DeleteMedicineUseCase';
+import { GetMedicinesUseCase } from '../../domain/useCases/GetMedicinesUseCase';
+import { UpdateMedicineUseCase } from '../../domain/useCases/UpdateMedicineUseCase';
 
 export interface UseHomeMedicinesResult {
   medicines: Medicine[];
@@ -33,6 +34,7 @@ export const useHomeMedicines = (
 
   const applyList = useCallback(async (data: Medicine[]) => {
     setMedicines(data);
+    await syncMedicineReminderNotifications(data, { requestPermission: false });
   }, []);
 
   const fetchData = useCallback(
@@ -68,6 +70,7 @@ export const useHomeMedicines = (
     try {
       const data = await getMedicinesUseCase.execute();
       setMedicines(data);
+      await syncMedicineReminderNotifications(data, { requestPermission: false });
       setError(null);
     } catch (err) {
       const message =

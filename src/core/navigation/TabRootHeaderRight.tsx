@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Pressable, StyleSheet, Alert, Platform } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@shared/theme';
+import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from '@shared/i18n';
+import { useTheme } from '@shared/theme';
+import React from 'react';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 const HIT = 44;
 
@@ -25,9 +25,9 @@ export const TabRootHeaderRight: React.FC = () => {
   };
 
   const onNotifications = () => {
-    Alert.alert(
-      t('home.notificationsA11y'),
-      t('account.notificationsComingSoon')
+    navigation.getParent()?.navigate(
+      'AccountTab' as never,
+      { screen: 'NotificationsSettings' } as never
     );
   };
 

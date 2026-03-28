@@ -1,16 +1,18 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Platform,
-  Alert,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Theme } from '@shared/theme';
 import type { TFunction } from 'i18next';
+import React from 'react';
+import {
+    Alert,
+    Platform,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native';
 import type { Medicine } from '../../domain/entities/Medicine';
+
+type TakeStatus = 'taken' | 'skipped' | 'postponed' | 'pending';
 
 interface MedicationScheduleRowProps {
   medicine: Medicine;
@@ -19,6 +21,11 @@ interface MedicationScheduleRowProps {
   isLast?: boolean;
   onEdit: () => void;
   onDelete: () => void;
+  scheduledTime?: string; // The specific time for this row  
+  takeStatus?: TakeStatus; // Status for this specific time
+  onMarkAsTaken?: () => void; // Callback to mark this dose as taken
+  onSkipDose?: () => void; // Callback to skip this dose
+  onPostponeDose?: () => void;
 }
 
 /**
@@ -31,17 +38,39 @@ export const MedicationScheduleRow: React.FC<MedicationScheduleRowProps> = ({
   isLast,
   onEdit,
   onDelete,
+  scheduledTime,
+  takeStatus = 'pending',
+  onMarkAsTaken,
+  onSkipDose,
+  onPostponeDose,
 }) => {
-  const frequencyPretty = medicine.frequency.replace(/-/g, ' ');
-  const primaryTime = medicine.times[0] ?? '—';
+  const frequencyPretty = medicine.frequency.replaceAll('-', ' ');
+  const primaryTime = scheduledTime || medicine.times[0] || '—';
   const extraCount = Math.max(0, medicine.times.length - 1);
   const timesLine =
     medicine.times.length > 0
       ? medicine.times.join(' · ')
       : t('home.noFixedAlarmTimes');
 
-  const onMark = () =>
-    Alert.alert(t('home.quickAddDoseTitle'), t('home.quickAddDoseMessage'));
+  const onMark = () => {
+    if (takeStatus === 'pending' && onMarkAsTaken) {
+      onMarkAsTaken();
+    } else {
+      Alert.alert(t('home.quickAddDoseTitle'), t('home.quickAddDoseMessage'));
+    }
+  };
+
+  const onSkip = () => {
+    if (takeStatus === 'pending' && onSkipDose) {
+      onSkipDose();
+    }
+  };
+
+  const onPostpone = () => {
+    if (takeStatus === 'pending' && onPostponeDose) {
+      onPostponeDose();
+    }
+  };
 
   const openRowMenu = () => {
     Alert.alert(medicine.name, undefined, [
@@ -54,6 +83,34 @@ export const MedicationScheduleRow: React.FC<MedicationScheduleRowProps> = ({
       },
     ]);
   };
+
+  // Get status-specific styling and content
+  const getStatusDisplay = () => {
+    switch (takeStatus) {
+      case 'taken':
+        return {
+          icon: 'checkmark-circle' as const,
+          color: '#22C55E', // green
+          text: t('home.doseTaken'),
+        };
+      case 'skipped':
+        return {
+          icon: 'close-circle' as const,
+          color: '#EF4444', // red  
+          text: t('home.doseSkipped'),
+        };
+      case 'postponed':
+        return {
+          icon: 'alarm' as const,
+          color: '#F59E0B',
+          text: t('home.dosePostponed'),
+        };
+      default:
+        return null;
+    }
+  };
+
+  const statusDisplay = getStatusDisplay();
 
   return (
     <View
@@ -78,6 +135,7 @@ export const MedicationScheduleRow: React.FC<MedicationScheduleRowProps> = ({
           </Text>
         ) : null}
       </View>
+      
       <Pressable
         onPress={onEdit}
         style={({ pressed }) => [
@@ -111,41 +169,93 @@ export const MedicationScheduleRow: React.FC<MedicationScheduleRowProps> = ({
           {timesLine}
         </Text>
       </Pressable>
-      <Pressable
-        onPress={openRowMenu}
-        hitSlop={10}
-        accessibilityRole="button"
-        accessibilityLabel={t('home.medicineRowMenuA11y')}
-        style={({ pressed }) => [
-          styles.menuHit,
-          pressed && { opacity: 0.7 },
-        ]}
-      >
-        <Ionicons
-          name="ellipsis-vertical"
-          size={20}
-          color={theme.colors.textSecondary}
-        />
-      </Pressable>
-      <Pressable
-        onPress={onMark}
-        hitSlop={12}
-        accessibilityRole="button"
-        accessibilityLabel={t('home.markDoseCheckboxA11y')}
-        style={({ pressed }) => [
-          styles.checkHit,
-          pressed && { opacity: 0.75 },
-        ]}
-      >
-        <View
-          style={[
-            styles.checkCircle,
-            {
-              borderColor: theme.colors.primary,
-            },
+
+      <View style={styles.actions}>
+        {statusDisplay ? (
+          // Show status when taken or skipped
+          <View style={styles.statusContainer}>
+            <Ionicons
+              name={statusDisplay.icon}
+              size={20}
+              color={statusDisplay.color}
+            />
+            <Text style={[styles.statusText, { color: statusDisplay.color }]}>
+              {statusDisplay.text}
+            </Text>
+          </View>
+        ) : (
+          // Show action buttons when pending
+          <View style={styles.actionButtons}>
+            <Pressable
+              onPress={onMark}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={t('home.markAsTakenA11y')}
+              style={({ pressed }) => [
+                styles.actionButton,
+                styles.takeButton,
+                { backgroundColor: theme.colors.primary },
+                pressed && { opacity: 0.75 },
+              ]}
+              testID={`take-${medicine.id}`}
+            >
+              <Ionicons name="checkmark" size={16} color="white" />
+            </Pressable>
+            
+            {onSkipDose && (
+              <Pressable
+                onPress={onSkip}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t('home.skipDoseA11y')}
+                style={({ pressed }) => [
+                  styles.actionButton,
+                  styles.skipButton,
+                  { borderColor: theme.colors.border },
+                  pressed && { opacity: 0.75 },
+                ]}
+                testID={`skip-${medicine.id}`}
+              >
+                <Ionicons name="close" size={16} color={theme.colors.textSecondary} />
+              </Pressable>
+            )}
+            {onPostponeDose && (
+              <Pressable
+                onPress={onPostpone}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t('home.postponeDoseA11y')}
+                style={({ pressed }) => [
+                  styles.actionButton,
+                  styles.postponeButton,
+                  { borderColor: '#F59E0B' },
+                  pressed && { opacity: 0.75 },
+                ]}
+                testID={`postpone-${medicine.id}`}
+              >
+                <Ionicons name="alarm-outline" size={16} color="#F59E0B" />
+              </Pressable>
+            )}
+          </View>
+        )}
+        
+        <Pressable
+          onPress={openRowMenu}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={t('home.medicineRowMenuA11y')}
+          style={({ pressed }) => [
+            styles.menuHit,
+            pressed && { opacity: 0.7 },
           ]}
-        />
-      </Pressable>
+        >
+          <Ionicons
+            name="ellipsis-vertical"
+            size={20}
+            color={theme.colors.textSecondary}
+          />
+        </Pressable>
+      </View>
     </View>
   );
 };
@@ -176,9 +286,6 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
-  menuHit: {
-    padding: 6,
-  },
   name: {
     fontSize: 16,
     fontWeight: '700',
@@ -194,22 +301,57 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontWeight: '500',
   },
-  checkHit: {
-    padding: 4,
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  checkCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  actionButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
     ...Platform.select({
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
+        shadowOpacity: 0.1,
         shadowRadius: 2,
       },
+      android: { elevation: 2 },
       default: {},
     }),
+  },
+  takeButton: {
+    // backgroundColor set dynamically
+  },
+  skipButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+  },
+  postponeButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.02)',
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  menuHit: {
+    padding: 6,
   },
 });

@@ -50,8 +50,7 @@ function fromApi(row: MedicineApiDto): Medicine {
     prescribedFor: row.prescribedFor ?? undefined,
     quantity:
       row.quantity != null && row.quantity > 0 ? row.quantity : undefined,
-    reminderOnEmpty:
-      row.reminderOnEmpty != null ? row.reminderOnEmpty : undefined,
+    reminderOnEmpty: row.reminderOnEmpty ?? undefined,
   };
 }
 

@@ -1,38 +1,39 @@
+import type { HomeTabParamList } from '@core/navigation/types';
+import { Ionicons } from '@expo/vector-icons';
+import { useOnboardingStorage } from '@features/onboarding';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Loader, ScreenWrapper, SkeletonCard } from '@shared/components';
+import { useComponentTracker, useNavigationLogger } from '@shared/hooks';
+import { useTranslation } from '@shared/i18n';
+import { useTheme } from '@shared/theme';
+import type { TFunction } from 'i18next';
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  RefreshControl,
-  Alert,
-  Platform,
-  TextInput,
+    Alert,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { HomeTabParamList } from '@core/navigation/types';
-import { ScreenWrapper, Loader, SkeletonCard } from '@shared/components';
-import { useOnboardingStorage } from '@features/onboarding';
-import { useTheme } from '@shared/theme';
-import { useTranslation } from '@shared/i18n';
-import type { TFunction } from 'i18next';
-import { Ionicons } from '@expo/vector-icons';
+import type { Medicine } from '../../domain/entities/Medicine';
 import {
-  MedicineReminderCalendar,
-  HomeGreetingHero,
-  TodayProgressSummary,
-  MedicationScheduleRow,
+    createMedicineUseCase,
+    deleteMedicineUseCase,
+    getMedicinesUseCase,
+    updateMedicineUseCase,
+} from '../../medicineServices';
+import {
+    HomeGreetingHero,
+    MedicationScheduleRow,
+    MedicineReminderCalendar,
+    TodayProgressSummary,
 } from '../components';
 import { useHomeMedicines } from '../hooks/useHomeMedicines';
-import {
-  getMedicinesUseCase,
-  createMedicineUseCase,
-  updateMedicineUseCase,
-  deleteMedicineUseCase,
-} from '../../medicineServices';
-import type { Medicine } from '../../domain/entities/Medicine';
 
 const MEDICINES_PREVIEW_LIMIT = 5;
 
@@ -127,6 +128,13 @@ function computeHomeQuickStats(
 const HOME_TINT_LIGHT = '#F0F2FA';
 
 export const HomeScreen: React.FC = () => {
+  // Hooks de logging e tracking
+  const { logScreenEvent, logError } = useNavigationLogger({
+    screenName: 'Home',
+    additionalData: { version: '1.0' }
+  });
+  const { trackEvent, trackError } = useComponentTracker('HomeScreen');
+
   useOnboardingStorage();
   const { theme, isDark } = useTheme();
   const { t, i18n, ready } = useTranslation();
@@ -155,19 +163,30 @@ export const HomeScreen: React.FC = () => {
 
   useFocusEffect(
     React.useCallback(() => {
+      logScreenEvent('Screen Focused - Syncing Medicines');
+      trackEvent('screen_focus_sync', { medicineCount: medicines.length });
       void syncMedicines();
-    }, [syncMedicines])
+    }, [syncMedicines, medicines.length])
   );
 
   const medicinesFiltered = React.useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return medicines;
-    return medicines.filter(
+    
+    const filtered = medicines.filter(
       (m) =>
         m.name.toLowerCase().includes(q) ||
         m.dosage.toLowerCase().includes(q) ||
         m.notes?.toLowerCase().includes(q)
     );
+
+    trackEvent('medicines_filtered', { 
+      query: q, 
+      totalMedicines: medicines.length, 
+      filteredCount: filtered.length 
+    });
+
+    return filtered;
   }, [medicines, searchQuery]);
 
   const medicinesForSelectedDay = React.useMemo(
@@ -199,36 +218,76 @@ export const HomeScreen: React.FC = () => {
   );
 
   const onAddMedication = () => {
-    navigation.navigate('MedicineForm', {});
+    try {
+      logScreenEvent('Add Medication Button Pressed');
+      trackEvent('navigate_to_medicine_form', { action: 'add' });
+      navigation.navigate('MedicineForm', {});
+    } catch (error) {
+      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      logError(errorInstance, 'Add Medication Navigation');
+      trackError(errorInstance, 'onAddMedication');
+    }
   };
 
   const openEditMedication = (id: string) => {
-    navigation.navigate('MedicineForm', { medicineId: id });
+    try {
+      logScreenEvent('Edit Medication Button Pressed', { medicineId: id });
+      trackEvent('navigate_to_medicine_form', { action: 'edit', medicineId: id });
+      navigation.navigate('MedicineForm', { medicineId: id });
+    } catch (error) {
+      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      logError(errorInstance, 'Edit Medication Navigation');
+      trackError(errorInstance, 'openEditMedication');
+    }
   };
 
   const confirmDeleteMedication = (m: Medicine) => {
-    Alert.alert(
-      t('home.deleteMedicationTitle'),
-      t('home.deleteMedicationMessage', { name: m.name }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('home.deleteMedication'),
-          style: 'destructive',
-          onPress: () => {
-            void (async () => {
-              try {
-                await deleteMedicine(m.id);
-              } catch (e) {
-                const msg =
-                  e instanceof Error ? e.message : t('common.error');
-                Alert.alert(t('common.error'), msg);
-              }
-            })();
+    try {
+      logScreenEvent('Delete Medication Confirm Dialog', { medicineId: m.id, medicineName: m.name });
+      trackEvent('delete_medicine_confirm', { medicineId: m.id, medicineName: m.name });
+
+      Alert.alert(
+        t('home.deleteMedicationTitle'),
+        t('home.deleteMedicationMessage', { name: m.name }),
+        [
+          { 
+            text: t('common.cancel'), 
+            style: 'cancel',
+            onPress: () => {
+              trackEvent('delete_medicine_cancelled', { medicineId: m.id });
+            }
           },
-        },
-      ]
-    );
+          {
+            text: t('home.deleteMedication'),
+            style: 'destructive',
+            onPress: () => {
+              void (async () => {
+                try {
+                  trackEvent('delete_medicine_confirmed', { medicineId: m.id });
+                  logScreenEvent('Deleting Medication', { medicineId: m.id });
+                  await deleteMedicine(m.id);
+                  trackEvent('delete_medicine_success', { medicineId: m.id });
+                  logScreenEvent('Medication Deleted Successfully', { medicineId: m.id });
+                } catch (e) {
+                  const errorInstance = e instanceof Error ? e : new Error(String(e));
+                  const msg = e instanceof Error ? e.message : t('common.error');
+                  
+                  logError(errorInstance, 'Delete Medication Error');
+                  trackError(errorInstance, 'confirmDeleteMedication');
+                  trackEvent('delete_medicine_failed', { medicineId: m.id, error: msg });
+                  
+                  Alert.alert(t('common.error'), msg);
+                }
+              })();
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      logError(errorInstance, 'Confirm Delete Medication Dialog');
+      trackError(errorInstance, 'confirmDeleteMedication');
+    }
   };
 
   const renderMedicinesContent = () => {

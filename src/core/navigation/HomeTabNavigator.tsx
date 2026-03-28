@@ -1,8 +1,9 @@
-import React from 'react';
+import { HomeScreen } from '@features/home/presentation/screens/HomeScreen';
+import { MedicineFormScreen } from '@features/home/presentation/screens/MedicineFormScreenWrapper';
+import { ScheduleScreen } from '@features/home/presentation/screens/ScheduleScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTheme } from '@shared/theme';
-import { HomeScreen } from '@features/home/presentation/screens/HomeScreen';
-import { MedicineFormScreen } from '@features/home/presentation/screens/MedicineFormScreen';
+import React from 'react';
 import { getMainTabStackScreenOptions } from './mainTabStackScreenOptions';
 import type { HomeTabParamList } from './types';
 
@@ -23,6 +24,13 @@ export const HomeTabNavigator: React.FC = () => {
         }}
       />
       <Stack.Screen name="MedicineForm" component={MedicineFormScreen} />
+      <Stack.Screen 
+        name="Schedule" 
+        component={ScheduleScreen} 
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack.Navigator>
   );
 };

@@ -1,6 +1,5 @@
+import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
-import { Alert } from 'react-native';
 import { TabRootHeaderRight } from '../TabRootHeaderRight';
 
 const mockNavigate = jest.fn();
@@ -40,11 +39,6 @@ jest.mock('@expo/vector-icons', () => {
 describe('TabRootHeaderRight', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
-    jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   it('navigates to AccountTab when profile icon is pressed', () => {
@@ -54,10 +48,12 @@ describe('TabRootHeaderRight', () => {
     expect(mockNavigate).toHaveBeenCalledWith('AccountTab');
   });
 
-  it('shows alert when notifications icon is pressed', () => {
+  it('opens notifications settings when notifications icon is pressed', () => {
     const { getAllByRole } = render(<TabRootHeaderRight />);
     const buttons = getAllByRole('button');
     fireEvent.press(buttons[0]);
-    expect(Alert.alert).toHaveBeenCalled();
+    expect(mockNavigate).toHaveBeenCalledWith('AccountTab', {
+      screen: 'NotificationsSettings',
+    });
   });
 });

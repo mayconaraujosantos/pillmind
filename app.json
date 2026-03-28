@@ -29,7 +29,8 @@
           "photosPermission": "Allow PillMind to access your photos to set your profile picture.",
           "cameraPermission": "Allow PillMind to use the camera for your profile picture."
         }
-      ]
+      ],
+      "expo-notifications"
     ],
     "ios": {
       "supportsTablet": true,
