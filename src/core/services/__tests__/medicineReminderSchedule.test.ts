@@ -1,8 +1,8 @@
 import type { Medicine } from '@features/home/domain/entities/Medicine';
 import {
-    computeMedicineReminderOccurrences,
-    medicineReminderScheduleConstants,
-    parsePrescriptionFrequency,
+  computeMedicineReminderOccurrences,
+  medicineReminderScheduleConstants,
+  parsePrescriptionFrequency,
 } from '../medicineReminderSchedule';
 
 function buildMedicine(overrides?: Partial<Medicine>): Medicine {
@@ -20,7 +20,9 @@ function buildMedicine(overrides?: Partial<Medicine>): Medicine {
 
 describe('medicineReminderSchedule', () => {
   it('parses interval and duration from prescription text', () => {
-    expect(parsePrescriptionFrequency('Tomar amoxilina de 8/8h durante 7 dias')).toEqual({
+    expect(
+      parsePrescriptionFrequency('Tomar amoxilina de 8/8h durante 7 dias')
+    ).toEqual({
       intervalHours: 8,
       durationDays: 7,
     });
@@ -28,13 +30,24 @@ describe('medicineReminderSchedule', () => {
 
   it('builds exact interval reminders for 8/8h over 7 days from the first prescribed time', () => {
     const now = new Date(2026, 2, 27, 7, 0, 0);
-    const occurrences = computeMedicineReminderOccurrences(buildMedicine(), now);
+    const occurrences = computeMedicineReminderOccurrences(
+      buildMedicine(),
+      now
+    );
 
     expect(occurrences).toHaveLength(21);
-    expect(occurrences[0].toISOString()).toBe(new Date(2026, 2, 27, 8, 0, 0).toISOString());
-    expect(occurrences[1].toISOString()).toBe(new Date(2026, 2, 27, 16, 0, 0).toISOString());
-    expect(occurrences[2].toISOString()).toBe(new Date(2026, 2, 28, 0, 0, 0).toISOString());
-    expect(occurrences[20].toISOString()).toBe(new Date(2026, 3, 3, 0, 0, 0).toISOString());
+    expect(occurrences[0].toISOString()).toBe(
+      new Date(2026, 2, 27, 8, 0, 0).toISOString()
+    );
+    expect(occurrences[1].toISOString()).toBe(
+      new Date(2026, 2, 27, 16, 0, 0).toISOString()
+    );
+    expect(occurrences[2].toISOString()).toBe(
+      new Date(2026, 2, 28, 0, 0, 0).toISOString()
+    );
+    expect(occurrences[20].toISOString()).toBe(
+      new Date(2026, 3, 3, 0, 0, 0).toISOString()
+    );
   });
 
   it('uses fixed daily times when multiple prescribed times are provided', () => {

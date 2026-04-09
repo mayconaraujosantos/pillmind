@@ -8,7 +8,9 @@ const MEDICINE_CHANNEL_ID = 'medicine-reminders';
 
 let notificationsInitialized = false;
 let notificationsUnavailable = false;
-let notificationsModulePromise: Promise<typeof import('expo-notifications') | null> | null = null;
+let notificationsModulePromise: Promise<
+  typeof import('expo-notifications') | null
+> | null = null;
 
 export interface ReminderSyncResult {
   permissionGranted: boolean;
@@ -38,7 +40,10 @@ function resolveNotificationsModuleShape(
   }
 
   const fallbackModule = module.default;
-  if (fallbackModule && typeof fallbackModule.setNotificationHandler === 'function') {
+  if (
+    fallbackModule &&
+    typeof fallbackModule.setNotificationHandler === 'function'
+  ) {
     return fallbackModule;
   }
 
@@ -57,7 +62,9 @@ function hasNotificationCoreApi(
   );
 }
 
-async function getNotificationsModule(): Promise<typeof import('expo-notifications') | null> {
+async function getNotificationsModule(): Promise<
+  typeof import('expo-notifications') | null
+> {
   if (notificationsUnavailable || Platform.OS === 'web') {
     return null;
   }
@@ -82,9 +89,13 @@ async function getNotificationsModule(): Promise<typeof import('expo-notificatio
     .catch((error: unknown) => {
       notificationsUnavailable = true;
       const message = error instanceof Error ? error.message : String(error);
-      logger.warn('medicineReminderNotifications', 'Notifications native module unavailable', {
-        message,
-      });
+      logger.warn(
+        'medicineReminderNotifications',
+        'Notifications native module unavailable',
+        {
+          message,
+        }
+      );
       return null;
     });
 
@@ -148,7 +159,9 @@ async function clearMedicineReminderNotifications(): Promise<void> {
   await Promise.all(
     scheduled
       .filter((entry) => entry.content.data?.kind === MEDICINE_REMINDER_KIND)
-      .map((entry) => Notifications.cancelScheduledNotificationAsync(entry.identifier))
+      .map((entry) =>
+        Notifications.cancelScheduledNotificationAsync(entry.identifier)
+      )
   );
 }
 
@@ -158,7 +171,11 @@ export async function syncMedicineReminderNotifications(
 ): Promise<ReminderSyncResult> {
   const Notifications = await getNotificationsModule();
   if (!Notifications) {
-    return { permissionGranted: false, scheduledCount: 0, notificationsAvailable: false };
+    return {
+      permissionGranted: false,
+      scheduledCount: 0,
+      notificationsAvailable: false,
+    };
   }
 
   await initializeMedicineReminderNotifications();
@@ -185,7 +202,11 @@ export async function syncMedicineReminderNotifications(
       'medicineReminderNotifications',
       'Skipping reminder sync because notifications permission is not granted'
     );
-    return { permissionGranted: false, scheduledCount: 0, notificationsAvailable: true };
+    return {
+      permissionGranted: false,
+      scheduledCount: 0,
+      notificationsAvailable: true,
+    };
   }
 
   await clearMedicineReminderNotifications();
@@ -252,12 +273,20 @@ export async function syncMedicineReminderNotifications(
 export async function getMedicineReminderStatus(): Promise<ReminderSyncResult> {
   const Notifications = await getNotificationsModule();
   if (!Notifications) {
-    return { permissionGranted: false, scheduledCount: 0, notificationsAvailable: false };
+    return {
+      permissionGranted: false,
+      scheduledCount: 0,
+      notificationsAvailable: false,
+    };
   }
 
   const permissionGranted = (await Notifications.getPermissionsAsync()).granted;
   if (!permissionGranted) {
-    return { permissionGranted: false, scheduledCount: 0, notificationsAvailable: true };
+    return {
+      permissionGranted: false,
+      scheduledCount: 0,
+      notificationsAvailable: true,
+    };
   }
 
   const scheduled = await Notifications.getAllScheduledNotificationsAsync();
@@ -293,7 +322,9 @@ export async function scheduleOneOffMedicineReminder(
   const notificationId = await Notifications.scheduleNotificationAsync({
     content: {
       title: medicine.name,
-      body: label ?? `Lembrete adiado: tomar ${medicine.dosage} às ${scheduledTime}`,
+      body:
+        label ??
+        `Lembrete adiado: tomar ${medicine.dosage} às ${scheduledTime}`,
       sound: 'default',
       data: {
         kind: MEDICINE_REMINDER_KIND,

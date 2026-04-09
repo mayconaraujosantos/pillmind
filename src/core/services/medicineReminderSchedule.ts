@@ -23,7 +23,15 @@ function startOfDay(date: Date): Date {
 }
 
 function endOfDay(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
 }
 
 function addDays(date: Date, days: number): Date {
@@ -109,7 +117,9 @@ function resolveScheduleEnd(
   }
 
   if (parsed.durationDays != null) {
-    return endOfDay(addDays(startOfDay(medicine.startDate), parsed.durationDays - 1));
+    return endOfDay(
+      addDays(startOfDay(medicine.startDate), parsed.durationDays - 1)
+    );
   }
 
   return endOfDay(addDays(now, DEFAULT_ROLLING_WINDOW_DAYS));

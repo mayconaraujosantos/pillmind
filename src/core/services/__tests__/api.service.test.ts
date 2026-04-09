@@ -50,9 +50,8 @@ describe('ApiService', () => {
         mockFetchResponse(true, mockData)
       );
 
-      const result: ApiResponse<typeof mockData> = await apiService.get(
-        '/test'
-      );
+      const result: ApiResponse<typeof mockData> =
+        await apiService.get('/test');
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
