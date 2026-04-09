@@ -53,3 +53,4 @@ coverage
 # IDE
 .idea/
 .env.local
+.claude/settings.local.json
