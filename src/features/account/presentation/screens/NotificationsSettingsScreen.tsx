@@ -5,7 +5,7 @@ import {
   syncMedicineReminderNotifications,
 } from '@core/services/medicineReminderNotifications';
 import { getMedicinesUseCase } from '@features/home/medicineServices';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
 import React from 'react';
@@ -25,7 +25,8 @@ export const NotificationsSettingsScreen: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   const [permissionGranted, setPermissionGranted] = React.useState(false);
   const [scheduledCount, setScheduledCount] = React.useState(0);
-  const [notificationsAvailable, setNotificationsAvailable] = React.useState(true);
+  const [notificationsAvailable, setNotificationsAvailable] =
+    React.useState(true);
 
   const loadStatus = React.useCallback(async () => {
     setLoading(true);
@@ -85,10 +86,7 @@ export const NotificationsSettingsScreen: React.FC = () => {
       setNotificationsAvailable(result.notificationsAvailable !== false);
 
       if (!result.notificationsAvailable) {
-        Alert.alert(
-          t('common.error'),
-          t('account.notificationsUnavailable')
-        );
+        Alert.alert(t('common.error'), t('account.notificationsUnavailable'));
         return;
       }
 
@@ -128,7 +126,7 @@ export const NotificationsSettingsScreen: React.FC = () => {
       </Text>
 
       {notificationsAvailable ? null : (
-        <Text style={[styles.warning, { color: theme.colors.textSecondary }]}> 
+        <Text style={[styles.warning, { color: theme.colors.textSecondary }]}>
           {t('account.notificationsUnavailable')}
         </Text>
       )}
@@ -142,25 +140,36 @@ export const NotificationsSettingsScreen: React.FC = () => {
           },
         ]}
       >
-        <Text style={[styles.statusLabel, { color: theme.colors.textSecondary }]}> 
+        <Text
+          style={[styles.statusLabel, { color: theme.colors.textSecondary }]}
+        >
           {t('account.notificationsPermissionLabel')}
         </Text>
-        <Text style={[styles.statusValue, { color: theme.colors.text }]}> 
+        <Text style={[styles.statusValue, { color: theme.colors.text }]}>
           {permissionGranted
             ? t('account.notificationsPermissionGranted')
             : t('account.notificationsPermissionDenied')}
         </Text>
-        <Text style={[styles.statusLabel, styles.topGap, { color: theme.colors.textSecondary }]}> 
+        <Text
+          style={[
+            styles.statusLabel,
+            styles.topGap,
+            { color: theme.colors.textSecondary },
+          ]}
+        >
           {t('account.notificationsScheduledLabel')}
         </Text>
-        <Text style={[styles.statusValue, { color: theme.colors.text }]}> 
+        <Text style={[styles.statusValue, { color: theme.colors.text }]}>
           {String(scheduledCount)}
         </Text>
       </View>
 
       {permissionGranted ? null : (
         <TouchableOpacity
-          style={[styles.primaryButton, { backgroundColor: theme.colors.primary }]}
+          style={[
+            styles.primaryButton,
+            { backgroundColor: theme.colors.primary },
+          ]}
           onPress={() => void handleEnableNotifications()}
           disabled={loading}
         >
@@ -182,7 +191,9 @@ export const NotificationsSettingsScreen: React.FC = () => {
         onPress={() => void handleSyncAlarms()}
         disabled={loading || !notificationsAvailable}
       >
-        <Text style={[styles.secondaryButtonText, { color: theme.colors.text }]}> 
+        <Text
+          style={[styles.secondaryButtonText, { color: theme.colors.text }]}
+        >
           {t('account.notificationsSyncCta')}
         </Text>
       </TouchableOpacity>
@@ -200,7 +211,9 @@ export const NotificationsSettingsScreen: React.FC = () => {
         onPress={() => void handleTestReminder()}
         disabled={loading || !notificationsAvailable}
       >
-        <Text style={[styles.secondaryButtonText, { color: theme.colors.text }]}> 
+        <Text
+          style={[styles.secondaryButtonText, { color: theme.colors.text }]}
+        >
           {t('account.notificationsTestCta')}
         </Text>
       </TouchableOpacity>

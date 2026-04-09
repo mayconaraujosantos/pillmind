@@ -5,12 +5,12 @@ import { AccountScreen } from '../AccountScreen';
 import { ThemeProvider } from '@shared/theme';
 import { AuthProvider } from '@features/onboarding/presentation/contexts/AuthContext';
 
-const mockNavigate = jest.fn();
+const mockPush = jest.fn();
 
-jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({
-    navigate: mockNavigate,
-    goBack: jest.fn(),
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    back: jest.fn(),
   }),
 }));
 
@@ -210,6 +210,6 @@ describe('AccountScreen', () => {
       fireEvent.press(await findByTestId('account-profile-row'));
     });
 
-    expect(mockNavigate).toHaveBeenCalledWith('EditProfile');
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/account/edit-profile');
   });
 });

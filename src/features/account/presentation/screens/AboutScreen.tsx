@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  View,
   Text,
   StyleSheet,
   ScrollView,
@@ -8,7 +7,6 @@ import {
   Linking,
   Alert,
 } from 'react-native';
-import Constants from 'expo-constants';
 import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
 import { config } from '@core/config';
@@ -16,7 +14,7 @@ import { config } from '@core/config';
 export const AboutScreen: React.FC = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
-  const version = Constants.expoConfig?.version ?? config.app.version ?? '—';
+  const version = config.app.version ?? '—';
   const site = config.legal.websiteUrl;
 
   const openSite = async () => {

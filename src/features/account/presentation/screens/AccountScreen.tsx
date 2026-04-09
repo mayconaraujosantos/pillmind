@@ -1,32 +1,29 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Appearance,
-  Alert,
-  ActivityIndicator,
-  Image,
-  Platform,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { ThemeSelector } from '@shared/components';
-import { useTheme } from '@shared/theme';
-import { useTranslation } from '@shared/i18n';
 import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
 import { useAuth } from '@features/onboarding/presentation/hooks/useAuth';
+import { ThemeSelector } from '@shared/components';
+import { useTranslation } from '@shared/i18n';
+import { useTheme } from '@shared/theme';
 import { logger } from '@shared/utils/logger';
-import type { AccountStackParamList } from '@features/account/navigation/types';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Appearance,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export const AccountScreen: React.FC = () => {
   const { theme, isDark, themeMode } = useTheme();
   const { t } = useTranslation();
-  const navigation =
-    useNavigation<NativeStackNavigationProp<AccountStackParamList>>();
+  const router = useRouter();
   const authContext = useAuthContext();
   const { logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
@@ -43,30 +40,30 @@ export const AccountScreen: React.FC = () => {
       key: 'notifications',
       label: t('account.notifications'),
       icon: 'notifications-outline',
-      onPress: () => navigation.navigate('NotificationsSettings'),
+      onPress: () => router.push('/(tabs)/account/notifications'),
     },
     {
       key: 'privacy',
       label: t('account.privacy'),
       icon: 'shield-checkmark-outline',
-      onPress: () => navigation.navigate('Privacy'),
+      onPress: () => router.push('/(tabs)/account/privacy'),
     },
     {
       key: 'about',
       label: t('account.about'),
       icon: 'information-circle-outline',
-      onPress: () => navigation.navigate('About'),
+      onPress: () => router.push('/(tabs)/account/about'),
     },
   ];
 
-  const pageBackground = isDark ? theme.colors.background : '#F8F8F8';
+  const pageBackground = theme.colors.background;
 
   const cardStyle = React.useMemo(
     () => ({
-      backgroundColor: isDark ? theme.colors.surface : '#FFFFFF',
+      backgroundColor: theme.colors.surface,
       borderRadius: 22,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+      borderColor: isDark ? 'rgba(255,255,255,0.08)' : theme.colors.border,
       ...Platform.select({
         ios: {
           shadowColor: '#000',
@@ -80,7 +77,7 @@ export const AccountScreen: React.FC = () => {
         default: {},
       }),
     }),
-    [isDark, theme.colors.surface]
+    [isDark, theme.colors.surface, theme.colors.border]
   );
 
   const handleDebugTheme = () => {
@@ -164,7 +161,7 @@ export const AccountScreen: React.FC = () => {
         <View style={[styles.card, cardStyle]}>
           <TouchableOpacity
             style={styles.accountRow}
-            onPress={() => navigation.navigate('EditProfile')}
+            onPress={() => router.push('/(tabs)/account/edit-profile')}
             activeOpacity={0.65}
             disabled={!authContext.user?.id}
             testID="account-profile-row"

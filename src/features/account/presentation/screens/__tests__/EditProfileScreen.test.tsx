@@ -12,10 +12,12 @@ import { EditProfileScreen } from '../EditProfileScreen';
 import { ThemeProvider } from '@shared/theme';
 import { AuthProvider } from '@features/onboarding/presentation/contexts/AuthContext';
 
-jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({
-    navigate: jest.fn(),
-    goBack: jest.fn(),
+const mockBack = jest.fn();
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    back: mockBack,
   }),
 }));
 

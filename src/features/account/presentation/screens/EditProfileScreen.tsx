@@ -1,30 +1,28 @@
-import React from 'react';
-import {
-  Text,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  View,
-  Image,
-  Modal,
-  Pressable,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import type { ProfileGender } from '@features/onboarding/domain/models/auth.model';
+import { authService } from '@features/onboarding/domain/services/auth.service';
+import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
 import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
-import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
-import { authService } from '@features/onboarding/domain/services/auth.service';
-import type { ProfileGender } from '@features/onboarding/domain/models/auth.model';
-import type { AccountStackParamList } from '@features/account/navigation/types';
-import { useProfilePhotoActions } from '../hooks/useProfilePhotoActions';
 import { logger } from '@shared/utils/logger';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useProfilePhotoActions } from '../hooks/useProfilePhotoActions';
 
 const DOB_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -39,8 +37,7 @@ const GENDERS: { value: ProfileGender; key: string }[] = [
 export const EditProfileScreen: React.FC = () => {
   const { theme, isDark } = useTheme();
   const { t } = useTranslation();
-  const navigation =
-    useNavigation<NativeStackNavigationProp<AccountStackParamList>>();
+  const router = useRouter();
   const authContext = useAuthContext();
   const user = authContext.user;
 
@@ -65,9 +62,9 @@ export const EditProfileScreen: React.FC = () => {
     }
   }, [user?.id, user?.name, user?.email, user?.dateOfBirth, user?.gender]);
 
-  const inputSurface = isDark ? theme.colors.surface : '#F0F0F0';
-  const inputBorder = isDark ? theme.colors.border : 'rgba(0,0,0,0.08)';
-  const screenBg = isDark ? theme.colors.background : '#FFFFFF';
+  const inputSurface = theme.colors.surface;
+  const inputBorder = theme.colors.border;
+  const screenBg = theme.colors.background;
 
   const handleSave = async () => {
     const trimmedName = name.trim();
@@ -109,7 +106,7 @@ export const EditProfileScreen: React.FC = () => {
       if (res.success && res.data) {
         await authContext.applyServerUser(res.data);
         Alert.alert(t('common.success'), t('account.profileUpdated'), [
-          { text: t('common.ok'), onPress: () => navigation.goBack() },
+          { text: t('common.ok'), onPress: () => router.back() },
         ]);
       } else {
         Alert.alert(
