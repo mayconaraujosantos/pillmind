@@ -173,7 +173,6 @@ npm run typecheck
 ### Why Different Hosts?
 
 - **iOS Simulator**: Runs on same machine as Node-RED
-
   - Can reach `localhost:1880` directly
   - Uses: `http://localhost:1880/api/auth/*`
 

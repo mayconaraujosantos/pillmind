@@ -225,7 +225,6 @@ O projeto utiliza **GitHub Actions** para automatizar o Git Flow e garantir qual
    ```
 
 2. **Criar Pull Request**:
-
    - Abra PR no GitHub de `feature/minha-feature` para `develop`
    - CI/CD valida automaticamente (lint, test, format)
    - EAS Update Preview é criado automaticamente para teste

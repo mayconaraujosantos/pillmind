@@ -13,14 +13,18 @@ O sistema de logs foi implementado para rastrear bugs, crashes e comportamentos 
 ## 🛠️ Componentes do Sistema
 
 ### 1. Logger (`@shared/utils/logger.ts`)
+
 Sistema básico de logs com níveis:
+
 - `DEBUG`: Informações de desenvolvimento
 - `INFO`: Eventos importantes
 - `WARN`: Situações de atenção
 - `ERROR`: Erros que não quebram o app
 
 ### 2. Crash Reporter (`@shared/utils/crashReporter.ts`)
+
 Sistema avançado que captura:
+
 - **JavaScript errors** globais
 - **Unhandled promise rejections**
 - **Ações do usuário** (últimas 20)
@@ -28,14 +32,18 @@ Sistema avançado que captura:
 - **Estado da aplicação** no momento do crash
 
 ### 3. Navigation Logger (`@shared/hooks/useNavigationLogger.ts`)
+
 Hook para tracking automático de navegação:
+
 - Entrada e saída de telas
 - Tempo gasto em cada tela
 - Parâmetros de navegação
 - Logs de eventos customizados
 
 ### 4. Error Boundary Melhorado (`@shared/components/ErrorBoundary.tsx`)
+
 Component que captura erros React:
+
 - **Stack trace** completo
 - **Component stack** para debugar
 - **Interface de recovery** para o usuário
@@ -67,7 +75,7 @@ import { useNavigationLogger } from '@shared/hooks';
 export const MyScreen = () => {
   const { logScreenEvent, logError } = useNavigationLogger({
     screenName: 'MyScreen',
-    additionalData: { version: '1.0' }
+    additionalData: { version: '1.0' },
   });
 
   const handleButtonPress = () => {
@@ -116,11 +124,13 @@ export default withErrorTracking(MyComponent, 'MyComponent');
 ## 🔍 Visualizando os Logs
 
 ### Durante Desenvolvimento
+
 - **Console do Metro**: Todos os logs aparecem automaticamente
 - **Flipper**: Se configurado, logs aparecem na aba de logs
 - **React Native Debugger**: Suporte completo a logs
 
 ### Logs Estruturados
+
 ```javascript
 // Exemplo de log estruturado no console:
 [2026-03-25T16:57:15.470Z] [INFO] [HomeScreen] User searched medicines {
@@ -131,6 +141,7 @@ export default withErrorTracking(MyComponent, 'MyComponent');
 ```
 
 ### Crash Reports
+
 ```javascript
 // Exemplo de crash report:
 🚨 CRASH REPORT
@@ -147,6 +158,7 @@ Recent User Actions: [
 ## 📊 Exemplos de Tracking Implementados
 
 ### HomeScreen (Exemplo Completo)
+
 - ✅ **Navegação**: Entrada/saída da tela
 - ✅ **Ações do usuário**: Adicionar, editar, deletar medicamentos
 - ✅ **Busca**: Filtros aplicados
@@ -154,6 +166,7 @@ Recent User Actions: [
 - ✅ **Erros**: Falhas de API, navegação, etc.
 
 ### App-wide
+
 - ✅ **Splash screen**: Tempo de carregamento
 - ✅ **Onboarding**: Conclusão, pulos
 - ✅ **Google Sign-in**: Configuração, falhas
@@ -162,19 +175,21 @@ Recent User Actions: [
 ## 🎯 Próximos Passos
 
 ### Para Debugar Crashes Atuais:
+
 1. **Rode o app** com as mudanças aplicadas
 2. **Reproduza o crash** (navegar entre telas)
 3. **Verifique o console** para logs detalhados
 4. **Analise o crash report** para entender a causa
 
 ### Para Adicionar em Outras Telas:
+
 ```typescript
 // 1. Importe o hook
 import { useNavigationLogger } from '@shared/hooks';
 
 // 2. Configure no componente
 const { logScreenEvent, logError } = useNavigationLogger({
-  screenName: 'NomeDaTela'
+  screenName: 'NomeDaTela',
 });
 
 // 3. Adicione logs em handlers
@@ -192,18 +207,21 @@ const handleAction = () => {
 ## 🔧 Configurações Avançadas
 
 ### Aumentar Histórico de Ações
+
 ```typescript
 // Em crashReporter.ts, linha 15:
 private maxActionHistory = 50; // padrão: 20
 ```
 
 ### Filtrar Logs em Produção
+
 ```typescript
 // Em logger.ts, personalizar por nível:
 if (!__DEV__ && level === LogLevel.DEBUG) return;
 ```
 
 ### Integração com Serviços Externos
+
 ```typescript
 // Em crashReporter.ts, método reportCrash:
 // Adicionar integração com Sentry, Bugsnag, etc.
@@ -216,7 +234,7 @@ if (!__DEV__) {
 ## 🎯 Benefícios Esperados
 
 - **Debugging mais rápido**: Logs estruturados mostram exatamente onde o erro ocorreu
-- **Melhor UX**: Error boundaries evitam que a app trave completamente  
+- **Melhor UX**: Error boundaries evitam que a app trave completamente
 - **Monitoramento proativo**: Identificar problemas antes que usuários reportem
 - **Analytics de uso**: Entender como usuários interagem com o app
 - **Releases mais estáveis**: Detectar regressions rapidamente
