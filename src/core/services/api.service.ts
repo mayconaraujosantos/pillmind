@@ -1,4 +1,3 @@
-import { randomUUID as expoRandomUUID } from 'expo-crypto';
 import { config } from '../config';
 import { logger } from '@shared/utils/logger';
 
@@ -44,11 +43,17 @@ class ApiService {
       return `${ts}-${hex}`;
     }
     try {
-      return `${ts}-${expoRandomUUID()}`;
+      const expoCrypto = require('expo-crypto') as {
+        randomUUID?: () => string;
+      };
+      if (typeof expoCrypto.randomUUID === 'function') {
+        return `${ts}-${expoCrypto.randomUUID()}`;
+      }
     } catch {
-      ApiService.requestIdSeq += 1;
-      return `${ts}-seq${ApiService.requestIdSeq}`;
+      // Fall through to deterministic fallback.
     }
+    ApiService.requestIdSeq += 1;
+    return `${ts}-seq${ApiService.requestIdSeq}`;
   }
 
   private async request<T>(
