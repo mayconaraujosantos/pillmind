@@ -127,7 +127,11 @@
     "medicinePhotoChange": "Trocar",
     "medicinePhotoRemove": "Remover",
     "medicinePhotoPermissionDenied": "Permita o acesso à galeria para adicionar uma foto.",
-    "medicineSave": "Salvar"
+    "medicineSave": "Salvar",
+    "manageReminders": "Gerenciar Lembretes",
+    "reminderSetupTitle": "Configurar lembretes?",
+    "reminderSetupMessage": "Deseja configurar os horários de lembrete para este medicamento agora?",
+    "reminderSetupCta": "Configurar"
   },
   "appointments": {
     "title": "Consultas",

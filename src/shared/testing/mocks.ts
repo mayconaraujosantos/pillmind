@@ -100,10 +100,6 @@ export const setupScreenMocks = () => {
     HomeScreen: () => null,
   }));
 
-  jest.mock('@features/account/navigation/AccountNavigator', () => ({
-    AccountNavigator: () => null,
-  }));
-
   jest.mock('@features/nearby/presentation/screens/NearbyScreen', () => ({
     NearbyScreen: () => null,
   }));

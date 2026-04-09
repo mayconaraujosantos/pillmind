@@ -344,48 +344,63 @@ export const useResponsiveTypography = (): ResponsiveTypographySystem => {
   });
 
   // Aplicar responsividade a todas as categorias
-  const responsiveDisplay = Object.keys(display).reduce((acc, key) => {
-    acc[key as keyof typeof display] = makeResponsive(
-      display[key as keyof typeof display]
-    );
-    return acc;
-  }, {} as Record<string, TextStyle>) as {
+  const responsiveDisplay = Object.keys(display).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof display] = makeResponsive(
+        display[key as keyof typeof display]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
     [K in keyof typeof display]: TextStyle;
   };
 
-  const responsiveHeading = Object.keys(heading).reduce((acc, key) => {
-    acc[key as keyof typeof heading] = makeResponsive(
-      heading[key as keyof typeof heading]
-    );
-    return acc;
-  }, {} as Record<string, TextStyle>) as {
+  const responsiveHeading = Object.keys(heading).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof heading] = makeResponsive(
+        heading[key as keyof typeof heading]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
     [K in keyof typeof heading]: TextStyle;
   };
 
-  const responsiveBody = Object.keys(body).reduce((acc, key) => {
-    acc[key as keyof typeof body] = makeResponsive(
-      body[key as keyof typeof body]
-    );
-    return acc;
-  }, {} as Record<string, TextStyle>) as {
+  const responsiveBody = Object.keys(body).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof body] = makeResponsive(
+        body[key as keyof typeof body]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
     [K in keyof typeof body]: TextStyle;
   };
 
-  const responsiveButton = Object.keys(button).reduce((acc, key) => {
-    acc[key as keyof typeof button] = makeResponsive(
-      button[key as keyof typeof button]
-    );
-    return acc;
-  }, {} as Record<string, TextStyle>) as {
+  const responsiveButton = Object.keys(button).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof button] = makeResponsive(
+        button[key as keyof typeof button]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
     [K in keyof typeof button]: TextStyle;
   };
 
-  const responsiveCaption = Object.keys(caption).reduce((acc, key) => {
-    acc[key as keyof typeof caption] = makeResponsive(
-      caption[key as keyof typeof caption]
-    );
-    return acc;
-  }, {} as Record<string, TextStyle>) as {
+  const responsiveCaption = Object.keys(caption).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof caption] = makeResponsive(
+        caption[key as keyof typeof caption]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
     [K in keyof typeof caption]: TextStyle;
   };
 

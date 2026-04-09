@@ -121,8 +121,8 @@ export const ModernInput: React.FC<ModernInputProps> = ({
   const borderColor = displayError
     ? theme.colors.error
     : isFocused
-    ? theme.colors.primary
-    : theme.colors.border;
+      ? theme.colors.primary
+      : theme.colors.border;
 
   // Better background color handling for different themes
   const backgroundColor = 'transparent';

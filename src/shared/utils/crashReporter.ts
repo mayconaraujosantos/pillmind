@@ -13,7 +13,7 @@ interface CrashReport {
   context: string;
   deviceInfo: DeviceInfo;
   userActions: string[];
-  appState: Record<string, any>;
+  appState: Record<string, unknown>;
 }
 
 class CrashReporter {
@@ -45,31 +45,38 @@ class CrashReporter {
       }
 
       // Handle unhandled promise rejections - safer approach
-      if (typeof global !== 'undefined') {
-        const originalHandler = global.Promise;
+      if (typeof globalThis !== 'undefined') {
+        const originalHandler = globalThis.Promise;
         if (originalHandler) {
           // Add a simple unhandled rejection handler
-          global.addEventListener?.('unhandledrejection', (event: PromiseRejectionEvent) => {
-            const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
-            this.reportCrash(error, 'Unhandled Promise Rejection');
-          });
+          globalThis.addEventListener?.(
+            'unhandledrejection',
+            (event: PromiseRejectionEvent) => {
+              const error =
+                event.reason instanceof Error
+                  ? event.reason
+                  : new Error(String(event.reason));
+              this.reportCrash(error, 'Unhandled Promise Rejection');
+            }
+          );
         }
       }
     } catch (setupError) {
       // If setup fails, just log it and continue - don't crash the app
       logger.warn('CrashReporter', 'Failed to setup global error handlers', {
-        error: setupError instanceof Error ? setupError.message : String(setupError)
+        error:
+          setupError instanceof Error ? setupError.message : String(setupError),
       });
     }
   }
 
-  recordUserAction(action: string, details?: Record<string, any>) {
+  recordUserAction(action: string, details?: Record<string, unknown>) {
     const actionEntry = `${new Date().toISOString()}: ${action}${
       details ? ` - ${JSON.stringify(details)}` : ''
     }`;
 
     this.userActions.push(actionEntry);
-    
+
     if (this.userActions.length > this.maxActionHistory) {
       this.userActions.shift();
     }
@@ -78,10 +85,10 @@ class CrashReporter {
   }
 
   reportCrash(
-    error: Error, 
-    context: string, 
+    error: Error,
+    context: string,
     isFatal: boolean = false,
-    appState?: Record<string, any>
+    appState?: Record<string, unknown>
   ) {
     const crashReport: CrashReport = {
       timestamp: new Date().toISOString(),
@@ -131,12 +138,16 @@ class CrashReporter {
   }
 
   // Record navigation events
-  recordNavigation(from: string, to: string, params?: any) {
+  recordNavigation(from: string, to: string, params?: unknown) {
     this.recordUserAction(`Navigation: ${from} → ${to}`, { params });
   }
 
   // Record component lifecycle events
-  recordComponentEvent(componentName: string, event: string, details?: any) {
+  recordComponentEvent(
+    componentName: string,
+    event: string,
+    details?: Record<string, unknown>
+  ) {
     this.recordUserAction(`${componentName}: ${event}`, details);
   }
 

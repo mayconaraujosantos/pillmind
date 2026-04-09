@@ -67,7 +67,7 @@
     "dosesShort": "Doses",
     "markAsTaken": "Mark next as taken",
     "doseTaken": "Dose taken",
-    "doseSkipped": "Dose skipped", 
+    "doseSkipped": "Dose skipped",
     "dosePostponed": "Dose postponed",
     "markAsTakenA11y": "Mark dose as taken",
     "skipDoseA11y": "Skip this dose",
@@ -127,7 +127,11 @@
     "medicinePhotoChange": "Change",
     "medicinePhotoRemove": "Remove",
     "medicinePhotoPermissionDenied": "Allow photo library access to add a picture.",
-    "medicineSave": "Save"
+    "medicineSave": "Save",
+    "manageReminders": "Manage Reminders",
+    "reminderSetupTitle": "Set up reminders?",
+    "reminderSetupMessage": "Would you like to configure reminder times for this medication?",
+    "reminderSetupCta": "Set up"
   },
   "appointments": {
     "title": "Appointments",

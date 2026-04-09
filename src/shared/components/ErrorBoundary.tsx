@@ -1,7 +1,13 @@
 import { crashReporter } from '@shared/utils/crashReporter';
 import { logger } from '@shared/utils/logger';
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 interface Props {
   children: ReactNode;
@@ -34,20 +40,17 @@ export class ErrorBoundary extends Component<Props, State> {
         errorMessage: error.message,
         errorStack: error.stack,
         componentStack: errorInfo.componentStack,
-        errorBoundaryStack: errorInfo.errorBoundaryStack,
-        eventPhase: errorInfo.eventPhase,
       },
       error
     );
 
     // Report crash with context
     crashReporter.reportCrash(
-      error, 
-      'React Error Boundary', 
+      error,
+      'React Error Boundary',
       true, // This is fatal for the component tree
       {
         componentStack: errorInfo.componentStack,
-        errorBoundaryStack: errorInfo.errorBoundaryStack,
       }
     );
 
@@ -59,7 +62,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = () => {
-    logger.info('ErrorBoundary', '🔄 Error boundary reset - attempting recovery');
+    logger.info(
+      'ErrorBoundary',
+      '🔄 Error boundary reset - attempting recovery'
+    );
     crashReporter.recordUserAction('Error Boundary Reset', { recovered: true });
     this.setState({ hasError: false, error: null, errorInfo: null });
   };
@@ -81,9 +87,12 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+        >
           <Text style={styles.title}>😵 Oops! Something went wrong</Text>
-          
+
           <Text style={styles.message}>
             {this.state.error?.message || 'An unexpected error occurred'}
           </Text>
@@ -106,10 +115,10 @@ export class ErrorBoundary extends Component<Props, State> {
             <TouchableOpacity style={styles.button} onPress={this.handleReset}>
               <Text style={styles.buttonText}>🔄 Try Again</Text>
             </TouchableOpacity>
-            
+
             {__DEV__ && (
-              <TouchableOpacity 
-                style={[styles.button, styles.secondaryButton]} 
+              <TouchableOpacity
+                style={[styles.button, styles.secondaryButton]}
                 onPress={this.handleShowDetails}
               >
                 <Text style={styles.buttonText}>🔍 Show Details</Text>
@@ -118,7 +127,8 @@ export class ErrorBoundary extends Component<Props, State> {
           </View>
 
           <Text style={styles.helpText}>
-            This error has been logged for debugging. If the problem persists, please contact support.
+            This error has been logged for debugging. If the problem persists,
+            please contact support.
           </Text>
         </ScrollView>
       );

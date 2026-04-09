@@ -283,9 +283,8 @@ export class NodeRedDiscoveryService {
       this.currentService = { url, lastSeen: Date.now() };
       // Salvar no AsyncStorage para persistir
       try {
-        const { default: AsyncStorage } = await import(
-          '@react-native-async-storage/async-storage'
-        );
+        const { default: AsyncStorage } =
+          await import('@react-native-async-storage/async-storage');
         await AsyncStorage.setItem('nodeRedURL', url);
       } catch {
         console.log('Não foi possível salvar configuração');
@@ -298,9 +297,8 @@ export class NodeRedDiscoveryService {
   // Recuperar configuração salva
   async getSavedNodeRedURL(): Promise<string | null> {
     try {
-      const { default: AsyncStorage } = await import(
-        '@react-native-async-storage/async-storage'
-      );
+      const { default: AsyncStorage } =
+        await import('@react-native-async-storage/async-storage');
       const saved = await AsyncStorage.getItem('nodeRedURL');
       if (saved) {
         const isStillValid = await this.testNodeRedConnection(saved);
@@ -323,9 +321,8 @@ export class NodeRedDiscoveryService {
   // Limpar configuração
   async clearConfiguration(): Promise<void> {
     try {
-      const { default: AsyncStorage } = await import(
-        '@react-native-async-storage/async-storage'
-      );
+      const { default: AsyncStorage } =
+        await import('@react-native-async-storage/async-storage');
       await AsyncStorage.removeItem('nodeRedURL');
       this.currentService = null;
     } catch {

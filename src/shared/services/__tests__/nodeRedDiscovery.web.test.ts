@@ -37,28 +37,28 @@ const setGlobalRTCPeerConnection = (candidate: string | null) => {
     }
   }
 
-  (global as typeof globalThis).RTCPeerConnection =
+  globalThis.RTCPeerConnection =
     FakeRTCPeerConnection as unknown as typeof RTCPeerConnection;
   return FakeRTCPeerConnection;
 };
 
 describe('NodeRedDiscoveryService (web)', () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
 
   beforeEach(() => {
     mockFetch.mockReset();
-    global.fetch = mockFetch as typeof fetch;
+    globalThis.fetch = mockFetch as typeof fetch;
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
     // @ts-expect-error - remove test global
-    delete (global as typeof globalThis).RTCPeerConnection;
+    delete globalThis.RTCPeerConnection;
   });
 
   it('returns null when RTCPeerConnection is unavailable', async () => {
     // @ts-expect-error - simulate missing browser API
-    delete (global as typeof globalThis).RTCPeerConnection;
+    delete globalThis.RTCPeerConnection;
 
     const service = createService();
 

@@ -33,7 +33,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
-    expect(getByText('Oops! Something went wrong')).toBeTruthy();
+    expect(getByText(/Oops! Something went wrong/)).toBeTruthy();
     expect(getByText('Boom')).toBeTruthy();
   });
 
@@ -47,12 +47,12 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
-    expect(getByText('Try Again')).toBeTruthy();
+    expect(getByText(/Try Again/)).toBeTruthy();
 
     shouldThrowRef.value = false;
-    fireEvent.press(getByText('Try Again'));
+    fireEvent.press(getByText(/Try Again/));
 
-    expect(queryByText('Oops! Something went wrong')).toBeNull();
+    expect(queryByText(/Oops! Something went wrong/)).toBeNull();
     expect(getByText('Recovered')).toBeTruthy();
   });
 

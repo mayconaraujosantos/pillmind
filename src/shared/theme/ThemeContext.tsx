@@ -173,7 +173,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
 
     // Re-detecção específica para iOS após um delay (problema de timing no simulator)
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     if (Platform.OS === 'ios') {
       timeoutId = setTimeout(() => {
         const reDetectedTheme = detectSystemTheme();

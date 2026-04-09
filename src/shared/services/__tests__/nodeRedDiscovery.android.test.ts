@@ -6,12 +6,12 @@ const mockFetch = jest.fn();
 const createService = () => new NodeRedDiscoveryService();
 
 describe('NodeRedDiscoveryService (android)', () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
   const originalOS = Platform.OS;
 
   beforeEach(() => {
     mockFetch.mockReset();
-    global.fetch = mockFetch as typeof fetch;
+    globalThis.fetch = mockFetch as typeof fetch;
     Object.defineProperty(Platform, 'OS', {
       value: 'android',
       configurable: true,
@@ -19,7 +19,7 @@ describe('NodeRedDiscoveryService (android)', () => {
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
     Object.defineProperty(Platform, 'OS', {
       value: originalOS,
       configurable: true,

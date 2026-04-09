@@ -13,8 +13,12 @@ export function withErrorTracking<P extends object>(
   WrappedComponent: ComponentType<P>,
   componentName?: string
 ) {
-  const displayName = componentName || WrappedComponent.displayName || WrappedComponent.name || 'Component';
-  
+  const displayName =
+    componentName ||
+    WrappedComponent.displayName ||
+    WrappedComponent.name ||
+    'Component';
+
   const TrackedComponent: React.FC<P & WithErrorTrackingProps> = (props) => {
     useEffect(() => {
       // Log component mount
@@ -31,8 +35,9 @@ export function withErrorTracking<P extends object>(
     try {
       return <WrappedComponent {...props} />;
     } catch (error) {
-      const errorInstance = error instanceof Error ? error : new Error(String(error));
-      
+      const errorInstance =
+        error instanceof Error ? error : new Error(String(error));
+
       logger.error(
         'ComponentError',
         `💥 Error in ${displayName}`,
@@ -40,7 +45,11 @@ export function withErrorTracking<P extends object>(
         errorInstance
       );
 
-      crashReporter.reportCrash(errorInstance, `Component Error - ${displayName}`, false);
+      crashReporter.reportCrash(
+        errorInstance,
+        `Component Error - ${displayName}`,
+        false
+      );
 
       // Re-throw to let ErrorBoundary handle it
       throw error;
@@ -59,7 +68,7 @@ export function useComponentTracker(componentName: string) {
     try {
       logger.debug('ComponentLifecycle', `🔧 ${componentName} mounted`);
       crashReporter.recordUserAction(`${componentName}: mounted`);
-    } catch (error) {
+    } catch {
       // Silent fail for mount tracking
     }
 
@@ -67,29 +76,44 @@ export function useComponentTracker(componentName: string) {
       try {
         logger.debug('ComponentLifecycle', `🔧 ${componentName} unmounted`);
         crashReporter.recordUserAction(`${componentName}: unmounted`);
-      } catch (error) {
+      } catch {
         // Silent fail for unmount tracking
       }
     };
   }, [componentName]);
 
-  const trackEvent = useCallback((eventName: string, data?: Record<string, any>) => {
-    try {
-      logger.info(componentName, eventName, data);
-      crashReporter.recordUserAction(`${componentName}: ${eventName}`, data);
-    } catch (error) {
-      // Silent fail for event tracking
-    }
-  }, [componentName]);
+  const trackEvent = useCallback(
+    (eventName: string, data?: Record<string, unknown>) => {
+      try {
+        logger.info(componentName, eventName, data);
+        crashReporter.recordUserAction(`${componentName}: ${eventName}`, data);
+      } catch {
+        // Silent fail for event tracking
+      }
+    },
+    [componentName]
+  );
 
-  const trackError = useCallback((error: Error, context?: string) => {
-    try {
-      logger.error(componentName, `Error: ${context}`, { error: error.message }, error);
-      crashReporter.reportCrash(error, `${componentName} - ${context}`, false);
-    } catch (reportError) {
-      // Silent fail for error tracking
-    }
-  }, [componentName]);
+  const trackError = useCallback(
+    (error: Error, context?: string) => {
+      try {
+        logger.error(
+          componentName,
+          `Error: ${context}`,
+          { error: error.message },
+          error
+        );
+        crashReporter.reportCrash(
+          error,
+          `${componentName} - ${context}`,
+          false
+        );
+      } catch {
+        // Silent fail for error tracking
+      }
+    },
+    [componentName]
+  );
 
   return { trackEvent, trackError };
 }

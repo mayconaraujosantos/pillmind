@@ -3,9 +3,9 @@ import { resolveMedicineImageUrlForDevice } from '../medicineImageUrl';
 // Mock da configuração
 jest.mock('@core/config', () => ({
   config: {
-    media: { 
-      minioPublicBaseUrl: 'http://192.168.1.4:8080/api/media', 
-      minioInferredPort: 9000 
+    media: {
+      minioPublicBaseUrl: 'http://192.168.1.4:8080/api/media',
+      minioInferredPort: 9000,
     },
     api: { baseUrl: 'http://192.168.1.4:8080' },
   },
@@ -15,7 +15,7 @@ describe('resolveMedicineImageUrlForDevice', () => {
   it('should return undefined for null/empty URLs', () => {
     expect(resolveMedicineImageUrlForDevice(null)).toBeUndefined();
     expect(resolveMedicineImageUrlForDevice('')).toBeUndefined();
-    expect(resolveMedicineImageUrlForDevice('  ')).toBe('  ');
+    expect(resolveMedicineImageUrlForDevice('  ')).toBeUndefined();
   });
 
   it('should not modify external URLs', () => {

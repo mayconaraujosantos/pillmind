@@ -3,17 +3,17 @@ import { styleGuide } from './styleGuide';
 export const lightColors = {
   primary: styleGuide.primaryBlue[500],
   secondary: styleGuide.primaryBlue[400],
-  background: '#FFFFFF',
-  surface: styleGuide.neutral[50],
+  background: '#F6F8FC',
+  surface: '#FFFFFF',
   text: styleGuide.neutral[900],
-  textSecondary: styleGuide.neutral[600],
-  border: styleGuide.neutral[200],
+  textSecondary: styleGuide.neutral[700],
+  border: '#DCE4F0',
   error: styleGuide.error[500],
   success: styleGuide.success[500],
   warning: styleGuide.warning[500],
   info: styleGuide.info[500],
   disabled: styleGuide.neutral[300],
-  placeholder: styleGuide.neutral[400],
+  placeholder: styleGuide.neutral[500],
 };
 
 export const darkColors = {

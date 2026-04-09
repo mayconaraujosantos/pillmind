@@ -23,11 +23,9 @@ export const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
 }) => {
   const { theme, isDark } = useTheme();
 
-  const HOME_TINT_LIGHT = '#F0F2FA';
-
   let bg = theme.colors.background;
   if (homeSoftTint && !isDark) {
-    bg = HOME_TINT_LIGHT;
+    bg = theme.colors.background; // theme canvas already carries the blue-tint (#F6F8FC)
   } else if (tabContentCanvas) {
     bg = theme.colors.surface;
   }

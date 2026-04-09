@@ -126,15 +126,15 @@ describe('useNodeRedDiscovery', () => {
 });
 
 describe('useNodeRedConnection', () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
   });
 
   it('reports connection status when request succeeds', async () => {
     const mockFetch = jest.fn().mockResolvedValue({ ok: true });
-    global.fetch = mockFetch as typeof fetch;
+    globalThis.fetch = mockFetch as typeof fetch;
 
     const { result } = renderHook(() =>
       useNodeRedConnection('http://localhost:1880')
@@ -148,7 +148,7 @@ describe('useNodeRedConnection', () => {
 
   it('reports disconnected when request fails', async () => {
     const mockFetch = jest.fn().mockRejectedValue(new Error('Network error'));
-    global.fetch = mockFetch as typeof fetch;
+    globalThis.fetch = mockFetch as typeof fetch;
 
     const { result } = renderHook(() =>
       useNodeRedConnection('http://localhost:1880')

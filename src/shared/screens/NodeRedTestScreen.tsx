@@ -33,8 +33,8 @@ export const NodeRedTestScreen: React.FC = () => {
           {isDiscovering
             ? '🔍 Discovering...'
             : nodeRedURL
-            ? '🟢 Found'
-            : '🔴 Not found'}
+              ? '🟢 Found'
+              : '🔴 Not found'}
         </Text>
 
         {nodeRedURL && <Text style={styles.urlText}>URL: {nodeRedURL}</Text>}
