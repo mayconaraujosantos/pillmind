@@ -1,34 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { ScreenWrapper } from '@shared/components';
-import { useTheme } from '@shared/theme';
+import { SimpleInfoScreen } from '@shared/components';
 
 export const NearbyScreen: React.FC = () => {
-  const { theme } = useTheme();
-
   return (
-    <ScreenWrapper>
-      <View style={styles.container}>
-        <Text style={[styles.title, { color: theme.colors.text }]}>Nearby</Text>
-        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-          Find nearby pharmacies and hospitals
-        </Text>
-      </View>
-    </ScreenWrapper>
+    <SimpleInfoScreen titleKey="nearby.title" subtitleKey="nearby.subtitle" />
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-  },
-});

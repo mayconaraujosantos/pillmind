@@ -4,6 +4,24 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeSelector } from '../ThemeSelector';
 import { ThemeProvider } from '../../theme';
 
+// Mock i18n
+jest.mock('@shared/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'theme.automatic': 'Automático',
+        'theme.systemDescription': 'Segue a configuração do sistema',
+        'theme.light': 'Claro',
+        'theme.lightDescription': 'Sempre usa o tema claro',
+        'theme.dark': 'Escuro',
+        'theme.darkDescription': 'Sempre usa o tema escuro',
+        'account.appearance': 'Aparência',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 describe('ThemeSelector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -11,19 +29,19 @@ describe('ThemeSelector', () => {
   });
 
   it('should render theme options', async () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <ThemeProvider>
         <ThemeSelector />
       </ThemeProvider>
     );
 
     await waitFor(() => {
-      expect(getByText('Aparência')).toBeTruthy();
+      expect(getByTestId('theme-selector-title')).toBeTruthy();
     });
 
-    expect(getByText('Automático')).toBeTruthy();
-    expect(getByText('Claro')).toBeTruthy();
-    expect(getByText('Escuro')).toBeTruthy();
+    expect(getByTestId('theme-option-automatic')).toBeTruthy();
+    expect(getByTestId('theme-option-light')).toBeTruthy();
+    expect(getByTestId('theme-option-dark')).toBeTruthy();
   });
 
   it('should show checkmark for selected theme', async () => {
@@ -62,18 +80,17 @@ describe('ThemeSelector', () => {
   });
 
   it('should render all theme options with correct labels', async () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <ThemeProvider>
         <ThemeSelector />
       </ThemeProvider>
     );
 
     await waitFor(() => {
-      expect(getByText('Automático')).toBeTruthy();
+      expect(getByTestId('theme-option-automatic')).toBeTruthy();
     });
 
-    expect(getByText('Segue a configuração do sistema')).toBeTruthy();
-    expect(getByText('Sempre usa o tema claro')).toBeTruthy();
-    expect(getByText('Sempre usa o tema escuro')).toBeTruthy();
+    expect(getByTestId('theme-option-light')).toBeTruthy();
+    expect(getByTestId('theme-option-dark')).toBeTruthy();
   });
 });

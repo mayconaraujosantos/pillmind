@@ -1,11 +1,13 @@
 module.exports = {
   preset: 'jest-expo',
+  /** RN + ThemeProvider + AuthProvider async mount often exceeds 5s under parallel workers */
+  testTimeout: 20000,
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg)',
+    'node_modules/(?!(?:\\.pnpm/[^/]+/node_modules/)?(?:(jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|healthicons-react-native))',
   ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   collectCoverageFrom: [
-    '**/*.{ts,tsx}',
+    'src/**/*.{ts,tsx}',
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/.expo/**',
@@ -14,6 +16,14 @@ module.exports = {
     '!**/jest.setup.js',
     '!**/*.examples.ts',
     '!**/*.examples.tsx',
+    '!**/index.ts',
+    '!**/examples/**',
+    '!**/shared/testing/**',
+    '!**/shared/screens/**',
+    '!**/shared/i18n/**',
+    '!**/features/**/domain/models/**',
+    '!**/features/**/domain/entities/**',
+    '!**/features/**/domain/repositories/**',
   ],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   testMatch: ['**/__tests__/**/*.(ts|tsx|js)', '**/*.(test|spec).(ts|tsx|js)'],

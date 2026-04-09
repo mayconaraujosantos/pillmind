@@ -1,0 +1,129 @@
+import React from 'react';
+import { Alert, Button, Text } from 'react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
+import { useSocialAuth } from '../useSocialAuth';
+
+const mockAuthContext = {
+  signInWithGoogle: jest.fn(),
+};
+
+jest.mock('../../contexts/AuthContext', () => ({
+  useAuthContext: () => mockAuthContext,
+}));
+
+jest.mock('@shared/utils/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
+}));
+
+const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn());
+
+const TestComponent = ({ onSuccess }: { onSuccess?: () => void }) => {
+  const {
+    modalState,
+    googleLoading,
+    openSocialAuth,
+    closeSocialAuth,
+    confirmSocialAuth,
+  } = useSocialAuth(onSuccess);
+
+  return (
+    <>
+      <Text testID="visible">{String(modalState.visible)}</Text>
+      <Text testID="provider">{modalState.provider}</Text>
+      <Text testID="loading">{String(modalState.loading)}</Text>
+      <Text testID="google-loading">{String(googleLoading)}</Text>
+      <Button title="open-google" onPress={() => openSocialAuth('google')} />
+      <Button title="open-apple" onPress={() => openSocialAuth('apple')} />
+      <Button title="close" onPress={closeSocialAuth} />
+      <Button title="confirm" onPress={() => void confirmSocialAuth()} />
+    </>
+  );
+};
+
+describe('useSocialAuth', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    alertSpy.mockClear();
+    mockAuthContext.signInWithGoogle.mockResolvedValue({ success: true });
+  });
+
+  it('opens modal only for Apple; Google does not show modal', async () => {
+    const { getByText, getByTestId } = render(<TestComponent />);
+
+    fireEvent.press(getByText('open-google'));
+    await waitFor(() => {
+      expect(getByTestId('google-loading').props.children).toBe('false');
+    });
+    expect(getByTestId('visible').props.children).toBe('false');
+
+    fireEvent.press(getByText('open-apple'));
+    expect(getByTestId('visible').props.children).toBe('true');
+    expect(getByTestId('provider').props.children).toBe('apple');
+
+    fireEvent.press(getByText('close'));
+    expect(getByTestId('visible').props.children).toBe('false');
+  });
+
+  it('starts Google auth immediately and calls onSuccess', async () => {
+    const onSuccess = jest.fn();
+    const { getByText, getByTestId } = render(
+      <TestComponent onSuccess={onSuccess} />
+    );
+
+    fireEvent.press(getByText('open-google'));
+    await waitFor(() => {
+      expect(mockAuthContext.signInWithGoogle).toHaveBeenCalledTimes(1);
+      expect(onSuccess).toHaveBeenCalledTimes(1);
+      expect(getByTestId('google-loading').props.children).toBe('false');
+    });
+  });
+
+  it('alerts when google auth fails (non-cancel)', async () => {
+    const { Alert } = require('react-native');
+    mockAuthContext.signInWithGoogle.mockResolvedValue({
+      success: false,
+      error: 'Invalid credentials',
+    });
+
+    const { getByText, getByTestId } = render(<TestComponent />);
+
+    fireEvent.press(getByText('open-google'));
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalled();
+      expect(getByTestId('google-loading').props.children).toBe('false');
+    });
+  });
+
+  it('does not alert when user cancels', async () => {
+    const { Alert } = require('react-native');
+    mockAuthContext.signInWithGoogle.mockResolvedValue({
+      success: false,
+      error: 'Login cancelado pelo usuário',
+    });
+
+    const { getByText, getByTestId } = render(<TestComponent />);
+
+    fireEvent.press(getByText('open-google'));
+    await waitFor(() => {
+      expect(getByTestId('google-loading').props.children).toBe('false');
+    });
+
+    expect(Alert.alert).not.toHaveBeenCalled();
+  });
+
+  it('shows alert for apple auth', async () => {
+    const { Alert } = require('react-native');
+    const { getByText } = render(<TestComponent />);
+
+    fireEvent.press(getByText('open-apple'));
+    fireEvent.press(getByText('confirm'));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalled();
+    });
+  });
+});

@@ -1,7 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@shared/theme';
-import { getOnboardingColors } from '../constants/onboarding.constants';
+import { logger } from '@shared/utils/logger';
+import { adaptiveSpacing, deviceSize } from '@shared/utils/dimensions';
+import {
+  getOnboardingColors,
+  ONBOARDING_STEPS,
+} from '../constants/onboarding.constants';
 
 interface OnboardingIndicatorProps {
   totalSteps: number;
@@ -9,17 +14,39 @@ interface OnboardingIndicatorProps {
 }
 
 export const OnboardingIndicator: React.FC<OnboardingIndicatorProps> = ({
-  totalSteps,
+  totalSteps: _totalSteps,
   currentStep,
 }) => {
   const { isDark } = useTheme();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
 
+  // Mostrar apenas os 3 primeiros dots (telas de onboarding)
+  // Desaparecer quando chegar nos formulários (step 3+)
+  const INDICATOR_STEPS = 3;
+  const shouldShowIndicator = currentStep < INDICATOR_STEPS;
+
+  const steps = useMemo(() => ONBOARDING_STEPS.slice(0, INDICATOR_STEPS), []);
+
+  useEffect(() => {
+    logger.debug('OnboardingIndicator', 'Indicator state', {
+      currentStep,
+      shouldShowIndicator,
+      stepsCount: steps.length,
+    });
+  }, [currentStep, steps.length]);
+
+  if (!shouldShowIndicator) {
+    logger.debug('OnboardingIndicator', 'Indicator hidden');
+    return null;
+  }
+
+  logger.debug('OnboardingIndicator', 'Indicator rendering');
   return (
     <View style={styles.container}>
-      {Array.from({ length: totalSteps }).map((_, index) => (
+      {steps.map((step, index) => (
         <View
-          key={index}
+          key={step.id}
+          testID={`onboarding-step-indicator-${index}`}
           style={[
             styles.dot,
             index === currentStep
@@ -40,15 +67,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    gap: adaptiveSpacing.xs,
+    paddingBottom: adaptiveSpacing.xs,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: deviceSize(6, 8, 10),
+    height: deviceSize(6, 8, 10),
+    borderRadius: deviceSize(3, 4, 5),
   },
   activeDot: {
-    width: 24,
+    width: deviceSize(20, 24, 28),
   },
   inactiveDot: {},
 });

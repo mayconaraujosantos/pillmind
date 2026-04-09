@@ -8,6 +8,7 @@ import {
   createBorderRadius,
   createSelectiveBorderRadius,
 } from '../borderRadius';
+import { expectKeys } from '../testUtils';
 
 describe('Border Radius System', () => {
   describe('borderRadius', () => {
@@ -265,32 +266,34 @@ describe('Border Radius System', () => {
 
   describe('Type Safety', () => {
     it('should have all required size keys', () => {
-      const keys = Object.keys(borderRadius);
-      expect(keys).toContain('xs');
-      expect(keys).toContain('sm');
-      expect(keys).toContain('md');
-      expect(keys).toContain('lg');
-      expect(keys).toContain('xl');
-      expect(keys).toContain('full');
-      expect(keys).toContain('none');
+      expectKeys(Object.keys(borderRadius), [
+        'xs',
+        'sm',
+        'md',
+        'lg',
+        'xl',
+        'full',
+        'none',
+      ]);
     });
 
     it('should have all required preset keys', () => {
-      const keys = Object.keys(borderRadiusPresets);
-      expect(keys).toContain('button');
-      expect(keys).toContain('buttonPill');
-      expect(keys).toContain('card');
-      expect(keys).toContain('cardLarge');
-      expect(keys).toContain('input');
-      expect(keys).toContain('badge');
-      expect(keys).toContain('badgePill');
-      expect(keys).toContain('modal');
-      expect(keys).toContain('bottomSheet');
-      expect(keys).toContain('avatarCircular');
-      expect(keys).toContain('avatarRounded');
-      expect(keys).toContain('chip');
-      expect(keys).toContain('alert');
-      expect(keys).toContain('thumbnail');
+      expectKeys(Object.keys(borderRadiusPresets), [
+        'button',
+        'buttonPill',
+        'card',
+        'cardLarge',
+        'input',
+        'badge',
+        'badgePill',
+        'modal',
+        'bottomSheet',
+        'avatarCircular',
+        'avatarRounded',
+        'chip',
+        'alert',
+        'thumbnail',
+      ]);
     });
   });
 });

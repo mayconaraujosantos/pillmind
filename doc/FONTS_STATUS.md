@@ -62,7 +62,6 @@ const styles = StyleSheet.create({
    ```
 
 2. **Verificar Renderização**:
-
    - As fontes devem aparecer consistentes em iOS e Android
    - Verifique se não há avisos de "font not found" no console
 

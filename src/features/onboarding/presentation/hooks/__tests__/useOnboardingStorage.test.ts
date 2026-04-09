@@ -1,5 +1,5 @@
-import { renderHook, waitFor, act } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { useOnboardingStorage } from '../useOnboardingStorage';
 
 // Mock do AsyncStorage
@@ -8,6 +8,18 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
   removeItem: jest.fn(),
 }));
+
+const STORAGE_KEY = '@pillmind:has_seen_onboarding';
+
+const renderStorageHook = async () => {
+  const { result } = renderHook(() => useOnboardingStorage());
+
+  await waitFor(() => {
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  return result;
+};
 
 describe('useOnboardingStorage', () => {
   beforeEach(() => {
@@ -26,44 +38,29 @@ describe('useOnboardingStorage', () => {
     });
 
     expect(result.current.hasSeenOnboarding).toBe(false);
-    expect(AsyncStorage.getItem).toHaveBeenCalledWith(
-      '@pillmind:has_seen_onboarding'
-    );
+    expect(AsyncStorage.getItem).toHaveBeenCalledWith(STORAGE_KEY);
   });
 
   it('deve retornar hasSeenOnboarding como true quando o valor no AsyncStorage é "true"', async () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue('true');
 
-    const { result } = renderHook(() => useOnboardingStorage());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+    const result = await renderStorageHook();
 
     expect(result.current.hasSeenOnboarding).toBe(true);
-    expect(AsyncStorage.getItem).toHaveBeenCalledWith(
-      '@pillmind:has_seen_onboarding'
-    );
+    expect(AsyncStorage.getItem).toHaveBeenCalledWith(STORAGE_KEY);
   });
 
   it('deve salvar "true" no AsyncStorage quando markOnboardingAsSeen é chamado', async () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
     (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useOnboardingStorage());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+    const result = await renderStorageHook();
 
     await act(async () => {
       await result.current.markOnboardingAsSeen();
     });
 
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-      '@pillmind:has_seen_onboarding',
-      'true'
-    );
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, 'true');
     await waitFor(() => {
       expect(result.current.hasSeenOnboarding).toBe(true);
     });
@@ -73,19 +70,13 @@ describe('useOnboardingStorage', () => {
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue('true');
     (AsyncStorage.removeItem as jest.Mock).mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useOnboardingStorage());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+    const result = await renderStorageHook();
 
     await act(async () => {
       await result.current.resetOnboarding();
     });
 
-    expect(AsyncStorage.removeItem).toHaveBeenCalledWith(
-      '@pillmind:has_seen_onboarding'
-    );
+    expect(AsyncStorage.removeItem).toHaveBeenCalledWith(STORAGE_KEY);
     await waitFor(() => {
       expect(result.current.hasSeenOnboarding).toBe(false);
     });
@@ -99,11 +90,7 @@ describe('useOnboardingStorage', () => {
       new Error('Storage error')
     );
 
-    const { result } = renderHook(() => useOnboardingStorage());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+    const result = await renderStorageHook();
 
     expect(result.current.hasSeenOnboarding).toBe(false);
     expect(consoleWarnSpy).toHaveBeenCalled();
@@ -120,18 +107,11 @@ describe('useOnboardingStorage', () => {
       new Error('Storage error')
     );
 
-    const { result } = renderHook(() => useOnboardingStorage());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+    const result = await renderStorageHook();
 
     await result.current.markOnboardingAsSeen();
 
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-      '@pillmind:has_seen_onboarding',
-      'true'
-    );
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, 'true');
     expect(consoleWarnSpy).toHaveBeenCalled();
 
     consoleWarnSpy.mockRestore();
@@ -142,11 +122,7 @@ describe('useOnboardingStorage', () => {
     (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
     (AsyncStorage.removeItem as jest.Mock).mockResolvedValue(undefined);
 
-    const { result } = renderHook(() => useOnboardingStorage());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
+    const result = await renderStorageHook();
 
     await act(async () => {
       await result.current.markOnboardingAsSeen();
@@ -164,9 +140,8 @@ describe('useOnboardingStorage', () => {
       expect(result.current.hasSeenOnboarding).toBe(false);
     });
 
-    const expectedKey = '@pillmind:has_seen_onboarding';
-    expect(AsyncStorage.getItem).toHaveBeenCalledWith(expectedKey);
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith(expectedKey, 'true');
-    expect(AsyncStorage.removeItem).toHaveBeenCalledWith(expectedKey);
+    expect(AsyncStorage.getItem).toHaveBeenCalledWith(STORAGE_KEY);
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(STORAGE_KEY, 'true');
+    expect(AsyncStorage.removeItem).toHaveBeenCalledWith(STORAGE_KEY);
   });
 });

@@ -1,10 +1,12 @@
 import { TextStyle } from 'react-native';
+import { useResponsive } from '../hooks/useResponsive';
 
 /**
  * Typography System - PillMind Style Guide
  *
  * Sistema completo de tipografia usando Roboto como fonte padrão.
  * Todas as variantes seguem o formato: tamanho / line height / letter spacing
+ * AGORA COM SUPORTE RESPONSIVO AUTOMÁTICO
  */
 
 /**
@@ -299,6 +301,124 @@ export const typography = {
   fontWeights,
   fontFamily,
 } as const;
+
+/**
+ * SISTEMA RESPONSIVO DE TIPOGRAFIA
+ * Hook para aplicar tipografia que se adapta automaticamente ao tamanho da tela
+ */
+export interface ResponsiveTypographySystem {
+  display: typeof display;
+  heading: typeof heading;
+  body: typeof body;
+  button: typeof button;
+  caption: typeof caption;
+  responsive: {
+    display: { [K in keyof typeof display]: TextStyle };
+    heading: { [K in keyof typeof heading]: TextStyle };
+    body: { [K in keyof typeof body]: TextStyle };
+    button: { [K in keyof typeof button]: TextStyle };
+    caption: { [K in keyof typeof caption]: TextStyle };
+  };
+}
+
+export const useResponsiveTypography = (): ResponsiveTypographySystem => {
+  const { rf, isSmallDevice, isMediumDevice, isLargeDevice } = useResponsive();
+
+  // Fator de escala baseado no tamanho do dispositivo
+  const getScaleFactor = () => {
+    if (isSmallDevice) return 0.3; // Escala conservadora para telas pequenas
+    if (isMediumDevice) return 0.5; // Escala padrão
+    if (isLargeDevice) return 0.7; // Escala maior para tablets
+    return 0.5;
+  };
+
+  const scaleFactor = getScaleFactor();
+
+  // Função para aplicar responsividade a um estilo
+  const makeResponsive = (style: TextStyle): TextStyle => ({
+    ...style,
+    fontSize: style.fontSize ? rf(style.fontSize, scaleFactor) : style.fontSize,
+    lineHeight: style.lineHeight
+      ? rf(style.lineHeight, scaleFactor)
+      : style.lineHeight,
+  });
+
+  // Aplicar responsividade a todas as categorias
+  const responsiveDisplay = Object.keys(display).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof display] = makeResponsive(
+        display[key as keyof typeof display]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
+    [K in keyof typeof display]: TextStyle;
+  };
+
+  const responsiveHeading = Object.keys(heading).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof heading] = makeResponsive(
+        heading[key as keyof typeof heading]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
+    [K in keyof typeof heading]: TextStyle;
+  };
+
+  const responsiveBody = Object.keys(body).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof body] = makeResponsive(
+        body[key as keyof typeof body]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
+    [K in keyof typeof body]: TextStyle;
+  };
+
+  const responsiveButton = Object.keys(button).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof button] = makeResponsive(
+        button[key as keyof typeof button]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
+    [K in keyof typeof button]: TextStyle;
+  };
+
+  const responsiveCaption = Object.keys(caption).reduce(
+    (acc, key) => {
+      acc[key as keyof typeof caption] = makeResponsive(
+        caption[key as keyof typeof caption]
+      );
+      return acc;
+    },
+    {} as Record<string, TextStyle>
+  ) as {
+    [K in keyof typeof caption]: TextStyle;
+  };
+
+  return {
+    display,
+    heading,
+    body,
+    button,
+    caption,
+    responsive: {
+      display: responsiveDisplay,
+      heading: responsiveHeading,
+      body: responsiveBody,
+      button: responsiveButton,
+      caption: responsiveCaption,
+    },
+  };
+};
 
 /**
  * Tipos para autocomplete e type safety

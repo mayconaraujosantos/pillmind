@@ -3,49 +3,62 @@
  */
 
 import {
-  spacing,
-  spacingScale,
-  insets,
-  stack,
-  inline,
-  gap,
   componentSpacing,
-  createPadding,
-  createPaddingHorizontal,
-  createPaddingVertical,
+  createCustomSpacing,
+  createGap,
   createMargin,
   createMarginHorizontal,
   createMarginVertical,
-  createGap,
-  createCustomSpacing,
+  createPadding,
+  createPaddingHorizontal,
+  createPaddingVertical,
+  gap,
+  inline,
+  insets,
+  spacing,
+  spacingScale,
+  stack,
 } from '../spacing';
+import { expectKeys } from '../testUtils';
 
 describe('Spacing System', () => {
+  const spacingValues = {
+    none: 0,
+    xxs: 4,
+    xs: 8,
+    sm: 16,
+    md: 24,
+    lg: 32,
+    xl: 40,
+    xxl: 48,
+    xxxl: 56,
+    xxxxl: 64,
+    xxxxxl: 72,
+    xxxxxxl: 80,
+    xxxxxxxl: 88,
+    xxxxxxxxl: 96,
+  } as const;
+
+  const baseProgression = {
+    xs: 8,
+    sm: 16,
+    md: 24,
+    lg: 32,
+    xl: 40,
+    xxl: 48,
+  } as const;
+
   describe('spacing', () => {
     it('should have correct spacing values', () => {
-      expect(spacing.none).toBe(0);
-      expect(spacing.xxs).toBe(4);
-      expect(spacing.xs).toBe(8);
-      expect(spacing.sm).toBe(16);
-      expect(spacing.md).toBe(24);
-      expect(spacing.lg).toBe(32);
-      expect(spacing.xl).toBe(40);
-      expect(spacing.xxl).toBe(48);
-      expect(spacing.xxxl).toBe(56);
-      expect(spacing.xxxxl).toBe(64);
-      expect(spacing.xxxxxl).toBe(72);
-      expect(spacing.xxxxxxl).toBe(80);
-      expect(spacing.xxxxxxxl).toBe(88);
-      expect(spacing.xxxxxxxxl).toBe(96);
+      Object.entries(spacingValues).forEach(([key, value]) => {
+        expect(spacing[key as keyof typeof spacingValues]).toBe(value);
+      });
     });
 
     it('should follow 8px base progression', () => {
-      expect(spacing.xs).toBe(8);
-      expect(spacing.sm).toBe(16);
-      expect(spacing.md).toBe(24);
-      expect(spacing.lg).toBe(32);
-      expect(spacing.xl).toBe(40);
-      expect(spacing.xxl).toBe(48);
+      Object.entries(baseProgression).forEach(([key, value]) => {
+        expect(spacing[key as keyof typeof baseProgression]).toBe(value);
+      });
     });
 
     it('should have values that are multiples of 4', () => {
@@ -308,28 +321,30 @@ describe('Spacing System', () => {
 
   describe('Type Safety', () => {
     it('should have all spacing size keys', () => {
-      const keys = Object.keys(spacing);
-      expect(keys).toContain('none');
-      expect(keys).toContain('xxs');
-      expect(keys).toContain('xs');
-      expect(keys).toContain('sm');
-      expect(keys).toContain('md');
-      expect(keys).toContain('lg');
-      expect(keys).toContain('xl');
+      expectKeys(Object.keys(spacing), [
+        'none',
+        'xxs',
+        'xs',
+        'sm',
+        'md',
+        'lg',
+        'xl',
+      ]);
     });
 
     it('should have all component spacing keys', () => {
-      const keys = Object.keys(componentSpacing);
-      expect(keys).toContain('button');
-      expect(keys).toContain('buttonLarge');
-      expect(keys).toContain('buttonSmall');
-      expect(keys).toContain('card');
-      expect(keys).toContain('cardLarge');
-      expect(keys).toContain('input');
-      expect(keys).toContain('modal');
-      expect(keys).toContain('section');
-      expect(keys).toContain('listItem');
-      expect(keys).toContain('page');
+      expectKeys(Object.keys(componentSpacing), [
+        'button',
+        'buttonLarge',
+        'buttonSmall',
+        'card',
+        'cardLarge',
+        'input',
+        'modal',
+        'section',
+        'listItem',
+        'page',
+      ]);
     });
   });
 

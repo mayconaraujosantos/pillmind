@@ -5,6 +5,7 @@ import { WithThemeProvider } from '../WithThemeProvider';
 
 describe('OnboardingFooter', () => {
   const mockProps = {
+    currentStep: 2,
     onSignIn: jest.fn(),
     onSignUp: jest.fn(),
   };
@@ -21,8 +22,9 @@ describe('OnboardingFooter', () => {
     );
 
     await waitFor(() => {
-      expect(getByText('SIGN IN')).toBeTruthy();
-      expect(getByText('SIGN UP')).toBeTruthy();
+      // Textos traduzidos para inglês (padrão nos testes)
+      expect(getByText('Login')).toBeTruthy();
+      expect(getByText('Create an account')).toBeTruthy();
     });
   });
 
@@ -34,7 +36,7 @@ describe('OnboardingFooter', () => {
     );
 
     await waitFor(() => {
-      fireEvent.press(getByText('SIGN IN'));
+      fireEvent.press(getByText('Login'));
     });
 
     expect(mockProps.onSignIn).toHaveBeenCalledTimes(1);
@@ -49,7 +51,7 @@ describe('OnboardingFooter', () => {
     );
 
     await waitFor(() => {
-      fireEvent.press(getByText('SIGN UP'));
+      fireEvent.press(getByText('Create an account'));
     });
 
     expect(mockProps.onSignUp).toHaveBeenCalledTimes(1);

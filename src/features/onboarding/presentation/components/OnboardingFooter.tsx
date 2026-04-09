@@ -1,54 +1,90 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import React, { useMemo, useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { useTheme } from '@shared/theme';
-import {
-  getOnboardingColors,
-  ONBOARDING_TEXTS,
-} from '../constants/onboarding.constants';
+import { logger } from '@shared/utils/logger';
+import { adaptiveSpacing, deviceSize } from '@shared/utils/dimensions';
+import { useTranslation } from '@shared/i18n';
+import { getOnboardingColors } from '../constants/onboarding.constants';
+import { OnboardingPrimaryButton } from './OnboardingPrimaryButton';
+import { OnboardingSecondaryButton } from './OnboardingSecondaryButton';
 
 interface OnboardingFooterProps {
-  onSignIn: () => void;
-  onSignUp: () => void;
+  currentStep: number;
+  onSignIn?: () => void;
+  onSignUp?: () => void;
+  onNext?: () => void;
+  _onScroll?: () => void;
 }
 
 export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
+  currentStep,
   onSignIn,
   onSignUp,
+  onNext,
+  _onScroll,
 }) => {
   const { isDark } = useTheme();
+  const { t } = useTranslation();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
+
+  useEffect(() => {
+    logger.debug('OnboardingFooter', 'Footer mounted', { currentStep });
+  }, [currentStep]);
+
+  logger.debug('OnboardingFooter', 'Footer rendering', { currentStep });
+
+  // Step 0-1: Mostrar "Next"
+  // Step 2 (último info): Mostrar "Create an account" e "Login"
+  // Step 3-5: Não mostrar footer (SignUp, SignIn, Success)
+  const shouldShowFooter = currentStep < 3;
+  const isLastInfoScreen = currentStep === 2;
+
+  if (!shouldShowFooter) {
+    return null;
+  }
+
+  const handleNextPress = () => {
+    onNext?.();
+  };
+
+  if (isLastInfoScreen) {
+    return (
+      <View style={styles.footer}>
+        <View style={styles.buttonColumn}>
+          <OnboardingPrimaryButton
+            testID="onboarding-get-started-button"
+            label={t('onboarding.buttons.createAccount')}
+            onPress={onSignUp}
+            backgroundColor={colors.PRIMARY}
+            textColor={colors.BUTTON_TEXT}
+            shadowColor={colors.PRIMARY}
+            style={styles.button}
+          />
+
+          <OnboardingSecondaryButton
+            label={t('onboarding.buttons.login')}
+            onPress={onSignIn}
+            textColor={colors.BUTTON_TEXT}
+            backgroundColor={colors.PRIMARY}
+            style={styles.button}
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.footer}>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          onPress={onSignIn}
-          style={[
-            styles.button,
-            styles.signInButton,
-            { borderColor: colors.PRIMARY },
-          ]}
-        >
-          <Text style={[styles.buttonText, { color: colors.PRIMARY }]}>
-            {ONBOARDING_TEXTS.SIGN_IN}
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={onSignUp}
-          style={[
-            styles.button,
-            styles.signUpButton,
-            {
-              backgroundColor: colors.PRIMARY,
-              shadowColor: colors.PRIMARY,
-            },
-          ]}
-        >
-          <Text style={[styles.buttonText, { color: colors.BUTTON_TEXT }]}>
-            {ONBOARDING_TEXTS.SIGN_UP}
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.singleButtonContainer}>
+        <OnboardingPrimaryButton
+          testID="onboarding-next-button"
+          label={t('common.next')}
+          onPress={handleNextPress}
+          backgroundColor={colors.PRIMARY}
+          textColor={colors.BUTTON_TEXT}
+          shadowColor={colors.PRIMARY}
+          style={styles.button}
+        />
       </View>
     </View>
   );
@@ -56,40 +92,35 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
 
 const styles = StyleSheet.create({
   footer: {
-    paddingHorizontal: 32,
-    paddingBottom: 48,
-    paddingTop: 0,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    gap: 16,
+    paddingHorizontal: adaptiveSpacing.lg,
+    paddingBottom: deviceSize(70, 90, 110),
+    paddingTop: adaptiveSpacing.sm,
+    marginTop: -adaptiveSpacing.xs,
+    alignContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
+    minHeight: 120,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 8,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  buttonColumn: {
+    width: '100%',
+    gap: 16,
+    maxWidth: 400,
+  },
+  singleButtonContainer: {
+    width: '100%',
+    gap: adaptiveSpacing.sm,
+    alignItems: 'center',
+    maxWidth: 400,
   },
   button: {
-    flex: 1,
-    paddingVertical: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 56,
-  },
-  // Estilo base para texto dos botões
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  signInButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-  },
-  signUpButton: {
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    width: '100%',
+    minHeight: 48,
   },
 });

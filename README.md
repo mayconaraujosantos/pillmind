@@ -11,10 +11,15 @@ Aplicativo de gerenciamento de medicamentos e lembretes desenvolvido com React N
 - **Jest** - Framework de testes
 - **ESLint** - Linter de código
 - **Prettier** - Formatador de código
+- **Node-RED** - Mock backend para autenticação (desenvolvimento)
 
 ## 📁 Estrutura do Projeto
 
 O projeto utiliza uma arquitetura **Feature-Based com Clean Architecture**. Para mais detalhes, consulte a [documentação de arquitetura](./doc/ARCHITECTURE.md).
+
+## ⚡ Quick Start
+
+👉 **Novo no projeto?** Leia o [Guia de Startup](./STARTUP.md) para configuração inicial.
 
 ## 🛠️ Instalação
 
@@ -32,6 +37,27 @@ npm run android
 npm run ios
 ```
 
+### ⚠️ Importante: Backend de Autenticação
+
+Para que a autenticação funcione, você precisa apontar o app para o **pillmind-backend** (Java) e definir as variáveis de ambiente:
+
+```bash
+# URL base do backend (sem /api)
+EXPO_PUBLIC_API_URL=http://localhost:8080
+
+# Google OAuth Web Client ID
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your_google_web_client_id.apps.googleusercontent.com
+```
+
+Se estiver usando o backend antigo via Node-RED (desenvolvimento), inicie em um terminal separado:
+
+```bash
+npm run nodered
+# Node-RED estará disponível em http://localhost:1880
+```
+
+Veja [NODERED_SETUP.md](./doc/NODERED_SETUP.md) para mais detalhes.
+
 ## 📝 Scripts Disponíveis
 
 ```bash
@@ -39,6 +65,7 @@ npm run ios
 npm start              # Inicia o servidor Expo
 npm start:clear        # Inicia com cache limpo
 npm reset              # Reseta o cache completamente
+npm run nodered        # Inicia o backend Node-RED (para autenticação)
 
 # Build
 npm run build:dev:android  # Build de desenvolvimento para Android
@@ -198,7 +225,6 @@ O projeto utiliza **GitHub Actions** para automatizar o Git Flow e garantir qual
    ```
 
 2. **Criar Pull Request**:
-
    - Abra PR no GitHub de `feature/minha-feature` para `develop`
    - CI/CD valida automaticamente (lint, test, format)
    - EAS Update Preview é criado automaticamente para teste

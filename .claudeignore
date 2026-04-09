@@ -1,0 +1,29 @@
+# Dependencies and package manager artifacts
+node_modules/
+
+# Build outputs and generated artifacts
+android/.gradle/
+android/build/
+android/app/build/
+ios/build/
+.expo/
+coverage/
+
+# Tooling and local caches
+.scannerwork/
+.sonarlint/
+.eslintcache
+.venv/
+
+# VCS and editor metadata
+.git/
+.idea/
+.vscode/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Optional large local assets
+layout_figma/

@@ -1,9 +1,23 @@
-import { CreateMedicineUseCase } from '../CreateMedicineUseCase';
-import { GetMedicinesUseCase } from '../GetMedicinesUseCase';
 import { Medicine } from '../../entities/Medicine';
 import { MedicineRepository } from '../../repositories/MedicineRepository';
+import { CreateMedicineUseCase } from '../CreateMedicineUseCase';
+import { GetMedicinesUseCase } from '../GetMedicinesUseCase';
+import { GetMedicineByIdUseCase } from '../GetMedicineByIdUseCase';
+import { UpdateMedicineUseCase } from '../UpdateMedicineUseCase';
+import { DeleteMedicineUseCase } from '../DeleteMedicineUseCase';
 
 describe('Medicine use cases', () => {
+  const medicineData: Omit<Medicine, 'id'> = {
+    name: 'Ibuprofen',
+    dosage: '200mg',
+    frequency: 'twice-a-day',
+    times: ['08:00', '20:00'],
+    startDate: new Date('2024-01-01'),
+    endDate: new Date('2024-01-07'),
+    notes: 'Take with food',
+    imageUrl: 'https://example.com/ibuprofen.png',
+  };
+
   const baseRepositoryMock = (): MedicineRepository => ({
     create: jest.fn<Promise<Medicine>, [Omit<Medicine, 'id'>]>(),
     getAll: jest.fn<Promise<Medicine[]>, []>(),
@@ -14,17 +28,6 @@ describe('Medicine use cases', () => {
   });
 
   it('creates a medicine through the repository', async () => {
-    const medicineData: Omit<Medicine, 'id'> = {
-      name: 'Ibuprofen',
-      dosage: '200mg',
-      frequency: 'twice-a-day',
-      times: ['08:00', '20:00'],
-      startDate: new Date('2024-01-01'),
-      endDate: new Date('2024-01-07'),
-      notes: 'Take with food',
-      imageUrl: 'https://example.com/ibuprofen.png',
-    };
-
     const repository = {
       ...baseRepositoryMock(),
       create: jest.fn(
@@ -44,17 +47,6 @@ describe('Medicine use cases', () => {
   });
 
   it('propagates repository errors when creating a medicine', async () => {
-    const medicineData: Omit<Medicine, 'id'> = {
-      name: 'Ibuprofen',
-      dosage: '200mg',
-      frequency: 'twice-a-day',
-      times: ['08:00', '20:00'],
-      startDate: new Date('2024-01-01'),
-      endDate: new Date('2024-01-07'),
-      notes: 'Take with food',
-      imageUrl: 'https://example.com/ibuprofen.png',
-    };
-
     const repository = {
       ...baseRepositoryMock(),
       create: jest.fn(async () => {
@@ -106,5 +98,62 @@ describe('Medicine use cases', () => {
 
     expect(repository.getAll).toHaveBeenCalled();
     expect(result).toEqual([]);
+  });
+
+  it('retrieves a single medicine by id', async () => {
+    const existing: Medicine = {
+      id: 'x',
+      name: 'A',
+      dosage: '1',
+      frequency: 'daily',
+      times: [],
+      startDate: new Date('2024-01-01'),
+    };
+    const repository = {
+      ...baseRepositoryMock(),
+      getById: jest.fn(async (id: string) => (id === 'x' ? existing : null)),
+    } satisfies MedicineRepository;
+
+    const useCase = new GetMedicineByIdUseCase(repository);
+
+    await expect(useCase.execute('x')).resolves.toEqual(existing);
+    await expect(useCase.execute('missing')).resolves.toBeNull();
+  });
+
+  it('updates a medicine through the repository', async () => {
+    const repository = {
+      ...baseRepositoryMock(),
+      update: jest.fn(
+        async (id: string, patch: Partial<Medicine>): Promise<Medicine> => ({
+          id,
+          name: 'Updated',
+          dosage: '10mg',
+          frequency: 'daily',
+          times: [],
+          startDate: new Date('2024-01-01'),
+          ...patch,
+        })
+      ),
+    } satisfies MedicineRepository;
+
+    const useCase = new UpdateMedicineUseCase(repository);
+
+    const result = await useCase.execute('1', { name: 'Updated' });
+
+    expect(repository.update).toHaveBeenCalledWith('1', { name: 'Updated' });
+    expect(result.name).toBe('Updated');
+  });
+
+  it('deletes a medicine through the repository', async () => {
+    const repository = {
+      ...baseRepositoryMock(),
+      delete: jest.fn(async () => {}),
+    } satisfies MedicineRepository;
+
+    const useCase = new DeleteMedicineUseCase(repository);
+
+    await useCase.execute('1');
+
+    expect(repository.delete).toHaveBeenCalledWith('1');
   });
 });

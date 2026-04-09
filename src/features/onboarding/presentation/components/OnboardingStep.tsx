@@ -1,38 +1,87 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import React, { useMemo, useEffect } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
+import {
+  adaptiveSpacing,
+  adaptiveFontSizes,
+  deviceSize,
+} from '@shared/utils/dimensions';
 import { useTheme } from '@shared/theme';
+import { logger } from '@shared/utils/logger';
 import {
   OnboardingStep as OnboardingStepType,
   getOnboardingColors,
 } from '../constants/onboarding.constants';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const IMAGE_HEIGHT = Math.min(SCREEN_HEIGHT * 0.4, 320);
+import { OnboardingSignUp } from './OnboardingSignUp';
+import { OnboardingSignIn } from './OnboardingSignIn';
+import { OnboardingSuccess } from './OnboardingSuccess';
+import { OnboardingImage } from './OnboardingImage';
 
 interface OnboardingStepProps {
   step: OnboardingStepType;
+  onSignUpComplete?: () => void;
+  onSignInComplete?: () => void;
+  onGoToSignUpFromSignIn?: () => void;
+  onGoToSignInFromSignUp?: () => void;
+  onFinish?: () => void;
 }
 
 export const OnboardingStepComponent: React.FC<OnboardingStepProps> = ({
   step,
+  onSignUpComplete,
+  onSignInComplete,
+  onGoToSignUpFromSignIn,
+  onGoToSignInFromSignUp,
+  onFinish,
 }) => {
+  // Hooks devem ser chamados no topo, antes de qualquer return
   const { isDark } = useTheme();
   const colors = useMemo(() => getOnboardingColors(isDark), [isDark]);
 
-  // Mostra a imagem se ela existir, independente de ser o último step
+  useEffect(() => {
+    logger.debug('OnboardingStepComponent', 'Step component mounted', {
+      stepId: step.id,
+      stepTitle: step.title,
+    });
+  }, [step.id]);
+
+  // Se for uma tela de signup, renderiza o componente de signup
+  if (step.type === 'signup') {
+    return (
+      <OnboardingSignUp
+        onSignUpComplete={onSignUpComplete}
+        onGoToSignIn={onGoToSignInFromSignUp}
+      />
+    );
+  }
+
+  // Se for uma tela de signin, renderiza o componente de signin
+  if (step.type === 'signin') {
+    return (
+      <OnboardingSignIn
+        onSignInComplete={onSignInComplete}
+        onGoToSignUp={onGoToSignUpFromSignIn}
+      />
+    );
+  }
+
+  // Se for uma tela de success, renderiza o componente de success
+  if (step.type === 'success') {
+    return <OnboardingSuccess onFinish={onFinish} />;
+  }
+
+  // Renderiza a tela informativa padrão
   const shouldShowImage = step.image !== undefined && step.image !== null;
+
+  logger.debug('OnboardingStepComponent', 'Rendering step', {
+    stepId: step.id,
+    stepTitle: step.title,
+    shouldShowImage,
+    type: step.type,
+  });
 
   return (
     <View style={styles.container}>
-      {shouldShowImage && (
-        <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: step.image }}
-            style={styles.image}
-            resizeMode="contain"
-          />
-        </View>
-      )}
+      {shouldShowImage && <OnboardingImage imageUrl={step.image!} />}
       <View style={styles.textContainer}>
         <Text style={[styles.title, { color: colors.TEXT_PRIMARY }]}>
           {step.title}
@@ -50,42 +99,33 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 32,
-  },
-  imageContainer: {
-    width: '100%',
-    height: IMAGE_HEIGHT,
-    maxHeight: 320,
-    marginBottom: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
+    paddingHorizontal: adaptiveSpacing.lg,
+    paddingBottom: adaptiveSpacing.xs,
+    paddingTop: adaptiveSpacing.xs,
   },
   textContainer: {
     width: '100%',
+    paddingHorizontal: adaptiveSpacing.md,
     alignItems: 'center',
-    marginBottom: 32,
-    marginTop: 0,
+    paddingTop: adaptiveSpacing.sm,
+    paddingBottom: adaptiveSpacing.md,
+    minHeight: deviceSize(90, 110, 130),
   },
   title: {
-    fontSize: 28,
+    fontSize: adaptiveFontSizes.xl,
     fontWeight: '800',
-    marginBottom: 16,
+    marginBottom: adaptiveSpacing.md,
     textAlign: 'center',
     letterSpacing: 0.3,
-    lineHeight: 36,
+    lineHeight: deviceSize(28, 32, 36),
     width: '100%',
   },
   description: {
-    fontSize: 16,
+    fontSize: adaptiveFontSizes.md,
     fontWeight: '400',
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: deviceSize(22, 24, 26),
     width: '100%',
+    paddingHorizontal: adaptiveSpacing.xs,
   },
 });

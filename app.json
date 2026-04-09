@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "plugins": [
       [
@@ -16,14 +16,33 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.1047433217870"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow PillMind to access your photos to set your profile picture.",
+          "cameraPermission": "Allow PillMind to use the camera for your profile picture."
+        }
+      ],
+      "expo-notifications",
+      "expo-router"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.pillmind.app"
+      "bundleIdentifier": "com.pillmind.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.pillmind.app",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

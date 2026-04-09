@@ -35,7 +35,7 @@ Configurações centrais da aplicação (navegação, config).
 **Exemplo:**
 
 ```typescript
-import { AppNavigator } from '@core/navigation/AppNavigator';
+import { getAppHeaderChrome } from '@core/navigation/appHeaderChrome';
 import { config } from '@core/config';
 ```
 
