@@ -52,3 +52,4 @@ coverage
 
 # IDE
 .idea/
+.env.local
