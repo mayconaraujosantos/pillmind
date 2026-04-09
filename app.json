@@ -30,7 +30,8 @@
           "cameraPermission": "Allow PillMind to use the camera for your profile picture."
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-router"
     ],
     "ios": {
       "supportsTablet": true,

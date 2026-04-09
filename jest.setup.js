@@ -26,6 +26,41 @@ jest.mock('react-native/Libraries/Utilities/Appearance', () => ({
   addChangeListener: jest.fn(() => ({ remove: jest.fn() })),
 }));
 
+// Mock expo-router globally — prevents native module loading during unit tests
+jest.mock('expo-router', () => {
+  const React = require('react');
+  return {
+    useRouter: () => ({
+      push: jest.fn(),
+      replace: jest.fn(),
+      back: jest.fn(),
+      navigate: jest.fn(),
+    }),
+    useNavigation: () => ({
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      addListener: jest.fn(() => jest.fn()),
+      getParent: () => ({ navigate: jest.fn() }),
+    }),
+    usePathname: () => '/',
+    useLocalSearchParams: () => ({}),
+    useSegments: () => [],
+    useFocusEffect: (cb) => {
+      cb();
+    },
+    Link: ({ children }) => children,
+    Redirect: () => null,
+    Stack: {
+      Screen: () => null,
+    },
+    Tabs: Object.assign(
+      ({ children }) => React.createElement(React.Fragment, null, children),
+      { Screen: () => null }
+    ),
+    Slot: () => null,
+  };
+});
+
 // Mock SafeAreaContext globally
 jest.mock('react-native-safe-area-context', () => {
   const React = require('react');

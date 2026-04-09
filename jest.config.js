@@ -3,7 +3,7 @@ module.exports = {
   /** RN + ThemeProvider + AuthProvider async mount often exceeds 5s under parallel workers */
   testTimeout: 20000,
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg)',
+    'node_modules/(?!(?:\\.pnpm/[^/]+/node_modules/)?(?:(jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|healthicons-react-native))',
   ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   collectCoverageFrom: [
