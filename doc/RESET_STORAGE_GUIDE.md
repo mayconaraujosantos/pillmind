@@ -127,12 +127,10 @@ O app usa estas chaves:
 ## 📝 Notas Importantes
 
 1. **Expo Go vs App Nativo:**
-
    - **Expo Go (iOS)**: Storage compartilhado entre todos os projetos
    - **App Nativo (Android)**: Storage isolado por app
 
 2. **Limpar Storage não limpa:**
-
    - Cache do Metro Bundler
    - Cache de imagens
    - Dados do sistema operacional

@@ -37,7 +37,6 @@
 ### Arquivos Principais sem Testes:
 
 - ❌ `App.tsx` - 0% (12-78 linhas não cobertas)
-- ❌ `src/core/navigation/AppNavigator.tsx` - 17.64% (19-42 linhas não cobertas)
 - ❌ `src/features/home/presentation/screens/HomeScreen.tsx` - 0% (7-40 linhas não cobertas)
 - ❌ `src/features/onboarding/presentation/screens/OnboardingScreen.tsx` - 0% (25-142 linhas não cobertas)
 
@@ -71,7 +70,7 @@
 
 1. **App.tsx** - Arquivo principal da aplicação, precisa de testes
 2. **HomeScreen.tsx** - Tela principal, importante ter cobertura
-3. **AppNavigator.tsx** - Navegação principal, precisa de mais testes
+3. **Estrutura `app/` do expo-router** - Navegação principal, precisa de mais testes
 4. **Entidades de Domínio** - Medicine, Appointment precisam de testes unitários
 
 ### Prioridade Média:

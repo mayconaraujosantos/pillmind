@@ -88,13 +88,11 @@ cat doc/CONVENTIONAL_COMMITS_QUICK.md  # Ver guia rápido
 Ao fazer commit:
 
 1. **Pre-commit hook** executa:
-
    - Typecheck (TypeScript)
    - Lint (ESLint)
    - Format (Prettier)
 
 2. **Commit-msg hook** executa:
-
    - Commitlint (valida formato)
 
 3. **Pre-push hook** executa:

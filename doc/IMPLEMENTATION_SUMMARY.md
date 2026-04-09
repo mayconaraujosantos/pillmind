@@ -140,7 +140,6 @@ const getSocialAuthUrl = (provider: 'apple' | 'google'): string => {
 Created 4 detailed guides:
 
 1. **STARTUP.md** - Quick start guide for development setup
-
    - Installation steps
    - Terminal setup instructions
    - Architecture overview
@@ -148,7 +147,6 @@ Created 4 detailed guides:
    - Troubleshooting tips
 
 2. **doc/NODERED_SETUP.md** - Node-RED configuration guide
-
    - Installation instructions
    - Configuration details
    - Testing approaches (curl, script)
@@ -156,7 +154,6 @@ Created 4 detailed guides:
    - Environment variables
 
 3. **doc/AUTHENTICATION_TESTING.md** - Testing guide
-
    - Test scenarios and steps
    - Troubleshooting tests
    - Manual testing with curl
@@ -287,25 +284,21 @@ Look for detailed timing and error information in device logs:
 ## Next Steps (For Production)
 
 1. **Replace Node-RED with real backend**
-
    - Update `getSocialAuthUrl()` to point to production API
    - Implement actual OAuth2 flow for Google/Apple
    - Use real authentication tokens
 
 2. **Implement token management**
-
    - Add token refresh logic
    - Store tokens securely (not in state)
    - Add logout functionality
 
 3. **Add navigation flow**
-
    - Navigate to authenticated screens after login
    - Add navigation to correct signin/signup
    - Add logout navigation back to onboarding
 
 4. **Security improvements**
-
    - Enable HTTPS for all API communication
    - Use secure token storage
    - Implement PKCE for OAuth flows

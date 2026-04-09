@@ -191,14 +191,12 @@ Output esperado:
 ## 🚀 Próximos Passos
 
 1. Aplicar em outros componentes:
-
    - [ ] OnboardingCarousel
    - [ ] OnboardingStep
    - [ ] HomeScreen cards
    - [ ] AppointmentsScreen
 
 2. Testar em dispositivos reais:
-
    - [ ] Moto G23 (problema reportado)
    - [ ] Dispositivos pequenos (< 5")
    - [ ] Tablets (> 7")

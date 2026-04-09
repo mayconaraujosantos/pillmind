@@ -123,7 +123,7 @@ sonar.coverage.exclusions=**/__tests__/**,**/*.test.ts,**/*.test.tsx,**/*.spec.t
 Mesmo com 0% de cobertura, estes arquivos devem permanecer na análise:
 
 - ❌ `HomeScreen.tsx` - Tela principal, precisa de testes
-- ❌ `AppNavigator.tsx` - Navegação principal, precisa de mais testes
+- ❌ `app/_layout.tsx` e `app/(tabs)/_layout.tsx` - Navegação principal, precisam de mais testes
 - ❌ `Medicine.ts`, `Appointment.ts` - Entidades de domínio, precisam de testes
 - ❌ `MedicineRepository.ts` - Repositório, precisa de testes
 - ❌ Use Cases - Lógica de negócio, precisa de testes

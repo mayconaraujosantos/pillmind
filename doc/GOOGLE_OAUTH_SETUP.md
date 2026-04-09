@@ -48,7 +48,6 @@ Acesse [Google Cloud Console](https://console.cloud.google.com) e:
 1. Crie/selecione projeto
 2. Vá em **APIs & Services** → **Credentials**
 3. Crie **OAuth client ID**:
-
    - **Type**: Web application
    - **Name**: PillMind Backend
    - Anote o **Client ID** (será algo como `123456789-abc.apps.googleusercontent.com`)

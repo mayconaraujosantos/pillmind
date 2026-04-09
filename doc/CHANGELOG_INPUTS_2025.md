@@ -196,19 +196,16 @@ marginBottom: 10,
 ## 📁 Arquivos Modificados
 
 1. ✅ `src/shared/components/Input.tsx`
-
    - iOS wrapper styles modernizados
    - Android wrapper styles modernizados
    - Label, hint, error text spacing melhorado
 
 2. ✅ `src/features/onboarding/presentation/components/OnboardingAuth.tsx`
-
    - Input container com novo design
    - Padding vertical ajustado
    - Label margin bottom aumentado
 
 3. ✅ `doc/MODERN_INPUT_DESIGN_2025.md`
-
    - Documentação completa do novo design
 
 4. ✅ `src/shared/components/ModernInputExamples.tsx`
@@ -244,23 +241,19 @@ marginBottom: 10,
 ## 🚀 Próximas Melhorias
 
 1. **Dark Mode Support**
-
    - Adaptar colors para tema escuro
    - Manter glassmorphism effect
 
 2. **Validation States**
-
    - Success state (border green)
    - Warning state (border yellow)
    - Loading animation
 
 3. **Floating Labels**
-
    - Labels que se movem ao focar
    - Animação suave
 
 4. **Focus Glow Effect**
-
    - Cor do shadow muda em focus
    - Efeito mais elegante
 

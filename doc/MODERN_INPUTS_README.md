@@ -202,37 +202,31 @@ ANTES: elevation: 2              DEPOIS: elevation: 1
 Todos os 7 documentos estão na pasta `doc/`:
 
 1. **MODERN_INPUTS_INDEX.md** ← **COMECE AQUI**
-
    - Índice de toda a documentação
    - Links para tudo
    - Guia de navegação
 
 2. **MODERN_INPUTS_QUICK_REFERENCE.md**
-
    - Snippets de código
    - Copy-paste ready
    - Troubleshooting
 
 3. **MODERN_INPUT_DESIGN_2025.md**
-
    - Design principles
    - Paleta de cores
    - Roadmap futuro
 
 4. **MODERN_INPUTS_VISUAL_GUIDE.md**
-
    - Comparações visuais
    - ASCII diagrams
    - Paleta de cores
 
 5. **MODERN_INPUTS_STATE_EXAMPLES.md**
-
    - Todos os estados
    - Form layouts
    - Accessibility
 
 6. **CHANGELOG_INPUTS_2025.md**
-
    - Antes/depois
    - Arquivos modificados
    - Benefícios

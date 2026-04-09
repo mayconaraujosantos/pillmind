@@ -178,23 +178,19 @@ Depois:
 ## 🚀 Próximas Melhorias (Roadmap)
 
 1. **Dark Mode Support** (Fase 2)
-
    - Adaptar cores para tema escuro
    - Manter efeito glassmorphism
 
 2. **Validation States** (Fase 2)
-
    - Success state (border verde)
    - Warning state (border amarelo)
    - Loading animation
 
 3. **Floating Labels** (Fase 3)
-
    - Labels que se movem ao focar
    - Animação suave
 
 4. **Advanced Focus Effects** (Fase 3)
-
    - Glow effect na cor primária
    - Mais elegância visual
 
@@ -259,19 +255,16 @@ Depois:
 ## 🔗 Documentação Relacionada
 
 1. **[MODERN_INPUT_DESIGN_2025.md](doc/MODERN_INPUT_DESIGN_2025.md)**
-
    - Guia completo de design principles
    - Especificações detalhadas
    - Paleta de cores
 
 2. **[CHANGELOG_INPUTS_2025.md](doc/CHANGELOG_INPUTS_2025.md)**
-
    - Resumo de mudanças
    - Antes e depois comparativo
    - Benefícios por stakeholder
 
 3. **[MODERN_INPUTS_VISUAL_GUIDE.md](doc/MODERN_INPUTS_VISUAL_GUIDE.md)**
-
    - Guia visual comparativo
    - Diagramas ASCII
    - Exemplos de estados

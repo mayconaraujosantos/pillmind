@@ -235,7 +235,6 @@ shadowRadius: 3 - 4;
    ```
 
 3. **Validation States**
-
    - Success state com border verde sutil
    - Warning state com border amarelo
    - Loading state com shimmer effect

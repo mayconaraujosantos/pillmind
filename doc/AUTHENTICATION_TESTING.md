@@ -30,7 +30,6 @@ npm run nodered
 
 1. Open browser: `http://localhost:1880`
 2. You should see the flow with 4 HTTP nodes:
-
    - `POST /api/auth/signup`
    - `POST /api/auth/signin`
    - `POST /api/auth/google`
@@ -90,7 +89,6 @@ npm run android
 
 1. In app, tap Google icon/button on onboarding
 2. Watch device logs closely:
-
    - `🔐 google sign up started`
    - `📡 Calling google endpoint` with endpoint URL
    - `⏱️ Request started at` with timestamp
@@ -148,7 +146,6 @@ Request took more than 30 seconds
    ```
 
 3. **Check which device has issue**:
-
    - iOS: Try both iOS simulator and Android emulator
    - Android emulator: Verify 10.0.2.2 host alias works
    - iOS simulator: Verify localhost works

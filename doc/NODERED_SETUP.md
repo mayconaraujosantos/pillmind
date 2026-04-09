@@ -63,13 +63,11 @@ bash scripts/test-nodered.sh
 The `settings.js` file configures Node-RED to:
 
 1. **Listen on all interfaces** (`0.0.0.0`):
-
    - Makes Node-RED accessible from Android emulator (10.0.2.2)
    - Makes Node-RED accessible from iOS simulator (localhost)
    - Makes Node-RED accessible from browser (localhost)
 
 2. **Enable CORS** (`httpCors: { origin: '*' }`):
-
    - Allows requests from different origins (mobile app to backend)
    - Only for development - use proper CORS in production
 
@@ -112,7 +110,6 @@ npm run nodered
    ```
 
 2. Verify endpoints exist in Node-RED:
-
    - Open http://localhost:1880
    - You should see the auth flow with HTTP endpoints
 
