@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 import { OnboardingSignIn } from './OnboardingSignIn';
 import { OnboardingSignUp } from './OnboardingSignUp';
 
@@ -17,17 +18,21 @@ export const OnboardingUnifiedAuth: React.FC<OnboardingUnifiedAuthProps> = ({
 
   if (currentScreen === 'signUp') {
     return (
-      <OnboardingSignUp
-        onSignUpComplete={onAuthComplete}
-        onGoToSignIn={() => setCurrentScreen('signIn')}
-      />
+      <View testID="onboarding-auth-form" style={{ flex: 1 }}>
+        <OnboardingSignUp
+          onSignUpComplete={onAuthComplete}
+          onGoToSignIn={() => setCurrentScreen('signIn')}
+        />
+      </View>
     );
   }
 
   return (
-    <OnboardingSignIn
-      onSignInComplete={onAuthComplete}
-      onGoToSignUp={() => setCurrentScreen('signUp')}
-    />
+    <View testID="onboarding-auth-form" style={{ flex: 1 }}>
+      <OnboardingSignIn
+        onSignInComplete={onAuthComplete}
+        onGoToSignUp={() => setCurrentScreen('signUp')}
+      />
+    </View>
   );
 };

@@ -25,6 +25,7 @@ interface OnboardingViewProps {
   currentStep: number;
   totalSteps: number;
   onScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  onAdvanceStep?: () => void;
   onSkip: () => void;
   onCreateAccount?: () => void;
   onLogin?: () => void;
@@ -39,6 +40,7 @@ export const OnboardingView = forwardRef<ScrollView, OnboardingViewProps>(
       currentStep,
       totalSteps,
       onScroll,
+      onAdvanceStep,
       onSkip,
       onCreateAccount,
       onLogin,
@@ -63,6 +65,8 @@ export const OnboardingView = forwardRef<ScrollView, OnboardingViewProps>(
 
     const handleNext = () => {
       logger.debug('OnboardingView', 'Next button pressed');
+      // Advance step state immediately (enables testability; scroll is cosmetic)
+      onAdvanceStep?.();
       const nextPosition = (currentStep + 1) * SCREEN_WIDTH;
       if (scrollViewRef && 'current' in scrollViewRef) {
         scrollViewRef.current?.scrollTo({

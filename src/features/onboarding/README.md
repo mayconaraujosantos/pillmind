@@ -27,12 +27,14 @@ src/features/onboarding/
 ## 🎯 Funcionalidades
 
 ### ✨ Carousel Introdutório
+
 - 3 telas informativas sobre o app
 - Navegação por swipe ou botões
 - Progresso visual com indicadores
 - Botão "Pular" (disponível nos 2 primeiros steps)
 
 ### 🔐 Autenticação
+
 - **Registro**: Email, nome e senha
 - **Login**: Email e senha
 - **OAuth**: Google e Apple Sign-In
@@ -40,6 +42,7 @@ src/features/onboarding/
 - Feedback visual de loading
 
 ### 🎨 Design System
+
 - Tema claro/escuro automático
 - Responsividade completa (phone/tablet/landscape)
 - Componentes acessíveis (Screen Reader)
@@ -48,10 +51,12 @@ src/features/onboarding/
 ## 🔧 Componentes Principais
 
 ### 📱 Telas
+
 - **OnboardingContainer**: Orquestrador principal
 - **OnboardingView**: Gerencia carousel + header + footer
 
 ### 🧩 Componentes
+
 - **OnboardingCarousel**: Carousel com swipe
 - **OnboardingHeader**: Header com botão pular
 - **OnboardingAuth**: Formulários de auth
@@ -59,6 +64,7 @@ src/features/onboarding/
 - **LanguageSelector**: Seletor de idioma (🇧🇷/🇺🇸)
 
 ### 🪝 Hooks
+
 - **useAuth()**: Autenticação local (email/password)
 - **useSocialAuth()**: OAuth (Google/Apple)
 - **useOnboardingStorage()**: Persistência do status
@@ -66,11 +72,13 @@ src/features/onboarding/
 - **useOnboardingScroll()**: Detecção de scroll
 
 ### 🏪 Contexts
+
 - **AuthContext**: Estado global de autenticação
 
 ## 🛠️ Como Usar
 
 ### Inicializar Onboarding
+
 ```typescript
 import { OnboardingContainer } from '@features/onboarding';
 
@@ -81,19 +89,20 @@ return shouldShowOnboarding ? <OnboardingContainer /> : <MainApp />;
 ```
 
 ### Usar Hook de Autenticação
+
 ```typescript
 import { useAuth } from '@features/onboarding/presentation/hooks';
 
 const MyComponent = () => {
   const { signUp, signIn, loading, error } = useAuth();
-  
+
   const handleSignUp = async () => {
     const result = await signUp({
       name: 'João Silva',
       email: 'joao@email.com',
-      password: 'MinhaSenh@123'
+      password: 'MinhaSenh@123',
     });
-    
+
     if (result.success) {
       // Sucesso
     } else {
@@ -104,9 +113,10 @@ const MyComponent = () => {
 ```
 
 ### Personalizar Temas
+
 ```typescript
 import { getOnboardingColors } from '@features/onboarding/presentation/constants';
-import { useColorScheme } from 'react-native'; 
+import { useColorScheme } from 'react-native';
 
 const colors = getOnboardingColors(useColorScheme());
 ```
@@ -114,6 +124,7 @@ const colors = getOnboardingColors(useColorScheme());
 ## ⚙️ Configuração
 
 ### Storage Keys
+
 Todas as chaves estão centralizadas em `constants/storage.constants.ts`:
 
 ```typescript
@@ -122,15 +133,19 @@ import { STORAGE_KEYS } from '@features/onboarding/presentation/constants';
 // ✅ Usar constantes
 AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_SEEN);
 
-// ❌ Não usar strings hard-coded  
+// ❌ Não usar strings hard-coded
 AsyncStorage.getItem('@pillmind:has_seen_onboarding');
 ```
 
 ### Validação
+
 Utilizar funções de validação centralizadas:
 
 ```typescript
-import { validateEmail, validateSignUpForm } from '@features/onboarding/presentation/utils';
+import {
+  validateEmail,
+  validateSignUpForm,
+} from '@features/onboarding/presentation/utils';
 
 const { isValid, error } = validateEmail(email);
 const formValidation = validateSignUpForm({ email, password, name });
@@ -139,6 +154,7 @@ const formValidation = validateSignUpForm({ email, password, name });
 ## 🧪 Testes
 
 ### Executar Testes
+
 ```bash
 # Todos os testes do onboarding
 npm test -- src/features/onboarding
@@ -149,10 +165,14 @@ npm test -- OnboardingAuth.test.tsx
 ```
 
 ### Dados de Teste
+
 Usar constantes de teste em vez de dados hard-coded:
 
 ```typescript
-import { TEST_DATA, TEST_SCENARIOS } from '@features/onboarding/__tests__/test-constants';
+import {
+  TEST_DATA,
+  TEST_SCENARIOS,
+} from '@features/onboarding/__tests__/test-constants';
 
 // ✅ Dados seguros e consistentes
 auth.signUp(TEST_DATA);
@@ -165,17 +185,19 @@ auth.signUp({ email: 'test@test.com', password: 'password123' });
 ## 📊 Estado e Fluxos
 
 ### Estados do Onboarding
+
 ```typescript
 type OnboardingPhase = 'carousel' | 'auth' | 'postLoginLoading' | 'success';
 ```
 
 ### Fluxo de Navegação
+
 ```
-📱 Carousel (steps 0,1,2) 
+📱 Carousel (steps 0,1,2)
    ↓ (usuário pula ou termina)
-🔐 Autenticação 
+🔐 Autenticação
    ↓ (login bem-sucedido)
-⏳ Post-login Loading 
+⏳ Post-login Loading
    ↓ (preparação completa)
 ✅ Success (navega para app principal)
 ```
@@ -183,8 +205,9 @@ type OnboardingPhase = 'carousel' | 'auth' | 'postLoginLoading' | 'success';
 ## 🔒 Segurança
 
 ### Boas Práticas Implementadas
+
 - ✅ Tokens armazenados com AsyncStorage
-- ✅ Validação client-side e server-side  
+- ✅ Validação client-side e server-side
 - ✅ Timeout em requisições (30s)
 - ✅ Retry automático para erros de rede
 - ✅ Logs estruturados para auditoria
@@ -194,6 +217,7 @@ type OnboardingPhase = 'carousel' | 'auth' | 'postLoginLoading' | 'success';
 ## 🌐 Internacionalização
 
 O onboarding suporta múltiplos idiomas:
+
 - 🇧🇷 Português (padrão)
 - 🇺🇸 English
 
@@ -202,6 +226,7 @@ Arquivos de tradução em `src/core/i18n/locales/`.
 ## 📱 Responsividade
 
 Suporta todos os tamanhos de dispositivo:
+
 - 📱 **Phone**: Layout otimizado para telas pequenas
 - 📱 **Tablet**: Aproveita espaço extra com padding
 - 📱 **Landscape**: Ajustes para orientação paisagem
@@ -209,6 +234,7 @@ Suporta todos os tamanhos de dispositivo:
 ## 🐛 Debug e Troubleshooting
 
 ### Logs Úteis
+
 ```typescript
 import { logger } from '@shared/utils/logger';
 
@@ -219,6 +245,7 @@ logger.error('AuthContext', 'Token validation failed', { error });
 ```
 
 ### Reset Para Desenvolvimento
+
 ```typescript
 import { useOnboardingStorage } from '@features/onboarding/presentation/hooks';
 
@@ -227,6 +254,7 @@ await resetOnboarding(); // Remove flag de "já viu onboarding"
 ```
 
 ### Storage Inspector
+
 ```bash
 # Para debugar AsyncStorage
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -239,6 +267,7 @@ console.log('📱 AsyncStorage:', allData);
 ## 🚀 Próximos Passos
 
 ### Melhorias Planejadas
+
 - [ ] **Biometria**: Touch ID / Face ID
 - [ ] **Social**: Cadastro com Facebook, GitHub
 - [ ] **Tutorial Interativo**: Guided tour no primeiro acesso
@@ -258,7 +287,8 @@ Para contribuir com melhorias:
 
 ---
 
-> 📚 **Links Úteis**: 
+> 📚 **Links Úteis**:
+>
 > - [Documentação Técnica Detalhada](../../doc/I18N_ONBOARDING_IMPLEMENTATION.md)
 > - [Fluxos de Autenticação](../../doc/AUTHENTICATION_FLOW_DIAGRAMS.md)
 > - [Melhorias de UX](../../doc/ONBOARDING_UX_IMPROVEMENTS.md)

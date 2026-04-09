@@ -15,6 +15,7 @@ interface OnboardingPrimaryButtonProps {
   textColor: string;
   shadowColor: string;
   style?: ViewStyle;
+  testID?: string;
 }
 
 export const OnboardingPrimaryButton: React.FC<
@@ -27,9 +28,13 @@ export const OnboardingPrimaryButton: React.FC<
   textColor,
   shadowColor,
   style,
+  testID,
 }) => {
   return (
     <TouchableOpacity
+      testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={label}
       onPress={onPress}
       disabled={isLoading}
       style={[

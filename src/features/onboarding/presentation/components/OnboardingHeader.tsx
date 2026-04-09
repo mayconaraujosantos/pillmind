@@ -47,6 +47,7 @@ export const OnboardingHeader: React.FC<OnboardingHeaderProps> = ({
               borderColor: colors.SKIP_BUTTON_BORDER,
             },
           ]}
+          testID="onboarding-skip-button"
           activeOpacity={0.6}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessibilityLabel="Pular onboarding"

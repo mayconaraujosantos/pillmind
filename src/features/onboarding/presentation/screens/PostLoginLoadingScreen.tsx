@@ -108,6 +108,7 @@ export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
   return (
     <ScreenWrapper>
       <View
+        testID="post-login-loading-overlay"
         style={[styles.container, { backgroundColor: theme.colors.background }]}
       >
         <Loader
@@ -117,12 +118,12 @@ export const PostLoginLoadingScreen: React.FC<PostLoginLoadingScreenProps> = ({
             progress < 25
               ? 'Preparing your session...'
               : progress < 50
-              ? 'Loading your preferences...'
-              : progress < 75
-              ? 'Setting up your account...'
-              : progress < 100
-              ? 'Almost ready!'
-              : 'Ready!'
+                ? 'Loading your preferences...'
+                : progress < 75
+                  ? 'Setting up your account...'
+                  : progress < 100
+                    ? 'Almost ready!'
+                    : 'Ready!'
           }
           testID="post-login-loader"
         />

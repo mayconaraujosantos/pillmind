@@ -24,19 +24,19 @@ export const TEST_SCENARIOS = {
     password: 'ValidPassword123!',
     name: 'Valid Test User',
   },
-  
+
   EXISTING_USER: {
-    email: 'existing.user@pillmind.example.com', 
+    email: 'existing.user@pillmind.example.com',
     password: 'ExistingPassword123!',
     name: 'Existing User',
   },
-  
+
   INVALID_EMAIL_USER: {
     email: 'invalid-email',
     password: 'ValidPassword123!',
     name: 'Invalid Email User',
   },
-  
+
   WEAK_PASSWORD_USER: {
     email: 'weakpass.user@pillmind.example.com',
     password: '123',

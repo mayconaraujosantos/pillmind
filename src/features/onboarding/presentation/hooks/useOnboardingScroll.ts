@@ -16,5 +16,9 @@ export const useOnboardingScroll = (totalSteps: number) => {
     }
   };
 
-  return { currentStep, handleScroll };
+  const advanceStep = () => {
+    setCurrentStep((prev) => Math.min(prev + 1, totalSteps - 1));
+  };
+
+  return { currentStep, handleScroll, advanceStep };
 };

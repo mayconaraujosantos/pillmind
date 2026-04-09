@@ -3,40 +3,31 @@
  * @description Define todas as interfaces, tipos e enums utilizados no onboarding
  */
 
-import { ERROR_CODES } from './constants/storage.constants';
+import { ERROR_CODES } from './presentation/constants/storage.constants';
 
 /**
  * Fases do processo de onboarding
  */
-export type OnboardingPhase = 
-  | 'carousel' 
-  | 'auth' 
-  | 'postLoginLoading' 
+export type OnboardingPhase =
+  | 'carousel'
+  | 'auth'
+  | 'postLoginLoading'
   | 'success';
 
 /**
  * Métodos de autenticação disponíveis
  */
-export type AuthMethod = 
-  | 'email' 
-  | 'google' 
-  | 'apple';
+export type AuthMethod = 'email' | 'google' | 'apple';
 
 /**
  * Tipos de ações de autenticação
  */
-export type AuthAction = 
-  | 'signUp' 
-  | 'signIn';
+export type AuthAction = 'signUp' | 'signIn';
 
 /**
  * Status de loading para diferentes componentes
  */
-export type LoadingState = 
-  | 'idle' 
-  | 'loading' 
-  | 'success' 
-  | 'error';
+export type LoadingState = 'idle' | 'loading' | 'success' | 'error';
 
 /**
  * Estrutura de resposta de erro

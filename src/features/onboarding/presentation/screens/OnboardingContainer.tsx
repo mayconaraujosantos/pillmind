@@ -27,7 +27,7 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
   startWithAuth = false,
 }) => {
   const scrollViewRef = useRef<ScrollView>(null);
-  const { currentStep, handleScroll } = useOnboardingScroll(
+  const { currentStep, handleScroll, advanceStep } = useOnboardingScroll(
     TOTAL_ONBOARDING_STEPS
   );
   const [currentScreen, setCurrentScreen] = useState<ScreenType>(
@@ -48,7 +48,7 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
 
   const handleSkip = () => {
     logger.info('OnboardingContainer', '⏭️ Skip pressed → auth');
-    setAuthEntryScreen('signIn');
+    setAuthEntryScreen('signUp');
     setCurrentScreen('auth');
     onSkip?.();
   };
@@ -81,6 +81,7 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
       'OnboardingContainer',
       '✅ Onboarding finished, calling onFinish'
     );
+    setCurrentScreen('success');
     onFinish?.();
   };
 
@@ -113,6 +114,7 @@ export const OnboardingContainer: React.FC<OnboardingContainerProps> = ({
       currentStep={currentStep}
       totalSteps={TOTAL_ONBOARDING_STEPS}
       onScroll={handleScroll}
+      onAdvanceStep={advanceStep}
       onSkip={handleSkip}
       onCreateAccount={handleGoToAuthSignUp}
       onLogin={handleGoToAuthSignIn}

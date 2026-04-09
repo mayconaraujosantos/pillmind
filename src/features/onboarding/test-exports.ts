@@ -16,9 +16,4 @@ export {
 } from './__tests__/test-constants';
 
 // Re-export tipos úteis para testes
-export type {
-  TestData,
-  ErrorResponse,
-  AuthResponse,
-  User,
-} from './types';
+export type { TestData, ErrorResponse, AuthResponse, User } from './types';

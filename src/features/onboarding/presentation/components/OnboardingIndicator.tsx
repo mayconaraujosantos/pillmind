@@ -46,6 +46,7 @@ export const OnboardingIndicator: React.FC<OnboardingIndicatorProps> = ({
       {steps.map((step, index) => (
         <View
           key={step.id}
+          testID={`onboarding-step-indicator-${index}`}
           style={[
             styles.dot,
             index === currentStep

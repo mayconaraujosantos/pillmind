@@ -142,6 +142,7 @@ export const OnboardingSignUp: React.FC<OnboardingSignUpProps> = ({
           text: t('onboarding.signUp.alreadyHaveAccount'),
           linkLabel: t('onboarding.signUp.signIn'),
           onPress: onGoToSignIn,
+          testID: 'auth-mode-toggle-signin',
         }}
       />
       <SocialAuthModal

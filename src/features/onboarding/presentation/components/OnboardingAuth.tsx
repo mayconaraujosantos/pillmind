@@ -36,6 +36,7 @@ type LinkCta = {
   text: string;
   linkLabel: string;
   onPress?: () => void;
+  testID?: string;
 };
 
 interface OnboardingAuthProps {
@@ -194,6 +195,7 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
 
       <View style={styles.buttonsContainer}>
         <OnboardingPrimaryButton
+          testID="onboarding-auth-submit-button"
           label={primaryLabel}
           isLoading={isLoading}
           onPress={handlePrimaryPress}
@@ -281,6 +283,7 @@ export const OnboardingAuth: React.FC<OnboardingAuthProps> = ({
           <Text style={[styles.linkText, { color: colors.TEXT_SECONDARY }]}>
             {linkCta.text}{' '}
             <Text
+              testID={linkCta.testID}
               onPress={linkCta.onPress}
               style={{ color: colors.PRIMARY, fontWeight: '700' }}
             >

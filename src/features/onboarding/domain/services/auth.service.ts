@@ -66,16 +66,16 @@ class AuthService {
       pic == null || pic === ''
         ? null
         : typeof pic === 'string'
-        ? pic
-        : String(pic);
+          ? pic
+          : String(pic);
 
     const dobRaw = r.dateOfBirth ?? r.date_of_birth;
     const dateOfBirth =
       dobRaw == null || dobRaw === ''
         ? null
         : typeof dobRaw === 'string'
-        ? dobRaw
-        : String(dobRaw);
+          ? dobRaw
+          : String(dobRaw);
 
     const genderNorm = this.normalizeGender(r.gender);
 

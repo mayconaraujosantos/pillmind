@@ -52,6 +52,7 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
       <View style={styles.footer}>
         <View style={styles.buttonColumn}>
           <OnboardingPrimaryButton
+            testID="onboarding-get-started-button"
             label={t('onboarding.buttons.createAccount')}
             onPress={onSignUp}
             backgroundColor={colors.PRIMARY}
@@ -76,6 +77,7 @@ export const OnboardingFooter: React.FC<OnboardingFooterProps> = ({
     <View style={styles.footer}>
       <View style={styles.singleButtonContainer}>
         <OnboardingPrimaryButton
+          testID="onboarding-next-button"
           label={t('common.next')}
           onPress={handleNextPress}
           backgroundColor={colors.PRIMARY}
