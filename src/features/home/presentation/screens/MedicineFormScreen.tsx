@@ -1,15 +1,13 @@
-import type { HomeTabParamList } from '@core/navigation/types';
+import { getAppHeaderChrome } from '@core/navigation/appHeaderChrome';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
-import type { RouteProp } from '@react-navigation/native';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ScreenWrapper } from '@shared/components';
 import { useSimpleNavLogger } from '@shared/hooks';
 import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
 import { resolveMedicineImageUrlForDevice } from '@shared/utils/medicineImageUrl';
 import * as ImagePicker from 'expo-image-picker';
-import type { ComponentType } from 'react';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
 import {
   ActivityIndicator,
@@ -26,419 +24,345 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-// Removed SvgProps import - using Vector Icons instead
 import {
   createMedicineUseCase,
   getMedicineByIdUseCase,
   updateMedicineUseCase,
   uploadMedicinePicture,
 } from '../../medicineServices';
-import {
-  formatDateInput,
-  parseDoseTimesField,
-  parseISODateOnly,
-} from '../utils/medicineFormParse';
+import { EndDatePicker } from '../components/EndDatePicker';
+import { FrequencyPicker } from '../components/FrequencyPicker';
+import { StartDatePicker } from '../components/StartDatePicker';
+import { TimePicker } from '../components/TimePicker';
 
-const MEDICINE_TYPE_IDS = [
-  'capsule',
-  'tablet',
-  'injection',
-  'liquid',
-] as const;
+const MEDICINE_TYPE_IDS = ['capsule', 'tablet', 'injection', 'liquid'] as const;
 
 type MedicineTypeId = (typeof MEDICINE_TYPE_IDS)[number];
+type MedicineIconProps = Pick<
+  ComponentProps<typeof FontAwesome5>,
+  'color' | 'size'
+>;
 
 /** Ícones FontAwesome5 específicos para medicamentos! 💊 */
-const TYPE_HEALTH_ICONS: Record<MedicineTypeId, ComponentType<any>> = {
+const TYPE_HEALTH_ICONS: Record<
+  MedicineTypeId,
+  ComponentType<MedicineIconProps>
+> = {
   // Cápsulas - Ícone perfeito de cápsulas
-  capsule: (props: any) => <FontAwesome5 name="capsules" size={24} color={props.color} />,
-  // Comprimidos - Ícone de pílulas/comprimidos  
-  tablet: (props: any) => <FontAwesome5 name="pills" size={24} color={props.color} />,
+  capsule: ({ color, size = 24 }) => (
+    <FontAwesome5 name="capsules" size={size} color={color} />
+  ),
+  // Comprimidos - Ícone de pílulas/comprimidos
+  tablet: ({ color, size = 24 }) => (
+    <FontAwesome5 name="pills" size={size} color={color} />
+  ),
   // Injeções - Ícone de seringa
-  injection: (props: any) => <FontAwesome5 name="syringe" size={24} color={props.color} />,
+  injection: ({ color, size = 24 }) => (
+    <FontAwesome5 name="syringe" size={size} color={color} />
+  ),
   // Líquidos - Ícone de frasco/medicamento líquido
-  liquid: (props: any) => <FontAwesome5 name="prescription-bottle" size={24} color={props.color} />,
+  liquid: ({ color, size = 24 }) => (
+    <FontAwesome5 name="prescription-bottle" size={size} color={color} />
+  ),
 };
 
 export const MedicineFormScreen: React.FC = () => {
   console.log('🏥 MedicineFormScreen: Component starting...');
-  
+
   try {
     // Logging para debug
     const { logNavEvent, logNavError } = useSimpleNavLogger('MedicineForm');
     console.log('🏥 MedicineFormScreen: Logger initialized');
-    
+
     logNavEvent('Screen Loading Started');
 
-    const route = useRoute<RouteProp<HomeTabParamList, 'MedicineForm'>>();
-    const navigation =
-      useNavigation<NativeStackNavigationProp<HomeTabParamList>>();
-    
+    const router = useRouter();
+
     console.log('🏥 MedicineFormScreen: Navigation hooks initialized');
-    
+
     const { t } = useTranslation();
     const { theme, isDark } = useTheme();
 
     console.log('🏥 MedicineFormScreen: Theme and translation initialized');
 
-    const medicineId = route.params?.medicineId;
-    
+    const { medicineId: rawMedicineId } = useLocalSearchParams<{
+      medicineId?: string | string[];
+    }>();
+    const medicineId = Array.isArray(rawMedicineId)
+      ? rawMedicineId[0]
+      : rawMedicineId;
+
     console.log('🏥 MedicineFormScreen: Medicine ID extracted:', medicineId);
 
     logNavEvent('Medicine ID extracted', { medicineId });
 
-  const [bootLoading, setBootLoading] = React.useState(Boolean(medicineId));
-  const [saving, setSaving] = React.useState(false);
-  const [name, setName] = React.useState('');
-  const [dosage, setDosage] = React.useState('');
-  const [frequency, setFrequency] = React.useState('once-a-day');
-  const [timesStr, setTimesStr] = React.useState('');
-  const [startStr, setStartStr] = React.useState(() =>
-    formatDateInput(new Date())
-  );
-  const [endStr, setEndStr] = React.useState('');
-  const [notes, setNotes] = React.useState('');
-  const [medicineType, setMedicineType] = React.useState<MedicineTypeId>(
-    'capsule'
-  );
-  const [prescribedFor, setPrescribedFor] = React.useState('');
-  const [quantityStr, setQuantityStr] = React.useState('1');
-  const [reminderOnEmpty, setReminderOnEmpty] = React.useState(true);
-  const [serverImageUrl, setServerImageUrl] = React.useState<
-    string | undefined
-  >();
-  const [localImageUri, setLocalImageUri] = React.useState<
-    string | undefined
-  >();
-  const [localImageMime, setLocalImageMime] = React.useState<
-    string | undefined
-  >();
-  const [imageCleared, setImageCleared] = React.useState(false);
+    const [bootLoading, setBootLoading] = React.useState(Boolean(medicineId));
+    const [saving, setSaving] = React.useState(false);
+    const [name, setName] = React.useState('');
+    const [dosage, setDosage] = React.useState('');
+    const [frequency, setFrequency] = React.useState('once-a-day');
+    const [times, setTimes] = React.useState<string[]>(['08:00']);
+    const [startDate, setStartDate] = React.useState(new Date());
+    const [endDate, setEndDate] = React.useState<Date | undefined>(undefined);
+    const [notes, setNotes] = React.useState('');
+    const [medicineType, setMedicineType] =
+      React.useState<MedicineTypeId>('capsule');
+    const [prescribedFor, setPrescribedFor] = React.useState('');
+    const [quantityStr, setQuantityStr] = React.useState('1');
+    const [reminderOnEmpty, setReminderOnEmpty] = React.useState(true);
+    const [serverImageUrl, setServerImageUrl] = React.useState<
+      string | undefined
+    >();
+    const [localImageUri, setLocalImageUri] = React.useState<
+      string | undefined
+    >();
+    const [localImageMime, setLocalImageMime] = React.useState<
+      string | undefined
+    >();
+    const [imageCleared, setImageCleared] = React.useState(false);
 
-  const inputSurface = isDark ? theme.colors.surface : '#F0F0F0';
-  const inputBorder = theme.colors.border;
+    const inputSurface = theme.colors.surface;
+    const inputBorder = theme.colors.border;
 
-  React.useLayoutEffect(() => {
-    logNavEvent('Navigation header setup starting');
-    try {
-      navigation.setOptions({
-        headerTitle: medicineId
-          ? t('home.editMedication')
-          : t('home.newMedication'),
-      });
-      logNavEvent('Navigation header setup completed');
-    } catch (error) {
-      logNavError(error, 'Navigation header setup');
-    }
-  }, [navigation, medicineId, t]);
+    React.useEffect(() => {
+      logNavEvent('Data loading effect started', { medicineId });
 
-  React.useEffect(() => {
-    logNavEvent('Data loading effect started', { medicineId });
-    
-    if (!medicineId) {
-      logNavEvent('No medicineId - setting boot loading to false');
-      setBootLoading(false);
-      return;
-    }
-    
-    let cancelled = false;
-    (async () => {
-      try {
-        logNavEvent('Fetching medicine data', { medicineId });
-        const m = await getMedicineByIdUseCase.execute(medicineId);
-        
-        logNavEvent('Medicine data fetched', { found: !!m });
-        
-        if (cancelled) {
-          logNavEvent('Request cancelled');
-          return;
-        }
-        
-        if (!m) {
-          logNavEvent('Medicine not found', { medicineId });
-          Alert.alert(t('common.error'), t('home.medicineNotFound'), [
-            { text: t('common.ok'), onPress: () => navigation.goBack() },
-          ]);
-          return;
-        }
-        
-        logNavEvent('Setting medicine data to form');
-        
-        setName(m.name);
-        setDosage(m.dosage);
-        setFrequency(m.frequency);
-        setTimesStr(m.times.join(', '));
-        setStartStr(formatDateInput(new Date(m.startDate)));
-        setEndStr(m.endDate ? formatDateInput(new Date(m.endDate)) : '');
-        setNotes(m.notes ?? '');
-        const mt = (m.medicineType ?? 'capsule') as MedicineTypeId;
-        setMedicineType(
-          (MEDICINE_TYPE_IDS as readonly string[]).includes(mt)
-            ? mt
-            : 'capsule'
-        );
-        setPrescribedFor(m.prescribedFor ?? '');
-        setQuantityStr(String(m.quantity ?? 1));
-        setReminderOnEmpty(m.reminderOnEmpty ?? true);
-        setServerImageUrl(m.imageUrl);
-        setLocalImageUri(undefined);
-        setLocalImageMime(undefined);
-        setImageCleared(false);
-        
-        logNavEvent('Medicine data set successfully');
-      } catch (error) {
-        logNavError(error, 'Loading medicine data');
-        
-        if (!cancelled) {
-          Alert.alert(t('common.error'), t('home.medicineLoadFailed'), [
-            { text: t('common.ok'), onPress: () => navigation.goBack() },
-          ]);
-        }
-      } finally {
-        if (!cancelled) setBootLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [medicineId, navigation, t]);
-
-  const pickMedicinePhoto = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert(
-        t('common.error'),
-        t('home.medicinePhotoPermissionDenied')
-      );
-      return;
-    }
-    const picked = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      quality: 0.85,
-    });
-    if (picked.canceled || !picked.assets?.[0]) return;
-    const a = picked.assets[0];
-    setLocalImageUri(a.uri);
-    setLocalImageMime(a.mimeType ?? 'image/jpeg');
-    setImageCleared(false);
-  };
-
-  const clearMedicinePhoto = () => {
-    setLocalImageUri(undefined);
-    setLocalImageMime(undefined);
-    setImageCleared(true);
-  };
-
-  const displayImageUri = resolveMedicineImageUrlForDevice(
-    localImageUri ??
-    (!imageCleared ? serverImageUrl : undefined)
-  );
-
-  const bumpQuantity = (delta: number) => {
-    const n = Math.max(
-      1,
-      (parseInt(quantityStr.replace(/\D/g, ''), 10) || 1) + delta
-    );
-    setQuantityStr(String(n));
-  };
-
-  const onSave = async () => {
-    logNavEvent('Save function started');
-    
-    try {
-      const trimmedName = name.trim();
-      const trimmedDosage = dosage.trim();
-      const start = parseISODateOnly(startStr);
-      
-      logNavEvent('Save validation', { 
-        hasName: !!trimmedName, 
-        hasDosage: !!trimmedDosage, 
-        hasStart: !!start 
-      });
-      
-      if (!trimmedName || !trimmedDosage || !start) {
-        logNavEvent('Save validation failed');
-        Alert.alert(t('common.error'), t('home.medicineFormValidation'));
+      if (!medicineId) {
+        logNavEvent('No medicineId - setting boot loading to false');
+        setBootLoading(false);
         return;
       }
-      
-      let endDateOut: Date | undefined;
-      if (endStr.trim()) {
-        const ed = parseISODateOnly(endStr);
-        if (!ed) {
-          logNavError(new Error('Invalid end date'), 'Date parsing');
-          Alert.alert(t('common.error'), t('home.medicineEndDateInvalid'));
+
+      let cancelled = false;
+      (async () => {
+        try {
+          logNavEvent('Fetching medicine data', { medicineId });
+          const m = await getMedicineByIdUseCase.execute(medicineId);
+
+          logNavEvent('Medicine data fetched', { found: !!m });
+
+          if (cancelled) {
+            logNavEvent('Request cancelled');
+            return;
+          }
+
+          if (!m) {
+            logNavEvent('Medicine not found', { medicineId });
+            Alert.alert(t('common.error'), t('home.medicineNotFound'), [
+              { text: t('common.ok'), onPress: () => router.back() },
+            ]);
+            return;
+          }
+
+          logNavEvent('Setting medicine data to form');
+
+          setName(m.name);
+          setDosage(m.dosage);
+          setFrequency(m.frequency);
+          setTimes(m.times.length > 0 ? [...m.times] : ['08:00']);
+          setStartDate(new Date(m.startDate));
+          setEndDate(m.endDate ? new Date(m.endDate) : undefined);
+          setNotes(m.notes ?? '');
+          const mt = (m.medicineType ?? 'capsule') as MedicineTypeId;
+          setMedicineType(
+            (MEDICINE_TYPE_IDS as readonly string[]).includes(mt)
+              ? mt
+              : 'capsule'
+          );
+          setPrescribedFor(m.prescribedFor ?? '');
+          setQuantityStr(String(m.quantity ?? 1));
+          setReminderOnEmpty(m.reminderOnEmpty ?? true);
+          setServerImageUrl(m.imageUrl);
+          setLocalImageUri(undefined);
+          setLocalImageMime(undefined);
+          setImageCleared(false);
+
+          logNavEvent('Medicine data set successfully');
+        } catch (error) {
+          logNavError(error, 'Loading medicine data');
+
+          if (!cancelled) {
+            Alert.alert(t('common.error'), t('home.medicineLoadFailed'), [
+              { text: t('common.ok'), onPress: () => router.back() },
+            ]);
+          }
+        } finally {
+          if (!cancelled) setBootLoading(false);
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }, [medicineId, router, t]);
+
+    const pickMedicinePhoto = async () => {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert(t('common.error'), t('home.medicinePhotoPermissionDenied'));
+        return;
+      }
+      const picked = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 0.85,
+      });
+      if (picked.canceled || !picked.assets?.[0]) return;
+      const a = picked.assets[0];
+      setLocalImageUri(a.uri);
+      setLocalImageMime(a.mimeType ?? 'image/jpeg');
+      setImageCleared(false);
+    };
+
+    const clearMedicinePhoto = () => {
+      setLocalImageUri(undefined);
+      setLocalImageMime(undefined);
+      setImageCleared(true);
+    };
+
+    const displayImageUri = resolveMedicineImageUrlForDevice(
+      localImageUri ?? (!imageCleared ? serverImageUrl : undefined)
+    );
+
+    const bumpQuantity = (delta: number) => {
+      const n = Math.max(
+        1,
+        (parseInt(quantityStr.replace(/\D/g, ''), 10) || 1) + delta
+      );
+      setQuantityStr(String(n));
+    };
+
+    const onSave = async () => {
+      logNavEvent('Save function started');
+
+      try {
+        const trimmedName = name.trim();
+        const trimmedDosage = dosage.trim();
+        const start = startDate;
+
+        logNavEvent('Save validation', {
+          hasName: !!trimmedName,
+          hasDosage: !!trimmedDosage,
+          hasStart: !!start,
+        });
+
+        if (!trimmedName || !trimmedDosage || !start) {
+          logNavEvent('Save validation failed');
+          Alert.alert(t('common.error'), t('home.medicineFormValidation'));
           return;
         }
-        endDateOut = ed;
-      }
-      
-      const times = parseDoseTimesField(timesStr);
-      const qty = Math.max(
-        1,
-        parseInt(quantityStr.replace(/\D/g, ''), 10) || 1
-      );
-      
-      logNavEvent('Starting save process', { medicineId });
-      setSaving(true);
-      
-      let imageUrl: string | undefined;
-      if (localImageUri) {
-        imageUrl = await uploadMedicinePicture(
-          localImageUri,
-          localImageMime
-        );
-      } else if (!imageCleared) {
-        imageUrl = serverImageUrl;
-      }
-      
-      const payload = {
-        name: trimmedName,
-        dosage: trimmedDosage,
-        frequency: frequency.trim() || 'once-a-day',
-        times,
-        startDate: start,
-        endDate: endDateOut,
-        notes: notes.trim() ? notes.trim() : undefined,
-        medicineType,
-        prescribedFor: prescribedFor.trim() || undefined,
-        quantity: qty,
-        reminderOnEmpty,
-        imageUrl,
-      };
-      
-      if (medicineId) {
-        await updateMedicineUseCase.execute(medicineId, payload);
-      } else {
-        await createMedicineUseCase.execute(payload);
-      }
-      
-      navigation.goBack();
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : t('common.error');
-      Alert.alert(t('common.error'), msg);
-      logNavError(e instanceof Error ? e : new Error('Unknown error'), 'Save operation failed');
-    } finally {
-      setSaving(false);
-    }
-  };
 
-  if (bootLoading) {
+        const qty = Math.max(
+          1,
+          parseInt(quantityStr.replace(/\D/g, ''), 10) || 1
+        );
+
+        logNavEvent('Starting save process', { medicineId });
+        setSaving(true);
+
+        let imageUrl: string | undefined;
+        if (localImageUri) {
+          imageUrl = await uploadMedicinePicture(localImageUri, localImageMime);
+        } else if (!imageCleared) {
+          imageUrl = serverImageUrl;
+        }
+
+        const payload = {
+          name: trimmedName,
+          dosage: trimmedDosage,
+          frequency: frequency.trim() || 'once-a-day',
+          times,
+          startDate: start,
+          endDate: endDate,
+          notes: notes.trim() ? notes.trim() : undefined,
+          medicineType,
+          prescribedFor: prescribedFor.trim() || undefined,
+          quantity: qty,
+          reminderOnEmpty,
+          imageUrl,
+        };
+
+        if (medicineId) {
+          await updateMedicineUseCase.execute(medicineId, payload);
+          router.back();
+        } else {
+          const created = await createMedicineUseCase.execute(payload);
+          router.back();
+          // Ask user if they want to configure reminders for the new medicine
+          setTimeout(() => {
+            Alert.alert(
+              t('home.reminderSetupTitle'),
+              t('home.reminderSetupMessage'),
+              [
+                { text: t('common.cancel'), style: 'cancel' },
+                {
+                  text: t('home.reminderSetupCta'),
+                  onPress: () =>
+                    router.push({
+                      pathname: '/medicine-reminders',
+                      params: {
+                        medicineId: created.id,
+                        medicineName: created.name,
+                      },
+                    }),
+                },
+              ]
+            );
+          }, 400);
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : t('common.error');
+        Alert.alert(t('common.error'), msg);
+        logNavError(
+          e instanceof Error ? e : new Error('Unknown error'),
+          'Save operation failed'
+        );
+      } finally {
+        setSaving(false);
+      }
+    };
+
+    if (bootLoading) {
+      return (
+        <ScreenWrapper tabContentCanvas homeSoftTint>
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        </ScreenWrapper>
+      );
+    }
+
     return (
       <ScreenWrapper tabContentCanvas homeSoftTint>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      </ScreenWrapper>
-    );
-  }
-
-  return (
-    <ScreenWrapper tabContentCanvas homeSoftTint>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
+        <Stack.Screen
+          options={{
+            title: medicineId
+              ? t('home.editMedication')
+              : t('home.newMedication'),
+            ...getAppHeaderChrome({
+              theme,
+              isDark,
+              contentBackgroundColor: theme.colors.background,
+            }),
+          }}
+        />
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicineNameLabel')}
-          </Text>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder={t('home.medicineNamePlaceholder')}
-            placeholderTextColor={theme.colors.placeholder}
-            style={[
-              styles.input,
-              {
-                backgroundColor: inputSurface,
-                borderColor: inputBorder,
-                color: theme.colors.text,
-              },
-            ]}
-          />
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicineTypeLabel')}
-          </Text>
-          <View style={styles.typeRow}>
-            {MEDICINE_TYPE_IDS.map((id) => {
-              const selected = medicineType === id;
-              const HealthIcon = TYPE_HEALTH_ICONS[id];
-              const iconColor = selected
-                ? theme.colors.primary
-                : theme.colors.textSecondary;
-              return (
-                <Pressable
-                  key={id}
-                  onPress={() => setMedicineType(id)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={t(`home.medicineType_${id}`)}
-                  style={({ pressed }) => [
-                    styles.typeChip,
-                    {
-                      borderColor: selected
-                        ? theme.colors.primary
-                        : inputBorder,
-                      backgroundColor: selected
-                        ? theme.colors.primary + '22'
-                        : inputSurface,
-                    },
-                    pressed && { opacity: 0.85 },
-                  ]}
-                >
-                  <HealthIcon size={28} color={iconColor} />
-                </Pressable>
-              );
-            })}
-          </View>
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicinePrescribedForLabel')}
-          </Text>
-          <TextInput
-            value={prescribedFor}
-            onChangeText={setPrescribedFor}
-            placeholder={t('home.medicinePrescribedForPlaceholder')}
-            placeholderTextColor={theme.colors.placeholder}
-            style={[
-              styles.input,
-              {
-                backgroundColor: inputSurface,
-                borderColor: inputBorder,
-                color: theme.colors.text,
-              },
-            ]}
-          />
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicineQuantityLabel')}
-          </Text>
-          <View style={styles.quantityRow}>
-            <TouchableOpacity
-              onPress={() => bumpQuantity(-1)}
-              style={[
-                styles.qtyBtn,
-                { borderColor: inputBorder, backgroundColor: inputSurface },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={t('home.medicineQuantityDecrease')}
-            >
-              <Text style={[styles.qtyBtnText, { color: theme.colors.text }]}>
-                −
-              </Text>
-            </TouchableOpacity>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicineNameLabel')}
+            </Text>
             <TextInput
-              value={quantityStr}
-              onChangeText={setQuantityStr}
-              keyboardType="number-pad"
+              value={name}
+              onChangeText={setName}
+              placeholder={t('home.medicineNamePlaceholder')}
+              placeholderTextColor={theme.colors.placeholder}
               style={[
-                styles.qtyInput,
+                styles.input,
                 {
                   backgroundColor: inputSurface,
                   borderColor: inputBorder,
@@ -446,255 +370,374 @@ export const MedicineFormScreen: React.FC = () => {
                 },
               ]}
             />
-            <TouchableOpacity
-              onPress={() => bumpQuantity(1)}
-              style={[
-                styles.qtyBtn,
-                { borderColor: inputBorder, backgroundColor: inputSurface },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel={t('home.medicineQuantityIncrease')}
-            >
-              <Text style={[styles.qtyBtnText, { color: theme.colors.text }]}>
-                +
-              </Text>
-            </TouchableOpacity>
-          </View>
 
-          <View style={styles.switchRow}>
-            <Text
-              style={[styles.switchLabel, { color: theme.colors.text }]}
-            >
-              {t('home.medicineReminderOnEmptyLabel')}
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicineTypeLabel')}
             </Text>
-            <Switch
-              value={reminderOnEmpty}
-              onValueChange={setReminderOnEmpty}
-              trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary + '88',
-              }}
-              thumbColor={reminderOnEmpty ? theme.colors.primary : '#f4f3f4'}
-            />
-          </View>
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicinePhotoLabel')}
-          </Text>
-          {displayImageUri ? (
-            <View style={styles.photoPreviewWrap}>
-              <Image
-                source={{ uri: displayImageUri }}
-                style={styles.photoPreview}
-                accessibilityIgnoresInvertColors
-              />
-              <View style={styles.photoActions}>
-                <TouchableOpacity
-                  onPress={() => void pickMedicinePhoto()}
-                  style={[
-                    styles.photoSecondaryBtn,
-                    { borderColor: theme.colors.primary },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.photoSecondaryBtnText,
-                      { color: theme.colors.primary },
+            <View style={styles.typeRow}>
+              {MEDICINE_TYPE_IDS.map((id) => {
+                const selected = medicineType === id;
+                const HealthIcon = TYPE_HEALTH_ICONS[id];
+                const iconColor = selected
+                  ? theme.colors.primary
+                  : theme.colors.textSecondary;
+                return (
+                  <Pressable
+                    key={id}
+                    onPress={() => setMedicineType(id)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={t(`home.medicineType_${id}`)}
+                    style={({ pressed }) => [
+                      styles.typeChip,
+                      {
+                        borderColor: selected
+                          ? theme.colors.primary
+                          : inputBorder,
+                        backgroundColor: selected
+                          ? theme.colors.primary + '22'
+                          : inputSurface,
+                      },
+                      pressed && { opacity: 0.85 },
                     ]}
                   >
-                    {t('home.medicinePhotoChange')}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={clearMedicinePhoto}
-                  style={[
-                    styles.photoSecondaryBtn,
-                    { borderColor: theme.colors.border },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.photoSecondaryBtnText,
-                      { color: theme.colors.textSecondary },
-                    ]}
-                  >
-                    {t('home.medicinePhotoRemove')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+                    <HealthIcon size={28} color={iconColor} />
+                  </Pressable>
+                );
+              })}
             </View>
-          ) : (
-            <TouchableOpacity
-              onPress={() => void pickMedicinePhoto()}
+
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicinePrescribedForLabel')}
+            </Text>
+            <TextInput
+              value={prescribedFor}
+              onChangeText={setPrescribedFor}
+              placeholder={t('home.medicinePrescribedForPlaceholder')}
+              placeholderTextColor={theme.colors.placeholder}
               style={[
-                styles.photoPlaceholder,
+                styles.input,
                 {
-                  borderColor: inputBorder,
                   backgroundColor: inputSurface,
+                  borderColor: inputBorder,
+                  color: theme.colors.text,
                 },
               ]}
+            />
+
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicineQuantityLabel')}
+            </Text>
+            <View style={styles.quantityRow}>
+              <TouchableOpacity
+                onPress={() => bumpQuantity(-1)}
+                style={[
+                  styles.qtyBtn,
+                  { borderColor: inputBorder, backgroundColor: inputSurface },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel={t('home.medicineQuantityDecrease')}
+              >
+                <Text style={[styles.qtyBtnText, { color: theme.colors.text }]}>
+                  −
+                </Text>
+              </TouchableOpacity>
+              <TextInput
+                value={quantityStr}
+                onChangeText={setQuantityStr}
+                keyboardType="number-pad"
+                style={[
+                  styles.qtyInput,
+                  {
+                    backgroundColor: inputSurface,
+                    borderColor: inputBorder,
+                    color: theme.colors.text,
+                  },
+                ]}
+              />
+              <TouchableOpacity
+                onPress={() => bumpQuantity(1)}
+                style={[
+                  styles.qtyBtn,
+                  { borderColor: inputBorder, backgroundColor: inputSurface },
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel={t('home.medicineQuantityIncrease')}
+              >
+                <Text style={[styles.qtyBtnText, { color: theme.colors.text }]}>
+                  +
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.switchRow}>
+              <Text style={[styles.switchLabel, { color: theme.colors.text }]}>
+                {t('home.medicineReminderOnEmptyLabel')}
+              </Text>
+              <Switch
+                value={reminderOnEmpty}
+                onValueChange={setReminderOnEmpty}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary + '88',
+                }}
+                thumbColor={reminderOnEmpty ? theme.colors.primary : '#f4f3f4'}
+              />
+            </View>
+
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicinePhotoLabel')}
+            </Text>
+            {displayImageUri ? (
+              <View style={styles.photoPreviewWrap}>
+                <Image
+                  source={{ uri: displayImageUri }}
+                  style={styles.photoPreview}
+                  accessibilityIgnoresInvertColors
+                />
+                <View style={styles.photoActions}>
+                  <TouchableOpacity
+                    onPress={() => void pickMedicinePhoto()}
+                    style={[
+                      styles.photoSecondaryBtn,
+                      { borderColor: theme.colors.primary },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.photoSecondaryBtnText,
+                        { color: theme.colors.primary },
+                      ]}
+                    >
+                      {t('home.medicinePhotoChange')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={clearMedicinePhoto}
+                    style={[
+                      styles.photoSecondaryBtn,
+                      { borderColor: theme.colors.border },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.photoSecondaryBtnText,
+                        { color: theme.colors.textSecondary },
+                      ]}
+                    >
+                      {t('home.medicinePhotoRemove')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => void pickMedicinePhoto()}
+                style={[
+                  styles.photoPlaceholder,
+                  {
+                    borderColor: inputBorder,
+                    backgroundColor: inputSurface,
+                  },
+                ]}
+                activeOpacity={0.85}
+              >
+                <Ionicons
+                  name="image-outline"
+                  size={32}
+                  color={theme.colors.textSecondary}
+                />
+                <Text
+                  style={[
+                    styles.photoPlaceholderText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {t('home.medicinePhotoPick')}
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicineDosageLabel')}
+            </Text>
+            <TextInput
+              value={dosage}
+              onChangeText={setDosage}
+              placeholder={t('home.medicineDosagePlaceholder')}
+              placeholderTextColor={theme.colors.placeholder}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: inputSurface,
+                  borderColor: inputBorder,
+                  color: theme.colors.text,
+                },
+              ]}
+            />
+
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicineFrequencyLabel')}
+            </Text>
+            <FrequencyPicker
+              value={frequency}
+              onChange={setFrequency}
+              onTimeSuggestion={(suggested) => {
+                // Only auto-fill times if the user hasn't customised them yet
+                // (i.e. the current times are the default or empty)
+                setTimes(suggested);
+              }}
+              primaryColor={theme.colors.primary}
+              surface={inputSurface}
+              border={inputBorder}
+              textColor={theme.colors.text}
+              textSecondary={theme.colors.textSecondary}
+            />
+
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicineTimesLabel')}
+            </Text>
+            <TimePicker
+              times={times}
+              onChange={setTimes}
+              primaryColor={theme.colors.primary}
+              surface={inputSurface}
+              border={inputBorder}
+              textColor={theme.colors.text}
+              textSecondary={theme.colors.textSecondary}
+              background={theme.colors.background}
+            />
+
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicineStartLabel')}
+            </Text>
+            <StartDatePicker
+              startDate={startDate}
+              onChange={setStartDate}
+              primaryColor={theme.colors.primary}
+              surface={inputSurface}
+              border={inputBorder}
+              textColor={theme.colors.text}
+              textSecondary={theme.colors.textSecondary}
+              background={theme.colors.background}
+            />
+
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicineEndLabel')}
+            </Text>
+            <EndDatePicker
+              endDate={endDate}
+              onChange={setEndDate}
+              primaryColor={theme.colors.primary}
+              surface={inputSurface}
+              border={inputBorder}
+              textColor={theme.colors.text}
+              textSecondary={theme.colors.textSecondary}
+              background={theme.colors.background}
+            />
+
+            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
+              {t('home.medicineNotesLabel')}
+            </Text>
+            <TextInput
+              value={notes}
+              onChangeText={setNotes}
+              placeholder={t('home.medicineNotesPlaceholder')}
+              placeholderTextColor={theme.colors.placeholder}
+              multiline
+              numberOfLines={3}
+              style={[
+                styles.input,
+                styles.textArea,
+                {
+                  backgroundColor: inputSurface,
+                  borderColor: inputBorder,
+                  color: theme.colors.text,
+                },
+              ]}
+            />
+
+            {/* Reminders button — only visible when editing an existing medicine */}
+            {medicineId ? (
+              <TouchableOpacity
+                style={[
+                  styles.remindersBtn,
+                  {
+                    borderColor: theme.colors.primary,
+                    backgroundColor: theme.colors.primary + '14',
+                  },
+                ]}
+                onPress={() =>
+                  router.push({
+                    pathname: '/medicine-reminders',
+                    params: {
+                      medicineId,
+                      medicineName: name.trim() || t('home.editMedication'),
+                    },
+                  })
+                }
+                activeOpacity={0.85}
+              >
+                <Ionicons
+                  name="alarm-outline"
+                  size={18}
+                  color={theme.colors.primary}
+                />
+                <Text
+                  style={[
+                    styles.remindersBtnText,
+                    { color: theme.colors.primary },
+                  ]}
+                >
+                  {t('home.manageReminders')}
+                </Text>
+              </TouchableOpacity>
+            ) : null}
+
+            <TouchableOpacity
+              style={[
+                styles.saveBtn,
+                { backgroundColor: theme.colors.primary },
+                saving && { opacity: 0.7 },
+              ]}
+              onPress={() => void onSave()}
+              disabled={saving}
               activeOpacity={0.85}
             >
-              <Ionicons
-                name="image-outline"
-                size={32}
-                color={theme.colors.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.photoPlaceholderText,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                {t('home.medicinePhotoPick')}
-              </Text>
+              {saving ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.saveBtnText}>{t('home.medicineSave')}</Text>
+              )}
             </TouchableOpacity>
-          )}
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicineDosageLabel')}
-          </Text>
-          <TextInput
-            value={dosage}
-            onChangeText={setDosage}
-            placeholder={t('home.medicineDosagePlaceholder')}
-            placeholderTextColor={theme.colors.placeholder}
-            style={[
-              styles.input,
-              {
-                backgroundColor: inputSurface,
-                borderColor: inputBorder,
-                color: theme.colors.text,
-              },
-            ]}
-          />
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicineFrequencyLabel')}
-          </Text>
-          <TextInput
-            value={frequency}
-            onChangeText={setFrequency}
-            placeholder={t('home.medicineFrequencyPlaceholder')}
-            placeholderTextColor={theme.colors.placeholder}
-            style={[
-              styles.input,
-              {
-                backgroundColor: inputSurface,
-                borderColor: inputBorder,
-                color: theme.colors.text,
-              },
-            ]}
-          />
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicineTimesLabel')}
-          </Text>
-          <TextInput
-            value={timesStr}
-            onChangeText={setTimesStr}
-            placeholder={t('home.medicineTimesPlaceholder')}
-            placeholderTextColor={theme.colors.placeholder}
-            style={[
-              styles.input,
-              {
-                backgroundColor: inputSurface,
-                borderColor: inputBorder,
-                color: theme.colors.text,
-              },
-            ]}
-          />
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicineStartLabel')}
-          </Text>
-          <TextInput
-            value={startStr}
-            onChangeText={setStartStr}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor={theme.colors.placeholder}
-            autoCapitalize="none"
-            style={[
-              styles.input,
-              {
-                backgroundColor: inputSurface,
-                borderColor: inputBorder,
-                color: theme.colors.text,
-              },
-            ]}
-          />
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicineEndLabel')}
-          </Text>
-          <TextInput
-            value={endStr}
-            onChangeText={setEndStr}
-            placeholder={t('home.medicineEndPlaceholder')}
-            placeholderTextColor={theme.colors.placeholder}
-            autoCapitalize="none"
-            style={[
-              styles.input,
-              {
-                backgroundColor: inputSurface,
-                borderColor: inputBorder,
-                color: theme.colors.text,
-              },
-            ]}
-          />
-
-          <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
-            {t('home.medicineNotesLabel')}
-          </Text>
-          <TextInput
-            value={notes}
-            onChangeText={setNotes}
-            placeholder={t('home.medicineNotesPlaceholder')}
-            placeholderTextColor={theme.colors.placeholder}
-            multiline
-            numberOfLines={3}
-            style={[
-              styles.input,
-              styles.textArea,
-              {
-                backgroundColor: inputSurface,
-                borderColor: inputBorder,
-                color: theme.colors.text,
-              },
-            ]}
-          />
-
-          <TouchableOpacity
-            style={[
-              styles.saveBtn,
-              { backgroundColor: theme.colors.primary },
-              saving && { opacity: 0.7 },
-            ]}
-            onPress={() => void onSave()}
-            disabled={saving}
-            activeOpacity={0.85}
-          >
-            {saving ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.saveBtnText}>{t('home.medicineSave')}</Text>
-            )}
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </ScreenWrapper>
-  );
-  
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </ScreenWrapper>
+    );
   } catch (error) {
     console.error('🏥 MedicineFormScreen: Critical error:', error);
-    
+
     // Fallback UI
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 20,
+        }}
+      >
         <Text style={{ fontSize: 18, color: 'red', marginBottom: 10 }}>
           Erro na tela de medicamentos
         </Text>
-        <Text style={{ fontSize: 14, color: '#666', textAlign: 'center', marginBottom: 20 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            color: '#666',
+            textAlign: 'center',
+            marginBottom: 20,
+          }}
+        >
           {error instanceof Error ? error.message : 'Erro desconhecido'}
         </Text>
       </View>
@@ -734,8 +777,22 @@ const styles = StyleSheet.create({
     minHeight: 88,
     textAlignVertical: 'top',
   },
+  remindersBtn: {
+    marginTop: 20,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  remindersBtnText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
   saveBtn: {
-    marginTop: 28,
+    marginTop: 12,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',

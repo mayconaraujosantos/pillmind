@@ -3,12 +3,12 @@ import type { Theme } from '@shared/theme';
 import type { TFunction } from 'i18next';
 import React from 'react';
 import {
-    Alert,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  Alert,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import type { Medicine } from '../../domain/entities/Medicine';
 
@@ -21,7 +21,7 @@ interface MedicationScheduleRowProps {
   isLast?: boolean;
   onEdit: () => void;
   onDelete: () => void;
-  scheduledTime?: string; // The specific time for this row  
+  scheduledTime?: string; // The specific time for this row
   takeStatus?: TakeStatus; // Status for this specific time
   onMarkAsTaken?: () => void; // Callback to mark this dose as taken
   onSkipDose?: () => void; // Callback to skip this dose
@@ -96,7 +96,7 @@ export const MedicationScheduleRow: React.FC<MedicationScheduleRowProps> = ({
       case 'skipped':
         return {
           icon: 'close-circle' as const,
-          color: '#EF4444', // red  
+          color: '#EF4444', // red
           text: t('home.doseSkipped'),
         };
       case 'postponed':
@@ -135,13 +135,10 @@ export const MedicationScheduleRow: React.FC<MedicationScheduleRowProps> = ({
           </Text>
         ) : null}
       </View>
-      
+
       <Pressable
         onPress={onEdit}
-        style={({ pressed }) => [
-          styles.mid,
-          pressed && { opacity: 0.85 },
-        ]}
+        style={({ pressed }) => [styles.mid, pressed && { opacity: 0.85 }]}
         accessibilityRole="button"
         accessibilityLabel={t('home.editMedication')}
       >
@@ -201,7 +198,7 @@ export const MedicationScheduleRow: React.FC<MedicationScheduleRowProps> = ({
             >
               <Ionicons name="checkmark" size={16} color="white" />
             </Pressable>
-            
+
             {onSkipDose && (
               <Pressable
                 onPress={onSkip}
@@ -216,7 +213,11 @@ export const MedicationScheduleRow: React.FC<MedicationScheduleRowProps> = ({
                 ]}
                 testID={`skip-${medicine.id}`}
               >
-                <Ionicons name="close" size={16} color={theme.colors.textSecondary} />
+                <Ionicons
+                  name="close"
+                  size={16}
+                  color={theme.colors.textSecondary}
+                />
               </Pressable>
             )}
             {onPostponeDose && (
@@ -238,16 +239,13 @@ export const MedicationScheduleRow: React.FC<MedicationScheduleRowProps> = ({
             )}
           </View>
         )}
-        
+
         <Pressable
           onPress={openRowMenu}
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={t('home.medicineRowMenuA11y')}
-          style={({ pressed }) => [
-            styles.menuHit,
-            pressed && { opacity: 0.7 },
-          ]}
+          style={({ pressed }) => [styles.menuHit, pressed && { opacity: 0.7 }]}
         >
           <Ionicons
             name="ellipsis-vertical"

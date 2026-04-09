@@ -70,7 +70,9 @@ export const useHomeMedicines = (
     try {
       const data = await getMedicinesUseCase.execute();
       setMedicines(data);
-      await syncMedicineReminderNotifications(data, { requestPermission: false });
+      await syncMedicineReminderNotifications(data, {
+        requestPermission: false,
+      });
       setError(null);
     } catch (err) {
       const message =

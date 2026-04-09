@@ -1,15 +1,15 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from '@shared/i18n';
+import { useTheme } from '@shared/theme';
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Platform,
   Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@shared/theme';
-import { useTranslation } from '@shared/i18n';
 
 type IonIconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -165,7 +165,7 @@ export const MedicineReminderCalendar: React.FC<
     : t('home.dateLabel');
   const dateTitle = `${titlePrefix}, ${formatTitleLine(selectedDate)}`;
 
-  const shellBg = isDark ? theme.colors.surface : '#DBDCFF';
+  const shellBg = isDark ? theme.colors.surface : '#EEF0FF';
   const panelBorder = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)';
 
   const onStatMenu = () => {
@@ -183,10 +183,10 @@ export const MedicineReminderCalendar: React.FC<
             ios: {
               shadowColor: '#000',
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: isDark ? 0.3 : 0.06,
-              shadowRadius: 14,
+              shadowOpacity: isDark ? 0.22 : 0.05,
+              shadowRadius: 10,
             },
-            android: { elevation: isDark ? 0 : 2 },
+            android: { elevation: isDark ? 0 : 1 },
             default: {},
           }),
         },
@@ -201,6 +201,19 @@ export const MedicineReminderCalendar: React.FC<
             {weekDays.map((day) => {
               const selected = isSameDay(day, selectedDate);
               const today = isSameDay(day, now);
+              let weekdayTextColor = theme.colors.textSecondary;
+              if (selected) {
+                weekdayTextColor = '#FFFFFF';
+              } else if (isDark) {
+                weekdayTextColor = DAY_PILL_ON_WHITE_WEEKDAY;
+              }
+
+              let dayNumberTextColor = theme.colors.text;
+              if (selected) {
+                dayNumberTextColor = '#FFFFFF';
+              } else if (isDark) {
+                dayNumberTextColor = DAY_PILL_ON_WHITE_NUMBER;
+              }
               return (
                 <View key={day.toISOString()} style={styles.gridColumn}>
                   <TouchableOpacity
@@ -247,13 +260,7 @@ export const MedicineReminderCalendar: React.FC<
                     <Text
                       style={[
                         styles.dayPillWeekday,
-                        {
-                          color: selected
-                            ? '#FFFFFF'
-                            : isDark
-                            ? DAY_PILL_ON_WHITE_WEEKDAY
-                            : theme.colors.textSecondary,
-                        },
+                        { color: weekdayTextColor },
                       ]}
                       numberOfLines={1}
                     >
@@ -262,13 +269,7 @@ export const MedicineReminderCalendar: React.FC<
                     <Text
                       style={[
                         styles.dayPillNumber,
-                        {
-                          color: selected
-                            ? '#FFFFFF'
-                            : isDark
-                            ? DAY_PILL_ON_WHITE_NUMBER
-                            : theme.colors.text,
-                        },
+                        { color: dayNumberTextColor },
                       ]}
                     >
                       {day.getDate()}

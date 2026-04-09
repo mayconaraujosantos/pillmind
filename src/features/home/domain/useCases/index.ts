@@ -8,4 +8,3 @@ export * from './UpdateMedicineUseCase';
 export * from './GetMedicineTakesUseCase';
 export * from './MarkMedicineAsTakenUseCase';
 export * from './SkipMedicineDoseUseCase';
-

@@ -1,37 +1,36 @@
-import type { HomeTabParamList } from '@core/navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useOnboardingStorage } from '@features/onboarding';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Loader, ScreenWrapper, SkeletonCard } from '@shared/components';
 import { useComponentTracker, useNavigationLogger } from '@shared/hooks';
 import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import type { TFunction } from 'i18next';
 import React from 'react';
 import {
-    Alert,
-    Platform,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import type { Medicine } from '../../domain/entities/Medicine';
 import {
-    createMedicineUseCase,
-    deleteMedicineUseCase,
-    getMedicinesUseCase,
-    updateMedicineUseCase,
+  createMedicineUseCase,
+  deleteMedicineUseCase,
+  getMedicinesUseCase,
+  updateMedicineUseCase,
 } from '../../medicineServices';
 import {
-    HomeGreetingHero,
-    MedicationScheduleRow,
-    MedicineReminderCalendar,
-    TodayProgressSummary,
+  HomeGreetingHero,
+  MedicationScheduleRow,
+  MedicineReminderCalendar,
+  TodayProgressSummary,
 } from '../components';
 import { useHomeMedicines } from '../hooks/useHomeMedicines';
 
@@ -125,21 +124,18 @@ function computeHomeQuickStats(
   return { scheduled, nextDoseLabel, adherencePct };
 }
 
-const HOME_TINT_LIGHT = '#F0F2FA';
-
 export const HomeScreen: React.FC = () => {
   // Hooks de logging e tracking
   const { logScreenEvent, logError } = useNavigationLogger({
     screenName: 'Home',
-    additionalData: { version: '1.0' }
+    additionalData: { version: '1.0' },
   });
   const { trackEvent, trackError } = useComponentTracker('HomeScreen');
 
   useOnboardingStorage();
   const { theme, isDark } = useTheme();
   const { t, i18n, ready } = useTranslation();
-  const navigation =
-    useNavigation<NativeStackNavigationProp<HomeTabParamList>>();
+  const router = useRouter();
   const {
     medicines,
     loading,
@@ -172,7 +168,7 @@ export const HomeScreen: React.FC = () => {
   const medicinesFiltered = React.useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return medicines;
-    
+
     const filtered = medicines.filter(
       (m) =>
         m.name.toLowerCase().includes(q) ||
@@ -180,10 +176,10 @@ export const HomeScreen: React.FC = () => {
         m.notes?.toLowerCase().includes(q)
     );
 
-    trackEvent('medicines_filtered', { 
-      query: q, 
-      totalMedicines: medicines.length, 
-      filteredCount: filtered.length 
+    trackEvent('medicines_filtered', {
+      query: q,
+      totalMedicines: medicines.length,
+      filteredCount: filtered.length,
     });
 
     return filtered;
@@ -220,10 +216,11 @@ export const HomeScreen: React.FC = () => {
   const onAddMedication = () => {
     try {
       logScreenEvent('Add Medication Button Pressed');
-      trackEvent('navigate_to_medicine_form', { action: 'add' });
-      navigation.navigate('MedicineForm', {});
+      trackEvent('navigate_to_medicine_form', { source: 'home' });
+      router.push('/medicine-form');
     } catch (error) {
-      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      const errorInstance =
+        error instanceof Error ? error : new Error(String(error));
       logError(errorInstance, 'Add Medication Navigation');
       trackError(errorInstance, 'onAddMedication');
     }
@@ -232,10 +229,17 @@ export const HomeScreen: React.FC = () => {
   const openEditMedication = (id: string) => {
     try {
       logScreenEvent('Edit Medication Button Pressed', { medicineId: id });
-      trackEvent('navigate_to_medicine_form', { action: 'edit', medicineId: id });
-      navigation.navigate('MedicineForm', { medicineId: id });
+      trackEvent('navigate_to_medicine_form', {
+        action: 'edit',
+        medicineId: id,
+      });
+      router.push({
+        pathname: '/medicine-form',
+        params: { medicineId: id },
+      });
     } catch (error) {
-      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      const errorInstance =
+        error instanceof Error ? error : new Error(String(error));
       logError(errorInstance, 'Edit Medication Navigation');
       trackError(errorInstance, 'openEditMedication');
     }
@@ -243,19 +247,25 @@ export const HomeScreen: React.FC = () => {
 
   const confirmDeleteMedication = (m: Medicine) => {
     try {
-      logScreenEvent('Delete Medication Confirm Dialog', { medicineId: m.id, medicineName: m.name });
-      trackEvent('delete_medicine_confirm', { medicineId: m.id, medicineName: m.name });
+      logScreenEvent('Delete Medication Confirm Dialog', {
+        medicineId: m.id,
+        medicineName: m.name,
+      });
+      trackEvent('delete_medicine_confirm', {
+        medicineId: m.id,
+        medicineName: m.name,
+      });
 
       Alert.alert(
         t('home.deleteMedicationTitle'),
         t('home.deleteMedicationMessage', { name: m.name }),
         [
-          { 
-            text: t('common.cancel'), 
+          {
+            text: t('common.cancel'),
             style: 'cancel',
             onPress: () => {
               trackEvent('delete_medicine_cancelled', { medicineId: m.id });
-            }
+            },
           },
           {
             text: t('home.deleteMedication'),
@@ -267,15 +277,22 @@ export const HomeScreen: React.FC = () => {
                   logScreenEvent('Deleting Medication', { medicineId: m.id });
                   await deleteMedicine(m.id);
                   trackEvent('delete_medicine_success', { medicineId: m.id });
-                  logScreenEvent('Medication Deleted Successfully', { medicineId: m.id });
+                  logScreenEvent('Medication Deleted Successfully', {
+                    medicineId: m.id,
+                  });
                 } catch (e) {
-                  const errorInstance = e instanceof Error ? e : new Error(String(e));
-                  const msg = e instanceof Error ? e.message : t('common.error');
-                  
+                  const errorInstance =
+                    e instanceof Error ? e : new Error(String(e));
+                  const msg =
+                    e instanceof Error ? e.message : t('common.error');
+
                   logError(errorInstance, 'Delete Medication Error');
                   trackError(errorInstance, 'confirmDeleteMedication');
-                  trackEvent('delete_medicine_failed', { medicineId: m.id, error: msg });
-                  
+                  trackEvent('delete_medicine_failed', {
+                    medicineId: m.id,
+                    error: msg,
+                  });
+
                   Alert.alert(t('common.error'), msg);
                 }
               })();
@@ -284,7 +301,8 @@ export const HomeScreen: React.FC = () => {
         ]
       );
     } catch (error) {
-      const errorInstance = error instanceof Error ? error : new Error(String(error));
+      const errorInstance =
+        error instanceof Error ? error : new Error(String(error));
       logError(errorInstance, 'Confirm Delete Medication Dialog');
       trackError(errorInstance, 'confirmDeleteMedication');
     }
@@ -323,8 +341,56 @@ export const HomeScreen: React.FC = () => {
               { color: theme.colors.textSecondary },
             ]}
           >
-            {t('home.addFirstMedication')}
+            Add your first medication to start smart reminders and daily
+            tracking.
           </Text>
+          <View style={styles.emptyBenefits}>
+            <View style={styles.emptyBenefitRow}>
+              <Ionicons
+                name="checkmark-circle"
+                size={16}
+                color={theme.colors.primary}
+              />
+              <Text
+                style={[
+                  styles.emptyBenefitText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                Automatic dose reminders
+              </Text>
+            </View>
+            <View style={styles.emptyBenefitRow}>
+              <Ionicons
+                name="checkmark-circle"
+                size={16}
+                color={theme.colors.primary}
+              />
+              <Text
+                style={[
+                  styles.emptyBenefitText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                Adherence progress every day
+              </Text>
+            </View>
+            <View style={styles.emptyBenefitRow}>
+              <Ionicons
+                name="checkmark-circle"
+                size={16}
+                color={theme.colors.primary}
+              />
+              <Text
+                style={[
+                  styles.emptyBenefitText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                Low stock alerts
+              </Text>
+            </View>
+          </View>
           <TouchableOpacity
             style={[
               styles.addMedicationButton,
@@ -333,9 +399,7 @@ export const HomeScreen: React.FC = () => {
             activeOpacity={0.85}
             onPress={onAddMedication}
           >
-            <Text style={styles.addMedicationText}>
-              + {t('home.addMedication')}
-            </Text>
+            <Text style={styles.addMedicationText}>+ Add first medication</Text>
           </TouchableOpacity>
         </View>
       );
@@ -438,9 +502,8 @@ export const HomeScreen: React.FC = () => {
     }
   }, [error, refresh]);
 
-  const homeCanvasBackground = isDark
-    ? theme.colors.surface
-    : HOME_TINT_LIGHT;
+  // Header uses surface (white/dark-card) so it visually separates from the scroll canvas
+  const stickyHeaderBg = theme.colors.surface;
 
   // Show full-screen loader on initial load
   if (loading && medicines.length === 0) {
@@ -457,13 +520,24 @@ export const HomeScreen: React.FC = () => {
 
   return (
     <ScreenWrapper tabContentCanvas homeSoftTint>
+      <StatusBar style={isDark ? 'light' : 'dark'} animated />
       <View style={styles.layoutRoot}>
         <View
           style={[
             styles.stickyTopBar,
             {
-              backgroundColor: homeCanvasBackground,
+              backgroundColor: stickyHeaderBg,
+              borderBottomWidth: isDark ? StyleSheet.hairlineWidth : 1,
               borderBottomColor: theme.colors.border,
+              ...Platform.select({
+                ios: {
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: isDark ? 0.3 : 0.1,
+                  shadowRadius: 6,
+                },
+                default: {},
+              }),
             },
           ]}
         >
@@ -486,226 +560,219 @@ export const HomeScreen: React.FC = () => {
           }
           testID="home-scroll-view"
         >
-        {medicines.length > 0 ? (
-          <TodayProgressSummary quickStats={quickStats} />
-        ) : null}
-        <View style={styles.searchRow}>
-          <View
-            style={[
-              styles.searchCard,
-              {
-                backgroundColor: theme.colors.surface,
-                ...Platform.select({
-                  ios: {
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.06,
-                    shadowRadius: 10,
-                  },
-                  android: { elevation: 2 },
-                  default: {},
-                }),
-              },
-            ]}
-          >
-            <Ionicons
-              name="search-outline"
-              size={18}
-              color={theme.colors.textSecondary}
-            />
-            <TextInput
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder={t('home.searchPlaceholderDots')}
-              placeholderTextColor={theme.colors.placeholder}
+          {medicines.length > 0 ? (
+            <TodayProgressSummary quickStats={quickStats} />
+          ) : null}
+          <View style={styles.searchRow}>
+            <View
               style={[
-                styles.searchInput,
-                { color: theme.colors.text },
-              ]}
-              autoCapitalize="none"
-              autoCorrect={false}
-              {...(Platform.OS === 'ios'
-                ? { clearButtonMode: 'while-editing' as const }
-                : {})}
-              accessibilityLabel={t('home.searchPlaceholder')}
-            />
-          </View>
-          <View
-            style={[
-              styles.searchCalendarAction,
-              {
-                backgroundColor: theme.colors.surface,
-                ...Platform.select({
-                  ios: {
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.06,
-                    shadowRadius: 8,
-                  },
-                  android: { elevation: 2 },
-                  default: {},
-                }),
-              },
-            ]}
-          >
-            <Ionicons
-              name="calendar-outline"
-              size={18}
-              color={theme.colors.text}
-            />
-          </View>
-        </View>
-
-        <MedicineReminderCalendar
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          quickStats={quickStats}
-        />
-
-        <View style={styles.medicinesSection}>
-          <View style={styles.sectionHeaderRow}>
-            <View style={styles.sectionTitles}>
-              <Text
-                style={[
-                  styles.sectionEyebrow,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                {t('home.scheduleSectionEyebrow')}
-              </Text>
-              <Text
-                style={[styles.sectionTitle, { color: theme.colors.text }]}
-              >
-                {t('home.yourMedications')}
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={onAddMedication}
-              style={styles.addLink}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={t('home.addMedication')}
-              activeOpacity={0.75}
-            >
-              <Ionicons
-                name="add-circle-outline"
-                size={22}
-                color={theme.colors.primary}
-              />
-              <Text
-                style={[styles.addLinkText, { color: theme.colors.primary }]}
-              >
-                {t('home.addMedicineShort')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          {refreshing && medicines.length > 0 && (
-            <View style={styles.refreshLoader}>
-              <Loader
-                variant="inline"
-                size="small"
-                message={t('home.refreshingMedications')}
-                testID="home-refresh-loader"
-              />
-            </View>
-          )}
-          {renderMedicinesContent()}
-        </View>
-
-        <View
-          style={[
-            styles.hydrationCard,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: 'rgba(0,0,0,0.06)',
-              ...Platform.select({
-                ios: {
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 14,
+                styles.searchCard,
+                {
+                  backgroundColor: theme.colors.surface,
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.06,
+                      shadowRadius: 10,
+                    },
+                    android: { elevation: 2 },
+                    default: {},
+                  }),
                 },
-                android: { elevation: 2 },
-                default: {},
-              }),
-            },
-          ]}
-        >
-          <View style={styles.hydrationHeader}>
-            <Text style={[styles.hydrationTitle, { color: theme.colors.text }]}>
-              {t('home.hydrationLikeTitle')}
-            </Text>
-            <TouchableOpacity
-              style={styles.hydrationFilterBtn}
-              activeOpacity={0.7}
+              ]}
             >
-              <Text
-                style={[
-                  styles.hydrationFilter,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                {t('home.thisWeekLabel')}
-              </Text>
               <Ionicons
-                name="chevron-down"
-                size={16}
+                name="search-outline"
+                size={18}
                 color={theme.colors.textSecondary}
               />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.chartRow}>
-            <View style={styles.yAxis}>
-              <Text
-                style={[
-                  styles.yAxisLabel,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                100
-              </Text>
-              <Text
-                style={[
-                  styles.yAxisLabel,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                75
-              </Text>
-              <Text
-                style={[
-                  styles.yAxisLabel,
-                  { color: theme.colors.textSecondary },
-                ]}
-              >
-                50
-              </Text>
+              <TextInput
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={t('home.searchPlaceholderDots')}
+                placeholderTextColor={theme.colors.placeholder}
+                style={[styles.searchInput, { color: theme.colors.text }]}
+                autoCapitalize="none"
+                autoCorrect={false}
+                {...(Platform.OS === 'ios'
+                  ? { clearButtonMode: 'while-editing' as const }
+                  : {})}
+                accessibilityLabel={t('home.searchPlaceholder')}
+              />
             </View>
-            <View style={styles.barRow}>
-              {[42, 68, 55, 73, 34, 61, 80].map((value, idx) => (
-                <View key={idx} style={styles.barCol}>
-                  <View
-                    style={[styles.barTrack, { backgroundColor: '#E8EAFF' }]}
-                  >
+            <View
+              style={[
+                styles.searchCalendarAction,
+                {
+                  backgroundColor: theme.colors.background,
+                  borderColor: theme.colors.border,
+                },
+              ]}
+            >
+              <Ionicons
+                name="calendar-outline"
+                size={18}
+                color={theme.colors.textSecondary}
+              />
+            </View>
+          </View>
+
+          <MedicineReminderCalendar
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            quickStats={quickStats}
+          />
+
+          <View style={styles.medicinesSection}>
+            <View style={styles.sectionHeaderRow}>
+              <View style={styles.sectionTitles}>
+                <Text
+                  style={[
+                    styles.sectionEyebrow,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {t('home.scheduleSectionEyebrow')}
+                </Text>
+                <Text
+                  style={[styles.sectionTitle, { color: theme.colors.text }]}
+                >
+                  {t('home.yourMedications')}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={onAddMedication}
+                style={styles.addLink}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t('home.addMedication')}
+                activeOpacity={0.75}
+              >
+                <Ionicons
+                  name="add-circle-outline"
+                  size={22}
+                  color={theme.colors.primary}
+                />
+                <Text
+                  style={[styles.addLinkText, { color: theme.colors.primary }]}
+                >
+                  {t('home.addMedicineShort')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {refreshing && medicines.length > 0 && (
+              <View style={styles.refreshLoader}>
+                <Loader
+                  variant="inline"
+                  size="small"
+                  message={t('home.refreshingMedications')}
+                  testID="home-refresh-loader"
+                />
+              </View>
+            )}
+            {renderMedicinesContent()}
+          </View>
+
+          <View
+            style={[
+              styles.hydrationCard,
+              {
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.border,
+                ...Platform.select({
+                  ios: {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.06,
+                    shadowRadius: 14,
+                  },
+                  android: { elevation: 2 },
+                  default: {},
+                }),
+              },
+            ]}
+          >
+            <View style={styles.hydrationHeader}>
+              <Text
+                style={[styles.hydrationTitle, { color: theme.colors.text }]}
+              >
+                {t('home.hydrationLikeTitle')}
+              </Text>
+              <TouchableOpacity
+                style={styles.hydrationFilterBtn}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.hydrationFilter,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {t('home.thisWeekLabel')}
+                </Text>
+                <Ionicons
+                  name="chevron-down"
+                  size={16}
+                  color={theme.colors.textSecondary}
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.chartRow}>
+              <View style={styles.yAxis}>
+                <Text
+                  style={[
+                    styles.yAxisLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  100
+                </Text>
+                <Text
+                  style={[
+                    styles.yAxisLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  75
+                </Text>
+                <Text
+                  style={[
+                    styles.yAxisLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  50
+                </Text>
+              </View>
+              <View style={styles.barRow}>
+                {[42, 68, 55, 73, 34, 61, 80].map((value, idx) => (
+                  <View key={idx} style={styles.barCol}>
                     <View
                       style={[
-                        styles.barFill,
-                        {
-                          height: `${value}%`,
-                          backgroundColor: theme.colors.primary,
-                        },
+                        styles.barTrack,
+                        { backgroundColor: theme.colors.border },
                       ]}
-                    />
+                    >
+                      <View
+                        style={[
+                          styles.barFill,
+                          {
+                            height: `${value}%`,
+                            backgroundColor: theme.colors.primary,
+                          },
+                        ]}
+                      />
+                    </View>
                   </View>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Controles de Debug - só aparecem em desenvolvimento */}
+          {/* Controles de Debug - só aparecem em desenvolvimento */}
         </ScrollView>
       </View>
     </ScreenWrapper>
@@ -764,6 +831,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    opacity: 0.75,
   },
   scheduleRowSkeleton: {
     marginBottom: 10,
@@ -922,6 +991,20 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 13,
     textAlign: 'center',
+    lineHeight: 18,
+  },
+  emptyBenefits: {
+    marginTop: 14,
+    gap: 6,
+  },
+  emptyBenefitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  emptyBenefitText: {
+    fontSize: 13,
+    fontWeight: '500',
   },
   addMedicationButton: {
     marginTop: 18,

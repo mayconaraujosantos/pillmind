@@ -197,10 +197,11 @@ export class ApiMedicineRepository implements MedicineRepository {
         : normalized === 'image/webp'
           ? 'medicine.webp'
           : 'medicine.jpg';
-    formData.append(
-      'file',
-      { uri: localUri, name: filename, type: normalized } as unknown as Blob
-    );
+    formData.append('file', {
+      uri: localUri,
+      name: filename,
+      type: normalized,
+    } as unknown as Blob);
     const res = await apiService.postFormData<{ imageUrl: string }>(
       '/api/medicines/picture',
       formData,

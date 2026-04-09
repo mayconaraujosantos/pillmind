@@ -86,16 +86,12 @@ export const TodayProgressSummary: React.FC<TodayProgressSummaryProps> = ({
           </View>
         </>
       ) : (
-        <Text
-          style={[styles.doseLine, { color: theme.colors.textSecondary }]}
-        >
+        <Text style={[styles.doseLine, { color: theme.colors.textSecondary }]}>
           {t('home.dailyTargetSubtitle')}
         </Text>
       )}
       <View style={styles.nextBlock}>
-        <Text
-          style={[styles.nextLabel, { color: theme.colors.textSecondary }]}
-        >
+        <Text style={[styles.nextLabel, { color: theme.colors.textSecondary }]}>
           {t('home.quickStatNextDose')}
         </Text>
         <Text style={[styles.nextValue, { color: theme.colors.text }]}>

@@ -17,7 +17,11 @@ function todayDateKey(date: Date = new Date()): string {
   return `${year}-${month}-${day}`;
 }
 
-function buildDoseKey(medicineId: string, scheduledTime: string, dateKey: string): string {
+function buildDoseKey(
+  medicineId: string,
+  scheduledTime: string,
+  dateKey: string
+): string {
   return `${medicineId}::${scheduledTime}::${dateKey}`;
 }
 
@@ -33,7 +37,9 @@ async function readAll(): Promise<Record<string, PostponedDoseRecord>> {
   }
 }
 
-async function writeAll(data: Record<string, PostponedDoseRecord>): Promise<void> {
+async function writeAll(
+  data: Record<string, PostponedDoseRecord>
+): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 

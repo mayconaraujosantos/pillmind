@@ -8,6 +8,12 @@ import { SkipMedicineDoseUseCase } from './domain/useCases/SkipMedicineDoseUseCa
 const medicineTakenRepository = new ApiMedicineTakenRepository();
 
 // Use cases instances
-export const markMedicineAsTakenUseCase = new MarkMedicineAsTakenUseCase(medicineTakenRepository);
-export const skipMedicineDoseUseCase = new SkipMedicineDoseUseCase(medicineTakenRepository);
-export const getMedicineTakesUseCase = new GetMedicineTakesUseCase(medicineTakenRepository);
+export const markMedicineAsTakenUseCase = new MarkMedicineAsTakenUseCase(
+  medicineTakenRepository
+);
+export const skipMedicineDoseUseCase = new SkipMedicineDoseUseCase(
+  medicineTakenRepository
+);
+export const getMedicineTakesUseCase = new GetMedicineTakesUseCase(
+  medicineTakenRepository
+);

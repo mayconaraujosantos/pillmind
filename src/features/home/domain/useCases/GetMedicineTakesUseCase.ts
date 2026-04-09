@@ -2,7 +2,9 @@ import { MedicineTaken } from '../entities/MedicineTaken';
 import { MedicineTakenRepository } from '../repositories/MedicineTakenRepository';
 
 export class GetMedicineTakesUseCase {
-  constructor(private readonly medicineTakenRepository: MedicineTakenRepository) {}
+  constructor(
+    private readonly medicineTakenRepository: MedicineTakenRepository
+  ) {}
 
   async executeForToday(): Promise<MedicineTaken[]> {
     return this.medicineTakenRepository.getTodayTakes();
@@ -12,8 +14,14 @@ export class GetMedicineTakesUseCase {
     return this.medicineTakenRepository.getTakesForDate(date);
   }
 
-  async executeForMedicine(medicineId: string, date?: Date): Promise<MedicineTaken[]> {
+  async executeForMedicine(
+    medicineId: string,
+    date?: Date
+  ): Promise<MedicineTaken[]> {
     const useDate = date || new Date();
-    return this.medicineTakenRepository.getTakesForMedicine(medicineId, useDate);
+    return this.medicineTakenRepository.getTakesForMedicine(
+      medicineId,
+      useDate
+    );
   }
 }

@@ -24,12 +24,15 @@ export const useMedicines = () => {
         setLoading(true);
       }
       setError(null);
-      
+
       const result = await getMedicinesUseCase.execute();
       setMedicines(result);
-      void syncMedicineReminderNotifications(result, { requestPermission: false });
+      void syncMedicineReminderNotifications(result, {
+        requestPermission: false,
+      });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao buscar medicamentos';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erro ao buscar medicamentos';
       setError(errorMessage);
       console.error('Error fetching medicines:', err);
     } finally {

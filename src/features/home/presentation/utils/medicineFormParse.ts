@@ -11,7 +11,10 @@ export function normalizeTimeToken(token: string): string | null {
 
 /** Aceita vírgula, ponto e vírgula ou espaço entre horários. */
 export function parseDoseTimesField(input: string): string[] {
-  const parts = input.split(/[,;]+|\s+/).map((s) => s.trim()).filter(Boolean);
+  const parts = input
+    .split(/[,;]+|\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
   const out: string[] = [];
   for (const p of parts) {
     const n = normalizeTimeToken(p);

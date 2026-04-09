@@ -1,20 +1,19 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
+import { useTranslation } from '@shared/i18n';
+import { useTheme } from '@shared/theme';
+import { logger } from '@shared/utils/logger';
+import { useRouter } from 'expo-router';
 import React from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
   Image,
   Platform,
-  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@shared/theme';
-import { useTranslation } from '@shared/i18n';
-import { useAuthContext } from '@features/onboarding/presentation/contexts/AuthContext';
-import { logger } from '@shared/utils/logger';
 
 const AVATAR = 52;
 const ICON_CIRCLE = 46;
@@ -37,7 +36,7 @@ export const HomeGreetingHero: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const { t } = useTranslation();
-  const navigation = useNavigation();
+  const router = useRouter();
   const auth = useAuthContext();
 
   const displayName = auth.user?.name?.trim() || t('account.user');
@@ -45,17 +44,17 @@ export const HomeGreetingHero: React.FC = () => {
   const pictureUrl = auth.displayPictureUrl;
 
   const openAccount = () => {
-    navigation.getParent()?.navigate('AccountTab');
+    router.push('/(tabs)/account');
   };
 
   const onNotifications = () => {
-    Alert.alert(
-      t('home.notificationsA11y'),
-      t('account.notificationsComingSoon')
-    );
+    router.push('/(tabs)/account/notifications');
   };
 
-  const chipBg = isDark ? theme.colors.surface : '#FFFFFF';
+  const chipBg = isDark ? theme.colors.surface : theme.colors.background;
+  const chipBorderColor = isDark
+    ? 'rgba(255,255,255,0.14)'
+    : theme.colors.border;
   const chipShadow = Platform.select({
     ios: {
       shadowColor: '#000',
@@ -79,7 +78,17 @@ export const HomeGreetingHero: React.FC = () => {
           accessibilityRole="button"
           accessibilityLabel={t('home.openProfileA11y')}
         >
-          <View style={[styles.avatarChip, chipBgStyle(chipBg), chipShadow]}>
+          <View
+            style={[
+              styles.avatarChip,
+              chipBgStyle(chipBg),
+              {
+                borderWidth: StyleSheet.hairlineWidth + 0.5,
+                borderColor: chipBorderColor,
+              },
+              chipShadow,
+            ]}
+          >
             <View
               style={[styles.avatar, { backgroundColor: theme.colors.primary }]}
             >
@@ -125,7 +134,17 @@ export const HomeGreetingHero: React.FC = () => {
           accessibilityLabel={t('home.notificationsA11y')}
           hitSlop={8}
         >
-          <View style={[styles.bellCircle, chipBgStyle(chipBg), chipShadow]}>
+          <View
+            style={[
+              styles.bellCircle,
+              chipBgStyle(chipBg),
+              {
+                borderWidth: StyleSheet.hairlineWidth + 0.5,
+                borderColor: chipBorderColor,
+              },
+              chipShadow,
+            ]}
+          >
             <Ionicons
               name="notifications-outline"
               size={22}

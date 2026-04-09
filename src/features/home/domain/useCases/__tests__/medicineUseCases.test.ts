@@ -111,9 +111,7 @@ describe('Medicine use cases', () => {
     };
     const repository = {
       ...baseRepositoryMock(),
-      getById: jest.fn(async (id: string) =>
-        id === 'x' ? existing : null
-      ),
+      getById: jest.fn(async (id: string) => (id === 'x' ? existing : null)),
     } satisfies MedicineRepository;
 
     const useCase = new GetMedicineByIdUseCase(repository);

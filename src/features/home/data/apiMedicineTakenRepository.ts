@@ -39,8 +39,12 @@ export class ApiMedicineTakenRepository implements MedicineTakenRepository {
     return token ? { 'x-access-token': token } : {};
   }
 
-  async markAsTaken(medicineId: string, date: Date, scheduledTime: string): Promise<MedicineTaken> {
-    const response = await apiService.post(
+  async markAsTaken(
+    medicineId: string,
+    date: Date,
+    scheduledTime: string
+  ): Promise<MedicineTaken> {
+    const response = await apiService.post<MedicineTakenApiDto>(
       `/api/medicines/${medicineId}/doses/take`,
       {
         date: dateOnlyLocal(date),
@@ -51,11 +55,20 @@ export class ApiMedicineTakenRepository implements MedicineTakenRepository {
         headers: this.authHeaders(),
       }
     );
+    if (!response.success || !response.data) {
+      throw new Error(
+        response.error?.message || 'Failed to mark dose as taken'
+      );
+    }
     return fromApi(response.data);
   }
 
-  async skipDose(medicineId: string, date: Date, scheduledTime: string): Promise<MedicineTaken> {
-    const response = await apiService.post(
+  async skipDose(
+    medicineId: string,
+    date: Date,
+    scheduledTime: string
+  ): Promise<MedicineTaken> {
+    const response = await apiService.post<MedicineTakenApiDto>(
       `/api/medicines/${medicineId}/doses/skip`,
       {
         date: dateOnlyLocal(date),
@@ -65,29 +78,55 @@ export class ApiMedicineTakenRepository implements MedicineTakenRepository {
         headers: this.authHeaders(),
       }
     );
+    if (!response.success || !response.data) {
+      throw new Error(response.error?.message || 'Failed to skip dose');
+    }
     return fromApi(response.data);
   }
 
   async getTodayTakes(): Promise<MedicineTaken[]> {
-    const response = await apiService.get('/api/medicines/doses/today', {
-      headers: this.authHeaders(),
-    });
+    const response = await apiService.get<MedicineTakenApiDto[]>(
+      '/api/medicines/doses/today',
+      {
+        headers: this.authHeaders(),
+      }
+    );
+    if (!response.success || !response.data) {
+      throw new Error(response.error?.message || 'Failed to load today takes');
+    }
     return response.data.map(fromApi);
   }
 
   async getTakesForDate(date: Date): Promise<MedicineTaken[]> {
-    const response = await apiService.get('/api/medicines/doses', {
-      headers: this.authHeaders(),
-      params: { date: dateOnlyLocal(date) },
-    });
+    const response = await apiService.get<MedicineTakenApiDto[]>(
+      `/api/medicines/doses?date=${encodeURIComponent(dateOnlyLocal(date))}`,
+      {
+        headers: this.authHeaders(),
+      }
+    );
+    if (!response.success || !response.data) {
+      throw new Error(
+        response.error?.message || 'Failed to load takes for date'
+      );
+    }
     return response.data.map(fromApi);
   }
 
-  async getTakesForMedicine(medicineId: string, date: Date): Promise<MedicineTaken[]> {
-    const response = await apiService.get(`/api/medicines/${medicineId}/doses`, {
-      headers: this.authHeaders(),
-      params: { date: dateOnlyLocal(date) },
-    });
+  async getTakesForMedicine(
+    medicineId: string,
+    date: Date
+  ): Promise<MedicineTaken[]> {
+    const response = await apiService.get<MedicineTakenApiDto[]>(
+      `/api/medicines/${medicineId}/doses?date=${encodeURIComponent(dateOnlyLocal(date))}`,
+      {
+        headers: this.authHeaders(),
+      }
+    );
+    if (!response.success || !response.data) {
+      throw new Error(
+        response.error?.message || 'Failed to load takes for medicine'
+      );
+    }
     return response.data.map(fromApi);
   }
 }
