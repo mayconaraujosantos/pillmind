@@ -1,8 +1,8 @@
-import { Platform, StyleSheet, type ViewStyle } from 'react-native';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
 import type { Theme } from '@shared/theme/types';
+import { Platform, StyleSheet, type ViewStyle } from 'react-native';
 
-const BORDER_LIGHT = 'rgba(0,0,0,0.1)';
+const BORDER_LIGHT = 'rgba(0,0,0,0.14)';
 const BORDER_DARK = 'rgba(255,255,255,0.14)';
 
 export type AppHeaderChromeParams = {
@@ -33,8 +33,8 @@ export function getAppHeaderChrome(
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: isDark ? 0.4 : 0.08,
-        shadowRadius: 3,
+        shadowOpacity: isDark ? 0.4 : 0.14,
+        shadowRadius: 4,
       },
       android: {
         elevation: 3,
@@ -53,8 +53,9 @@ export function getAppHeaderChrome(
     },
     headerTitleAlign: 'center',
     headerShadowVisible: false,
+    statusBarStyle: isDark ? 'light' : 'dark',
+    statusBarBackgroundColor: headerBackground,
     contentStyle: { backgroundColor: contentBackgroundColor },
-    animation: 'default',
   };
 }
 

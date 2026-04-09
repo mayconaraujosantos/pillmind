@@ -26,12 +26,7 @@ jest.mock('@expo/vector-icons', () => {
 describe('TabBarIcon', () => {
   it('should render home icon when focused', () => {
     const { getByTestId } = render(
-      <TabBarIcon
-        routeName="HomeTab"
-        focused={true}
-        color="#007AFF"
-        size={24}
-      />
+      <TabBarIcon routeName="index" focused={true} color="#007AFF" size={24} />
     );
 
     expect(getByTestId('icon-home')).toBeTruthy();
@@ -39,12 +34,7 @@ describe('TabBarIcon', () => {
 
   it('should render home-outline icon when not focused', () => {
     const { getByTestId } = render(
-      <TabBarIcon
-        routeName="HomeTab"
-        focused={false}
-        color="#8E8E93"
-        size={24}
-      />
+      <TabBarIcon routeName="index" focused={false} color="#8E8E93" size={24} />
     );
 
     expect(getByTestId('icon-home-outline')).toBeTruthy();
@@ -53,7 +43,7 @@ describe('TabBarIcon', () => {
   it('should render appointments icon when focused', () => {
     const { getByTestId } = render(
       <TabBarIcon
-        routeName="AppointmentsTab"
+        routeName="appointments"
         focused={true}
         color="#007AFF"
         size={24}
@@ -66,7 +56,7 @@ describe('TabBarIcon', () => {
   it('should render appointments-outline icon when not focused', () => {
     const { getByTestId } = render(
       <TabBarIcon
-        routeName="AppointmentsTab"
+        routeName="appointments"
         focused={false}
         color="#8E8E93"
         size={24}
@@ -79,7 +69,7 @@ describe('TabBarIcon', () => {
   it('should render account icon when focused', () => {
     const { getByTestId } = render(
       <TabBarIcon
-        routeName="AccountTab"
+        routeName="account"
         focused={true}
         color="#007AFF"
         size={24}
@@ -92,7 +82,7 @@ describe('TabBarIcon', () => {
   it('should render parental icon when focused', () => {
     const { getByTestId } = render(
       <TabBarIcon
-        routeName="ParentalTab"
+        routeName="parental"
         focused={true}
         color="#007AFF"
         size={24}
@@ -104,12 +94,7 @@ describe('TabBarIcon', () => {
 
   it('should render nearby icon when focused', () => {
     const { getByTestId } = render(
-      <TabBarIcon
-        routeName="NearbyTab"
-        focused={true}
-        color="#007AFF"
-        size={24}
-      />
+      <TabBarIcon routeName="nearby" focused={true} color="#007AFF" size={24} />
     );
 
     expect(getByTestId('icon-location')).toBeTruthy();
@@ -117,12 +102,7 @@ describe('TabBarIcon', () => {
 
   it('should render with correct size', () => {
     const { getByTestId } = render(
-      <TabBarIcon
-        routeName="HomeTab"
-        focused={true}
-        color="#007AFF"
-        size={32}
-      />
+      <TabBarIcon routeName="index" focused={true} color="#007AFF" size={32} />
     );
 
     const icon = getByTestId('icon-home');

@@ -2,13 +2,11 @@ import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
 import { TabRootHeaderRight } from '../TabRootHeaderRight';
 
-const mockNavigate = jest.fn();
+const mockPush = jest.fn();
 
-jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({
-    getParent: () => ({
-      navigate: mockNavigate,
-    }),
+jest.mock('expo-router', () => ({
+  useRouter: () => ({
+    push: mockPush,
   }),
 }));
 
@@ -38,22 +36,20 @@ jest.mock('@expo/vector-icons', () => {
 
 describe('TabRootHeaderRight', () => {
   beforeEach(() => {
-    mockNavigate.mockClear();
+    mockPush.mockClear();
   });
 
-  it('navigates to AccountTab when profile icon is pressed', () => {
+  it('navigates to account route when profile icon is pressed', () => {
     const { getAllByRole } = render(<TabRootHeaderRight />);
     const buttons = getAllByRole('button');
     fireEvent.press(buttons[1]);
-    expect(mockNavigate).toHaveBeenCalledWith('AccountTab');
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/account');
   });
 
   it('opens notifications settings when notifications icon is pressed', () => {
     const { getAllByRole } = render(<TabRootHeaderRight />);
     const buttons = getAllByRole('button');
     fireEvent.press(buttons[0]);
-    expect(mockNavigate).toHaveBeenCalledWith('AccountTab', {
-      screen: 'NotificationsSettings',
-    });
+    expect(mockPush).toHaveBeenCalledWith('/(tabs)/account/notifications');
   });
 });

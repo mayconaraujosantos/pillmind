@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useTranslation } from '@shared/i18n';
 import { useTheme } from '@shared/theme';
 import React from 'react';
@@ -13,7 +13,7 @@ const HIT = 44;
 export const TabRootHeaderRight: React.FC = () => {
   const { theme, isDark } = useTheme();
   const { t } = useTranslation();
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const ripple =
     Platform.OS === 'android'
@@ -21,14 +21,11 @@ export const TabRootHeaderRight: React.FC = () => {
       : undefined;
 
   const openProfile = () => {
-    navigation.getParent()?.navigate('AccountTab');
+    router.push('/(tabs)/account');
   };
 
   const onNotifications = () => {
-    navigation.getParent()?.navigate(
-      'AccountTab' as never,
-      { screen: 'NotificationsSettings' } as never
-    );
+    router.push('/(tabs)/account/notifications');
   };
 
   return (

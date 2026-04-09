@@ -35,27 +35,27 @@ describe('Navigation Types', () => {
   describe('TabParamList', () => {
     it('should have correct structure for all tab routes', () => {
       const tabParams: TabParamList = {
-        HomeTab: undefined,
-        AppointmentsTab: undefined,
-        AccountTab: undefined,
-        ParentalTab: undefined,
-        NearbyTab: undefined,
+        index: undefined,
+        appointments: undefined,
+        account: undefined,
+        parental: undefined,
+        nearby: undefined,
       };
 
-      expect(tabParams.HomeTab).toBeUndefined();
-      expect(tabParams.AppointmentsTab).toBeUndefined();
-      expect(tabParams.AccountTab).toBeUndefined();
-      expect(tabParams.ParentalTab).toBeUndefined();
-      expect(tabParams.NearbyTab).toBeUndefined();
+      expect(tabParams.index).toBeUndefined();
+      expect(tabParams.appointments).toBeUndefined();
+      expect(tabParams.account).toBeUndefined();
+      expect(tabParams.parental).toBeUndefined();
+      expect(tabParams.nearby).toBeUndefined();
     });
 
     it('should contain all expected tab routes', () => {
       const expectedTabRoutes: Array<keyof TabParamList> = [
-        'HomeTab',
-        'AppointmentsTab',
-        'AccountTab',
-        'ParentalTab',
-        'NearbyTab',
+        'index',
+        'appointments',
+        'account',
+        'parental',
+        'nearby',
       ];
 
       expect(expectedTabRoutes.length).toBe(5);
